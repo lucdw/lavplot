@@ -112,7 +112,7 @@ lvp_position_nodes <- function(nodes, edges, allowbottom = FALSE) {
   if (any(nodes$voorkeur == "m" & nodes$tiepe %in% c("lv", "cv"))) {
     strucs <- which(nodes$voorkeur == "m" & nodes$tiepe %in% c("lv", "cv"))
     if (length(strucs) > 1L && allowbottom) {
-      vanaf <- integer(length(strucs) / 2)
+      vanaf <- integer(1L + length(strucs) / 2)
       nodes$voorkeur[strucs[seq.int(vanaf, length(strucs))]] <- "b"
     }
   }

@@ -1,7 +1,7 @@
 lvp_make_tikz <- function(nodes, edges, cex = 1.75, outfile = NULL) {
   latexsymbols <- c(
     "varGamma", "varSigma", "varDelta", "varUpsilon", "varTheta", "varPhi",
-    "varLambda", "varPsi", "varXi", "varOmega", "varPi",
+    "varLambda", "varPsi", "varXi", "varOmega", "varPi", "varepsilon",
     "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta",
     "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho",
     "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega",
