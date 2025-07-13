@@ -1,0 +1,17 @@
+Package: lavplot
+Type: Package
+Title: Utility to create tikz,  svg and diagram code for plotting lavaan models
+Version: 0.1.0
+Authors@R: c(
+  person(given = "Luc", family = "De Wilde",
+  role = c("aut", "cre"),
+  email = "Luc.DeWilde@UGent.be"))
+Maintainer: Luc De Wilde <luc.dewilde@ugent.be>
+Depends: R (>= 3.1.0), lavaan
+Description: This package takes as input a sem model in lavaan syntax or the 
+  resulting model description as a list or a data.frame. It can produce the necessary
+  code to create a plot in tikz, in svg or in R using package diagram.
+  The plot with diagram will be rather simple, but the plots in tikz and svg are
+  meant to be incorporated in a pdf (tikz) or html (svg) file.
+License: GPL (>= 2)
+Encoding: UTF-8
