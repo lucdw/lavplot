@@ -1,7 +1,7 @@
 lvp_make_tikz <- function(nodes, edges, cex = 1.75, outfile = NULL) {
   latexsymbols <- c(
     "varGamma", "varSigma", "varDelta", "varUpsilon", "varTheta", "varPhi",
-    "varLambda", "varPsi", "varXi", "varOmega", "varPi", "varepsilon",
+    "varLambda", "varPsi", "varXi", "varOmega", "varPi", "varepsilon", "varphi",
     "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta",
     "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho",
     "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega",
@@ -72,25 +72,25 @@ lvp_make_tikz <- function(nodes, edges, cex = 1.75, outfile = NULL) {
     if (van == naar) { # self
       if (nodes$kolom[van] == 1L) {
         writeLines(paste("\\path[<->] (", vannaam,
-                         ") edge [in=160, out=-160, looseness=8] node {",
+                         ") edge [in=160, out=-160, looseness=8] node[right] {",
                          nodelabel(edges$label[j]), "} (",
                          vannaam, ");",
                          sep = ""), zz)
       } else if (nodes$rij[van] == maxrij) {
         writeLines(paste("\\path[<->] (", vannaam,
-                         ") edge [in=-110, out=-70, looseness=8] node {",
+                         ") edge [in=-110, out=-70, looseness=8] node[above] {",
                          nodelabel(edges$label[j]), "} (",
                          vannaam, ");",
                          sep = ""), zz)
       } else if (nodes$kolom[van] == maxcol) {
         writeLines(paste("\\path[<->] (", vannaam,
-                         ") edge [in=20, out=-20, looseness=8] node {",
+                         ") edge [in=20, out=-20, looseness=8] node[left] {",
                          nodelabel(edges$label[j]), "} (",
                          vannaam, ");",
                          sep = ""), zz)
       } else {
         writeLines(paste("\\path[<->] (", vannaam,
-                         ") edge [in=110, out=70, looseness=8] node {",
+                         ") edge [in=110, out=70, looseness=8] node[below] {",
                          nodelabel(edges$label[j]), "} (",
                          vannaam, ");",
                          sep = ""), zz)
