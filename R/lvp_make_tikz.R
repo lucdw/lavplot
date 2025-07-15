@@ -1,4 +1,4 @@
-lvp_make_tikz <- function(nodes, edges, cex = 1.75, outfile = NULL) {
+lvp_make_tikz <- function(nodes, edges, cex = 1.3, outfile = NULL) {
   latexsymbols <- c(
     "varGamma", "varSigma", "varDelta", "varUpsilon", "varTheta", "varPhi",
     "varLambda", "varPsi", "varXi", "varOmega", "varPi", "varepsilon", "varphi",
@@ -33,18 +33,20 @@ lvp_make_tikz <- function(nodes, edges, cex = 1.75, outfile = NULL) {
     "\\usepackage{xcolor}",
     "\\usepackage{color}",
     "\\usepackage{tikz}")
-  commstyle <- paste0("draw, minimum size=", round(6 * cex), "mm, semithick")
+  commstyle <- paste0("draw, minimum size=", round(6 * cex), "mm")
   tikzstart <- c(
     "\\usetikzlibrary {shapes.geometric}",
     "\\tikzset{",
-    "bend angle=45,",
+    "bend angle=45,",">=stealth,",
     paste0("x={(", cex, "cm,0cm)}, y={(0cm,", cex, "cm)},"),
-    paste0("lv/.style={circle, ", commstyle, "},"),
-    paste0("cv/.style={regular polygon, regular polygon sides=6, ", commstyle, "},"),
-    paste0("ov/.style={rectangle, ", commstyle,"},"),
-    paste0("wov/.style={rectangle, rounded corners, ", commstyle, "},"),
-    paste0("bov/.style={rectangle, rounded corners, ", commstyle, "},"),
-    paste0("const/.style={regular polygon, regular polygon sides=3, ", commstyle, "}"),
+    paste0("lv/.style={circle, ", commstyle, ", thick},"),
+    paste0("varlv/.style={circle, draw, minimum size=", round(4 * cex), "mm, semithick},"),
+    paste0("cv/.style={regular polygon, regular polygon sides=6, ", commstyle, ", thick},"),
+    paste0("ov/.style={rectangle, ", commstyle,", thick},"),
+    paste0("av/.style={rectangle, fill=black!10, ", commstyle,", thick},"),
+    paste0("wov/.style={rectangle, rounded corners, ", commstyle, ", thick},"),
+    paste0("bov/.style={rectangle, rounded corners, ", commstyle, ", thick},"),
+    paste0("const/.style={regular polygon, regular polygon sides=3, ", commstyle, ", thick}"),
     "}")
   texmid <- "\\begin{document}"
   writeLines(
@@ -64,6 +66,7 @@ lvp_make_tikz <- function(nodes, edges, cex = 1.75, outfile = NULL) {
       ") at (", xpos, ",", ypos, ") {",
       nodelabel(nodes$naam[j]), "};", sep = ""), zz)
   }
+  varlv <-any(nodes$tiepe == "varlv")
   for (j in seq.int(nrow(edges))) {
     van <- which(nodes$id == edges$van[j])
     vannaam <- nodenaam(nodes$naam[van], nodes$blok[van])
@@ -98,30 +101,43 @@ lvp_make_tikz <- function(nodes, edges, cex = 1.75, outfile = NULL) {
     } else {
       bending <- " "
       anchorv <- anchorn <- ""
-      if (nodes$kolom[van] == 1L) anchorv <- ".east"
-      if (nodes$kolom[van] == maxcol) anchorv <- ".west"
-      if (nodes$rij[van] == 1L) anchorv <- ".south"
-      if (nodes$rij[van] == maxrij) anchorv <- ".north"
-      if (nodes$kolom[naar] == 1L) anchorn <- ".east"
-      if (nodes$kolom[naar] == maxcol) anchorn <- ".west"
-      if (nodes$rij[naar] == 1L) anchorn <- ".south"
-      if (nodes$rij[naar] == maxrij) anchorn <- ".north"
-      if (nodes$kolom[van] == nodes$kolom[naar] && nodes$kolom[van] %in% c(1L, maxcol)) {
-        if (nodes$kolom[van] == 1) anchorv <- anchorn <- ".west"
-        if (nodes$kolom[van] == maxcol) anchorv <- anchorn <- ".east"
-        if ((nodes$kolom[van] == 1L) == (nodes$rij[van] < nodes$rij[naar])) {
-          bending <- " [bend right] "
-        } else {
-          bending <- " [bend left] "
+      if (edges$tiepe[j] == "ip") {
+        edges$tiepe[j] <- "p"
+        if (nodes$kolom[van] <= 1L + varlv ||           # composite left
+            nodes$kolom[naar] >= maxcol - varlv) {      # LV right
+          anchorv <- ".east"
+          anchorn <- ".west"
+        } else if (nodes$kolom[naar] <= 1L + varlv ||        # LV left
+                    nodes$kolom[van] >= maxcol - varlv) {    # composite right
+          anchorv <- ".west"
+          anchorn <- ".east"
+        } else if (nodes$rij[van] <= 1L + varlv ||           # composite left
+                   nodes$rij[naar] >= maxrij - varlv) {      # LV right
+          anchorv <- ".south"
+          anchorn <- ".north"
+        } else if (nodes$rij[naar] <= 1L + varlv ||       # LV left
+                   nodes$rij[van] >= maxrij - varlv) {    # composite right
+          anchorv <- ".north"
+          anchorn <- ".south"
         }
-      } else if (nodes$rij[van] == nodes$rij[naar] &&
-                 nodes$rij[van] %in% c(1L, maxrij)) {
-        if (nodes$rij[van] == 1) anchorv <- anchorn <- ".north"
-        if (nodes$rij[van] == maxcol) anchorv <- anchorn <- ".south"
-        if ((nodes$rij[van] < 3L) == (nodes$kolom[van] < nodes$kolom[naar])) {
-          bending <- " [bend left] "
-        } else {
-          bending <- " [bend right] "
+      } else if (nodes$tiepe[van] == nodes$tiepe[naar])  {
+        if (nodes$kolom[van] == nodes$kolom[naar] && nodes$kolom[van] %in% c(1L, maxcol)) {
+          if (nodes$kolom[van] == 1L) anchorv <- anchorn <- ".west"
+          if (nodes$kolom[van] == maxcol) anchorv <- anchorn <- ".east"
+          if ((nodes$kolom[van] == 1L) == (nodes$rij[van] < nodes$rij[naar])) {
+            bending <- " [bend right] "
+          } else {
+            bending <- " [bend left] "
+          }
+        } else if (nodes$rij[van] == nodes$rij[naar] &&
+                  nodes$rij[van] %in% c(1L, maxrij)) {
+          if (nodes$rij[van] == 1) anchorv <- anchorn <- ".north"
+          if (nodes$rij[van] == maxcol) anchorv <- anchorn <- ".south"
+          if ((nodes$rij[van] < 3L) == (nodes$kolom[van] < nodes$kolom[naar])) {
+            bending <- " [bend left] "
+          } else {
+            bending <- " [bend right] "
+          }
         }
       }
       thelabel <- nodelabel(edges$label[j])
@@ -130,7 +146,7 @@ lvp_make_tikz <- function(nodes, edges, cex = 1.75, outfile = NULL) {
                            ifelse(edges$labelbelow[j], "below", "above"),
                            ",sloped] {", thelabel, "} ")
       }
-      pijl <- ifelse(edges$tiepe[j] == "p", "->", "<->")
+      pijl <- ifelse(edges$tiepe[j] %in% c("p", "ip"), "->", "<->")
       writeLines(paste("\\path[", pijl, "] (", vannaam, anchorv, ") edge",
                 bending, thelabel, "(", naarnaam, anchorn, ");", sep = ""), zz)
     }

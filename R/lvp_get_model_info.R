@@ -1,7 +1,5 @@
 # extract info from model
 lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
-  #TODO: implement varlv TRUE
-  if (varlv) stop("varlv not yet implemented!")
   if (is.null(model) == is.null(infile)) {
       stop("either model or infile must be specified")
   }
@@ -35,7 +33,7 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
   nodes <- data.frame(
     id = integer(maxnodes),
     naam = character(maxnodes),
-    tiepe = character(maxnodes), # ov, lv, cv, wov, bov, const
+    tiepe = character(maxnodes), # ov, lv, varlv, cv, wov, bov, const
     # cv: composite; wov = within; bov = between; const = intercept
     blok = integer(maxnodes),
     voorkeur = character(maxnodes), # l = links, r = rechts, m = midden
@@ -49,7 +47,8 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
     label = character(maxedges),
     van = integer(maxedges),
     naar = integer(maxedges),
-    tiepe = character(maxedges), # p = pijl, d = dubbele pijl, s = self
+    tiepe = character(maxedges), # p = pijl, d = dubbele pijl, s = self,
+                                 # ip = indicator pijl
     labelbelow = rep(FALSE, maxedges)
   )
   curnode <- 0L
@@ -92,7 +91,7 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
       edges$label[curedge] <- edge_label(tbl$label[i], tbl$fixed[i])
       edges$van[curedge] <- jl
       edges$naar[curedge] <- jr
-      edges$tiepe[curedge] <- "p"
+      edges$tiepe[curedge] <- "ip"
     } else if (tbl$op[i] == "<~") {
       #### <~ : is a result of ####
       # lhs node
@@ -130,7 +129,7 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
       edges$label[curedge] <- edge_label(tbl$label[i], tbl$fixed[i])
       edges$van[curedge] <- jr
       edges$naar[curedge] <- jl
-      edges$tiepe[curedge] <- "p"
+      edges$tiepe[curedge] <- "ip"
     } else if (tbl$op[i] == "~") {
       #### ~ : is regressed on ####
       # lhs node
@@ -268,6 +267,39 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
       edges$tiepe[curedge] <- ifelse(jl == jr, "s", "d")
     }
   }
+  # aanpassingen voor varlv
+  if (varlv && any(edges$tiepe == "s")) {
+    #       wijzigen varianties
+    welke <- which(edges$tiepe == "s")
+    varlvnodes <- rep(0L, length(welke))
+    lvnodes <- rep(0L, length(welke))
+    for (ji in seq_along(welke)) {
+      j <- welke[ji]
+      curnode <- curnode + 1L
+      jj <- curnode
+      nodes$id[curnode] <- curnode
+      nodes$naam[curnode] <- gsub("=.*$", "", edges$label[j])
+      nodes$tiepe[curnode] <- "varlv"
+      nodes$blok[curnode] <- nodes$blok[which(nodes$id == edges$van[j])[[1L]]]
+      varlvnodes[ji] <- curnode
+      lvnodes[ji] <- edges$van[j]
+      edges$van[j] <- curnode
+      edges$tiepe[j] <- "p"
+      edges$label[j] <- ifelse(grepl("=", edges$label[j]),
+                               gsub("^.*=","",edges$label[j]), "")
+    }
+    #       wijzigen covarianties
+    for (j1 in seq_along(welke)) {
+      for (j2 in seq_along(welke)) {
+        if (j1 != j2 && any(edges$tiepe == "d" & edges$van == lvnodes[j1] & edges$naar == lvnodes[j2])) {
+          edg <- which(edges$tiepe == "d" &  edges$van == lvnodes[j1] & edges$naar == lvnodes[j2])[[1L]]
+          edges$van[edg] <- varlvnodes[j1]
+          edges$naar[edg] <- varlvnodes[j2]
+        }
+      }
+    }
+  }
+
   latents <- nodes$id[nodes$tiepe == "lv" | nodes$tiepe == "cv"]
   for (j in latents) {
     nodes$indicatoren[j] <- sum(tbl$lhs == nodes$naam[j] &

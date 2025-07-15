@@ -19,8 +19,16 @@ delta_nodes <- function(node1, node2) {
 }
 search_position <- function(j, nodes, edges) {
   thisnode <- c(nodes$rij[j], nodes$kolom[j])
-  availrows <- range(nodes$rij, na.rm = TRUE)
-  availcols <- range(nodes$kolom, na.rm = TRUE)
+  if (all(is.na(nodes$rij))) {
+    availcols <- availrows <- c(1L, 3L)
+  } else {
+    availrows <- range(nodes$rij, na.rm = TRUE)
+    availcols <- range(nodes$kolom, na.rm = TRUE)
+    availrows[1L] <- availrows[1] - 1L
+    availrows[2L] <- availrows[2L] + 1L
+    availcols[1L] <- availcols[1] - 1L
+    availcols[2L] <- availcols[2L] + 1L
+  }
   availpositions <- list((availrows[2L] - availrows[1L] + 1L) *
                            (availcols[2L] - availcols[1L] + 1L))
   positie <- 0L
@@ -96,125 +104,196 @@ lvp_position_nodes <- function(nodes, edges, allowbottom = FALSE) {
     attr(nodes, "mlrij") <- rijen1 + 1L
     return(nodes)
   }
+  varlvs <- which(nodes$tiepe == "varlv")
+  varlv <-length(varlvs) > 0L
+  d_lv <- ifelse(varlv, 3L, 2L)  # distance from border
+  d_ind <- ifelse(varlv, 2L, 1L) # depends on presence varlv's
   # structural part
-  if (any(nodes$voorkeur == "l" & nodes$tiepe %in% c("lv", "cv"))) {
-    strucs <- which(nodes$voorkeur == "l" & nodes$tiepe %in% c("lv", "cv"))
-    maxindicatoren <- max(nodes$indicatoren[strucs])
-    nodes$rij[strucs] <- 2L + seq.int(length(strucs)) * maxindicatoren
-    nodes$kolom[strucs] <- 2L
-  }
-  if (any(nodes$voorkeur == "r" & nodes$tiepe %in% c("lv", "cv"))) {
-    strucs <- which(nodes$voorkeur == "r" & nodes$tiepe %in% c("lv", "cv"))
-    maxindicatoren <- max(nodes$indicatoren[strucs])
-    nodes$rij[strucs] <- 2L + seq.int(length(strucs)) * maxindicatoren
-    nodes$kolom[strucs] <- 99L
-  }
-  if (any(nodes$voorkeur == "m" & nodes$tiepe %in% c("lv", "cv"))) {
-    strucs <- which(nodes$voorkeur == "m" & nodes$tiepe %in% c("lv", "cv"))
-    if (length(strucs) > 1L && allowbottom) {
-      vanaf <- as.integer(1L + length(strucs) / 2)
-      nodes$voorkeur[strucs[seq.int(vanaf, length(strucs))]] <- "b"
+  lvcvs <- nodes$tiepe %in% c("lv", "cv")
+  if (any(lvcvs)) { # lv's or cv's present
+    if (any(nodes$voorkeur == "l" & lvcvs)) {
+      strucs <- which(nodes$voorkeur == "l" & lvcvs)
+      maxindicatoren <- max(nodes$indicatoren[strucs])
+      nodes$rij[strucs] <- d_lv + seq.int(length(strucs)) * maxindicatoren
+      nodes$kolom[strucs] <- d_lv
     }
-  }
-  if (any(nodes$voorkeur == "m" & nodes$tiepe %in% c("lv", "cv"))) {
-    strucs <- which(nodes$voorkeur == "m" & nodes$tiepe %in% c("lv", "cv"))
-    maxindicatoren <- max(nodes$indicatoren[strucs])
-    nodes$kolom[strucs] <- 2L + seq.int(length(strucs)) * maxindicatoren
-    nodes$rij[strucs] <- 2L
-  }
-  if (any(nodes$voorkeur == "b" & nodes$tiepe %in% c("lv", "cv"))) {
-    strucs <- which(nodes$voorkeur == "b" & nodes$tiepe %in% c("lv", "cv"))
-    maxindicatoren <- max(nodes$indicatoren[strucs])
-    nodes$kolom[strucs] <- 2L + seq.int(length(strucs)) * maxindicatoren
-    nodes$rij[strucs] <- 99L
-  }
-  # indicators
-  allindicators <- nodes$id[nodes$voorkeur == ""]
-  strucs <- which(nodes$voorkeur == "l" & nodes$tiepe %in% c("lv", "cv"))
-  for (j in strucs) {
-    indicatorids <- c(edges$van[edges$naar == nodes$id[j]],
-                      edges$naar[edges$van == nodes$id[j]])
-    indicatorids <- intersect(indicatorids, allindicators)
-    indicators <- which(nodes$id %in% indicatorids)
-    rijtje <- nodes$rij[j]
-    addedindicators <- 0L
-    for (k in indicators) {
-      if (is.na(nodes$rij[k])) {
-        nodes$rij[k] <- rijtje
-        rijtje <- rijtje + 1L
-        nodes$kolom[k] <- 1L
-        addedindicators <- addedindicators + 1L
+    if (any(nodes$voorkeur == "r" & lvcvs)) {
+      strucs <- which(nodes$voorkeur == "r" & lvcvs)
+      maxindicatoren <- max(nodes$indicatoren[strucs])
+      nodes$rij[strucs] <- d_lv + seq.int(length(strucs)) * maxindicatoren
+      nodes$kolom[strucs] <- 101L - d_lv
+    }
+    if (any(nodes$voorkeur == "m" & lvcvs)) {
+      strucs <- which(nodes$voorkeur == "m" & lvcvs)
+      if (length(strucs) > 1L && allowbottom) {
+        vanaf <- as.integer(1L + length(strucs) / 2)
+        nodes$voorkeur[strucs[seq.int(vanaf, length(strucs))]] <- "b"
       }
     }
-    if (addedindicators > 2) {
-      nodes$rij[j] <- nodes$rij[j] + as.integer((addedindicators - 1) / 2)
+    if (any(nodes$voorkeur == "m" & lvcvs)) {
+      strucs <- which(nodes$voorkeur == "m" & lvcvs)
+      maxindicatoren <- max(nodes$indicatoren[strucs])
+      nodes$kolom[strucs] <- d_lv + seq.int(length(strucs)) * maxindicatoren
+      nodes$rij[strucs] <- d_lv
     }
-  }
-  strucs <- which(nodes$voorkeur == "r" & nodes$tiepe %in% c("lv", "cv"))
-  for (j in strucs) {
-    indicatorids <- c(edges$van[edges$naar == nodes$id[j]],
-                      edges$naar[edges$van == nodes$id[j]])
-    indicatorids <- intersect(indicatorids, allindicators)
-    indicators <- which(nodes$id %in% indicatorids)
-    rijtje <- nodes$rij[j]
-    addedindicators <- 0L
-    for (k in indicators) {
-      if (is.na(nodes$rij[k])) {
-        nodes$rij[k] <- rijtje
-        rijtje <- rijtje + 1L
-        nodes$kolom[k] <- 100L
-        addedindicators <- addedindicators + 1L
+    if (any(nodes$voorkeur == "b" & lvcvs)) {
+      strucs <- which(nodes$voorkeur == "b" & lvcvs)
+      maxindicatoren <- max(nodes$indicatoren[strucs])
+      nodes$kolom[strucs] <- d_lv + seq.int(length(strucs)) * maxindicatoren
+      nodes$rij[strucs] <- 101L - d_lv
+    }
+    # indicators
+    allindicators <- nodes$id[nodes$voorkeur == ""]
+    strucs <- which(nodes$voorkeur == "l" & lvcvs)
+    for (j in strucs) {
+      indicatorids <- c(edges$van[edges$naar == nodes$id[j]],
+                        edges$naar[edges$van == nodes$id[j]])
+      indicatorids <- intersect(indicatorids, allindicators)
+      indicators <- which(nodes$id %in% indicatorids)
+      rijtje <- nodes$rij[j]
+      addedindicators <- 0L
+      for (k in indicators) {
+        if (is.na(nodes$rij[k])) {
+          nodes$rij[k] <- rijtje
+          rijtje <- rijtje + 1L
+          nodes$kolom[k] <- d_ind
+          addedindicators <- addedindicators + 1L
+          if (varlv) { # variances of indicators?
+            varlvedges <- which(edges$naar == nodes$id[k] & edges$van %in% varlvs)
+            if (length(varlvedges) > 0L) {
+              lvvarid <- edges$van[varlvedges[1L]]
+              nodes$kolom[lvvarid] <- 1L          # kolom 1
+              nodes$rij[lvvarid] <- nodes$rij[k]  # zelfde rij als indicator
+            }
+          }
+        }
+      }
+      if (addedindicators > 2) {
+        nodes$rij[j] <- nodes$rij[j] + as.integer((addedindicators - 1) / 2)
       }
     }
-    if (addedindicators > 2) {
-      nodes$rij[j] <- nodes$rij[j] + as.integer((addedindicators - 1) / 2)
-    }
-  }
-  strucs <- which(nodes$voorkeur == "m" & nodes$tiepe %in% c("lv", "cv"))
-  for (j in strucs) {
-    indicatorids <- c(edges$van[edges$naar == nodes$id[j]],
-                      edges$naar[edges$van == nodes$id[j]])
-    indicatorids <- intersect(indicatorids, allindicators)
-    indicators <- which(nodes$id %in% indicatorids)
-    kolompje <- nodes$kolom[j]
-    addedindicators <- 0L
-    for (k in indicators) {
-      if (is.na(nodes$rij[k])) {
-        nodes$kolom[k] <- kolompje
-        kolompje <- kolompje + 1L
-        nodes$rij[k] <- 1L
-        addedindicators <- addedindicators + 1L
+    strucs <- which(nodes$voorkeur == "r" & lvcvs)
+    for (j in strucs) {
+      indicatorids <- c(edges$van[edges$naar == nodes$id[j]],
+                        edges$naar[edges$van == nodes$id[j]])
+      indicatorids <- intersect(indicatorids, allindicators)
+      indicators <- which(nodes$id %in% indicatorids)
+      rijtje <- nodes$rij[j]
+      addedindicators <- 0L
+      for (k in indicators) {
+        if (is.na(nodes$rij[k])) {
+          nodes$rij[k] <- rijtje
+          rijtje <- rijtje + 1L
+          nodes$kolom[k] <- 101L - d_ind
+          addedindicators <- addedindicators + 1L
+          if (varlv) { # variances of indicators?
+            varlvedges <- which(edges$naar == nodes$id[k] & edges$van %in% varlvs)
+            if (length(varlvedges) > 0L) {
+              lvvarid <- edges$van[varlvedges[1L]]
+              nodes$kolom[lvvarid] <- 100L        # kolom 100
+              nodes$rij[lvvarid] <- nodes$rij[k]  # zelfde rij als indicator
+            }
+          }
+        }
+      }
+      if (addedindicators > 2) {
+        nodes$rij[j] <- nodes$rij[j] + as.integer((addedindicators - 1) / 2)
       }
     }
-    if (addedindicators > 2) {
-      nodes$kolom[j] <- nodes$kolom[j] + as.integer((addedindicators - 1) / 2)
-    }
-  }
-  strucs <- which(nodes$voorkeur == "b" & nodes$tiepe %in% c("lv", "cv"))
-  for (j in strucs) {
-    indicatorids <- c(edges$van[edges$naar == nodes$id[j]],
-                      edges$naar[edges$van == nodes$id[j]])
-    indicatorids <- intersect(indicatorids, allindicators)
-    indicators <- which(nodes$id %in% indicatorids)
-    kolompje <- nodes$kolom[j]
-    addedindicators <- 0L
-    for (k in indicators) {
-      if (is.na(nodes$rij[k])) {
-        nodes$kolom[k] <- kolompje
-        kolompje <- kolompje + 1L
-        nodes$rij[k] <- 100L
-        addedindicators <- addedindicators + 1L
+    strucs <- which(nodes$voorkeur == "m" & lvcvs)
+    for (j in strucs) {
+      indicatorids <- c(edges$van[edges$naar == nodes$id[j]],
+                        edges$naar[edges$van == nodes$id[j]])
+      indicatorids <- intersect(indicatorids, allindicators)
+      indicators <- which(nodes$id %in% indicatorids)
+      kolompje <- nodes$kolom[j]
+      addedindicators <- 0L
+      for (k in indicators) {
+        if (is.na(nodes$rij[k])) {
+          nodes$kolom[k] <- kolompje
+          kolompje <- kolompje + 1L
+          nodes$rij[k] <- d_ind
+          addedindicators <- addedindicators + 1L
+          if (varlv) { # variances of indicators?
+            varlvedges <- which(edges$naar == nodes$id[k] & edges$van %in% varlvs)
+            if (length(varlvedges) > 0L) {
+              lvvarid <- edges$van[varlvedges[1L]]
+              nodes$rij[lvvarid] <- 1L                # rij 1
+              nodes$kolom[lvvarid] <- nodes$kolom[k]  # zelfde kol als indicator
+            }
+          }
+        }
+      }
+      if (addedindicators > 2) {
+        nodes$kolom[j] <- nodes$kolom[j] + as.integer((addedindicators - 1) / 2)
       }
     }
-    if (addedindicators > 2) {
-      nodes$kolom[j] <- nodes$kolom[j] + as.integer((addedindicators - 1) / 2)
+    strucs <- which(nodes$voorkeur == "b" & lvcvs)
+    for (j in strucs) {
+      indicatorids <- c(edges$van[edges$naar == nodes$id[j]],
+                        edges$naar[edges$van == nodes$id[j]])
+      indicatorids <- intersect(indicatorids, allindicators)
+      indicators <- which(nodes$id %in% indicatorids)
+      kolompje <- nodes$kolom[j]
+      addedindicators <- 0L
+      for (k in indicators) {
+        if (is.na(nodes$rij[k])) {
+          nodes$kolom[k] <- kolompje
+          kolompje <- kolompje + 1L
+          nodes$rij[k] <- 101L - d_ind
+          addedindicators <- addedindicators + 1L
+          if (varlv) { # variances of indicators?
+            varlvedges <- which(edges$naar == nodes$id[k] & edges$van %in% varlvs)
+            if (length(varlvedges) > 0L) {
+              lvvarid <- edges$van[varlvedges[1L]]
+              nodes$rij[lvvarid] <- 100L              # rij 100
+              nodes$kolom[lvvarid] <- nodes$kolom[k]  # zelfde kol als indicator
+            }
+          }
+        }
+      }
+      if (addedindicators > 2) {
+        nodes$kolom[j] <- nodes$kolom[j] + as.integer((addedindicators - 1) / 2)
+      }
+    }
+  } else { # only observed variables
+    if (any(nodes$voorkeur == "l")) {
+      strucs <- which(nodes$voorkeur == "l")
+      nodes$rij[strucs] <- 1L + seq.int(length(strucs))
+      nodes$kolom[strucs] <- 1L
+    }
+    if (any(nodes$voorkeur == "r")) {
+      strucs <- which(nodes$voorkeur == "r")
+      nodes$rij[strucs] <- 1L + seq.int(length(strucs))
+      nodes$kolom[strucs] <- 100L
+    }
+    if (any(nodes$voorkeur == "m")) {
+      strucs <- which(nodes$voorkeur == "m")
+      if (length(strucs) > 1L && allowbottom) {
+        vanaf <- as.integer(1L + length(strucs) / 2)
+        nodes$voorkeur[strucs[seq.int(vanaf, length(strucs))]] <- "b"
+      }
+    }
+    if (any(nodes$voorkeur == "m")) {
+      strucs <- which(nodes$voorkeur == "m")
+      nodes$kolom[strucs] <- 1L + seq.int(length(strucs))
+      nodes$rij[strucs] <- 1L
+    }
+    if (any(nodes$voorkeur == "b")) {
+      strucs <- which(nodes$voorkeur == "b")
+      nodes$kolom[strucs] <- 1L + seq.int(length(strucs))
+      nodes$rij[strucs] <- 100L
     }
   }
-  # remove the holes in rows and columns
-  rijen <- sort(unique(nodes$rij))
-  nodes$rij <- match(nodes$rij, rijen)
-  kolommen <- sort(unique(nodes$kolom))
-  nodes$kolom <- match(nodes$kolom, kolommen)
+  if (all(nodes$voorkeur == "")) { # no regressions defined
+      # do nothing, should be covered by search_position subroutine
+  } else {
+    # remove the holes in rows and columns
+    rijen <- sort(unique(nodes$rij))
+    nodes$rij <- match(nodes$rij, rijen)
+    kolommen <- sort(unique(nodes$kolom))
+    nodes$kolom <- match(nodes$kolom, kolommen)
+  }
   attr(nodes, "mlrij") <- 0L
   # handle nodes which are not yet placed
   while(any(is.na(nodes$rij))) {

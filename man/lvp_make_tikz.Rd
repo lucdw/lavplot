@@ -2,7 +2,7 @@
 \alias{lvp_make_tikz}
 \title{Creates diagram code for tikz}
 \usage{
-lvp_make_tikz(nodes, edges, cex = 1.75, outfile = NULL)
+lvp_make_tikz(nodes, edges, cex = 1.3, outfile = NULL)
 }
 \arguments{
 \item{nodes}{The nodes data.frame as returned from position_nodes}

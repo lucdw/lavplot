@@ -3,8 +3,11 @@
 \title{Creates diagram code for tikz, svg or diagram}
 \usage{
 lavplot(model = NULL, infile = NULL, varlv = FALSE,
-        allowbottom = FALSE, cex = 1.75, outfile = NULL,
-        outformat = c("tikz", "svg", "diagram"))
+        allowbottom = FALSE, cex = 1.3, outfile = NULL,
+        outformat = c("tikz", "svg", "diagram"),
+        placenodes = NULL,
+        edgelabelsbelow = NULL,
+        verbose = FALSE)
 }
 \arguments{
 \item{model}{A character vector specifying the model in lavaan syntax or a list
@@ -21,6 +24,9 @@ bottom of the graph.}
 \item{cex}{Minimum distance between nodes in cm.}
 \item{outfile}{Where to write the result.}
 \item{outformat}{format for the generated code: tikz, svg or diagram}
+\item{placenodes}{optional list with members nodename = c(row, column)}
+\item{edgelabelsbelow}{optional list with members c(nodename1, nodename2)}
+\item{verbose}{logical, if TRUE intermediate results are printed}
 }
 \value{
 A character array - invisible - with the generated code.
