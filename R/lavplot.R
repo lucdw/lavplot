@@ -5,6 +5,7 @@ lavplot <- function(model = NULL,
                     cex = 1.3,
                     outfile = NULL,
                     outformat = c("tikz", "svg", "diagram"),
+                    sloped_labels = TRUE,
                     placenodes = NULL,
                     edgelabelsbelow = NULL,
                     verbose = FALSE) {
@@ -47,7 +48,7 @@ lavplot <- function(model = NULL,
     }
   }
   if (outformat == "tikz") {
-    lvp_make_tikz(nodes, edges, cex, outfile)
+    lvp_make_tikz(nodes, edges, cex, sloped_labels = sloped_labels, outfile)
   } else if (outformat == "svg") {
     lvp_make_tikz(nodes, edges, outfile)
   } else {

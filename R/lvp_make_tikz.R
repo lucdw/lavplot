@@ -1,4 +1,5 @@
-lvp_make_tikz <- function(nodes, edges, cex = 1.3, outfile = NULL) {
+lvp_make_tikz <- function(nodes, edges, cex = 1.3, sloped_labels = TRUE,
+                          outfile = NULL) {
   latexsymbols <- c(
     "varGamma", "varSigma", "varDelta", "varUpsilon", "varTheta", "varPhi",
     "varLambda", "varPsi", "varXi", "varOmega", "varPi", "varepsilon", "varphi",
@@ -103,24 +104,28 @@ lvp_make_tikz <- function(nodes, edges, cex = 1.3, outfile = NULL) {
       anchorv <- anchorn <- ""
       if (edges$tiepe[j] == "ip") {
         edges$tiepe[j] <- "p"
-        if (nodes$kolom[van] <= 1L + varlv ||           # composite left
-            nodes$kolom[naar] >= maxcol - varlv) {      # LV right
+        if (nodes$voorkeur[van] %in% c("l", "r") ||
+             nodes$voorkeur[naar] %in% c("l", "r")) {
+        if ((nodes$kolom[van] <= 1L + varlv ||           # composite left
+             nodes$kolom[naar] >= maxcol - varlv)) {     # LV right
           anchorv <- ".east"
           anchorn <- ".west"
         } else if (nodes$kolom[naar] <= 1L + varlv ||        # LV left
                     nodes$kolom[van] >= maxcol - varlv) {    # composite right
           anchorv <- ".west"
           anchorn <- ".east"
-        } else if (nodes$rij[van] <= 1L + varlv ||           # composite left
-                   nodes$rij[naar] >= maxrij - varlv) {      # LV right
+        }} else if (nodes$voorkeur[van] %in% c("m", "b") ||
+                    nodes$voorkeur[naar] %in% c("m", "b")) {
+          if (nodes$rij[van] <= 1L + varlv ||           # composite left
+                   nodes$rij[naar] >= maxrij - varlv) { # LV right
           anchorv <- ".south"
           anchorn <- ".north"
         } else if (nodes$rij[naar] <= 1L + varlv ||       # LV left
                    nodes$rij[van] >= maxrij - varlv) {    # composite right
           anchorv <- ".north"
           anchorn <- ".south"
-        }
-      } else if (nodes$tiepe[van] == nodes$tiepe[naar])  {
+        }}
+      } else if (nodes$tiepe[van] == nodes$tiepe[naar] && edges$tiepe[j] == "d")  {
         if (nodes$kolom[van] == nodes$kolom[naar] && nodes$kolom[van] %in% c(1L, maxcol)) {
           if (nodes$kolom[van] == 1L) anchorv <- anchorn <- ".west"
           if (nodes$kolom[van] == maxcol) anchorv <- anchorn <- ".east"
@@ -144,7 +149,8 @@ lvp_make_tikz <- function(nodes, edges, cex = 1.3, outfile = NULL) {
       if (thelabel != "") {
         thelabel <- paste0("node[" ,
                            ifelse(edges$labelbelow[j], "below", "above"),
-                           ",sloped] {", thelabel, "} ")
+                           ifelse(sloped_labels, ",sloped", ""),
+                           "] {", thelabel, "} ")
       }
       pijl <- ifelse(edges$tiepe[j] %in% c("p", "ip"), "->", "<->")
       writeLines(paste("\\path[", pijl, "] (", vannaam, anchorv, ") edge",

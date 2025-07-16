@@ -1,4 +1,5 @@
 importFrom("lavaan", "lavParseModelString")
+importFrom("graphics", "grid", "lines", "par", "plot.default")
 export("lvp_get_model_info")
 export("lvp_position_nodes")
 export("lvp_make_tikz")

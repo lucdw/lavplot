@@ -2,12 +2,13 @@
 \alias{lvp_make_tikz}
 \title{Creates diagram code for tikz}
 \usage{
-lvp_make_tikz(nodes, edges, cex = 1.3, outfile = NULL)
+lvp_make_tikz(nodes, edges, cex = 1.3, sloped_labels = TRUE, outfile = NULL)
 }
 \arguments{
 \item{nodes}{The nodes data.frame as returned from position_nodes}
 \item{edges}{The edges data.frame as returned from get_model_info}
 \item{cex}{Minimum distance between nodes in cm.}
+\item{sloped_labels}{logical, sloped labels above (or under) the edges}
 \item{outfile}{Where to write the result.}
 }
 \value{

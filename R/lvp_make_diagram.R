@@ -18,6 +18,7 @@ lvp_make_diagram <- function(nodes, edges, outfile = "") {
     pos[j, 1L] <- nodes$kolom[j] / (max(nodes$kolom) + 1)
     boxtypes[j] <- switch(nodes$tiepe[j],
                           lv = "circle",
+                          varlv = "circle",
                           ov = "rect",
                           wov = "rect",
                           bov = "rect",
@@ -25,6 +26,7 @@ lvp_make_diagram <- function(nodes, edges, outfile = "") {
                           const = "multi")
     boxcols[j] <- switch(nodes$tiepe[j],
                           lv = "white",
+                          varlv = "lightgrey",
                           ov = "white",
                           wov = "lightgreen",
                           bov = "lightblue",
