@@ -54,7 +54,11 @@ The return value consists of a list of two data.frames:
     the model and the fixed value if present}
     \item{van}{integer, id of the starting node}
     \item{naar}{integer, id of the destination node}
-    \item{tiepe}{character,  p = arrow, d = double arrow, s = self-loop}
+    \item{vananker}{character, anchor point for starting node, initialized NA}
+    \item{naaranker}{character, anchor point for destination node,
+    initialized NA}
+    \item{tiepe}{character,  like op in lavaan model, except (residual)
+    variance, coded here as '~~~'.}
     \item{labelbelow}{logical, if label has to be positioned under the line,
     initalized FALSE}
   }

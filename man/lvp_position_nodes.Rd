@@ -2,18 +2,19 @@
 \alias{lvp_position_nodes}
 \title{Position the nodes in the diagram}
 \usage{
-lvp_position_nodes(nodes, edges, allowbottom = FALSE)
+lvp_position_nodes(nodes_edges, allowbottom = FALSE)
 }
 \arguments{
-\item{nodes}{The nodes data.frame as returned from lvp_get_model_info}
-\item{edges}{The edges data.frame as returned from lvp_get_model_info}
+\item{nodes_edges}{The nodes and edges data.frames in a list as
+        returned from lvp_get_model_info}
 \item{allowbottom}{A logical indicating if indicators can be placed at the
-bottom of the graph.}
+      bottom of the graph.}
 }
 \value{
-A modified nodes data.frame, where the columns 'rij' and 'kolom' are filled in.}
+A list with modified nodes and edges data.frames, and an integer mlrij giving
+the position at which a line should drawn for multilevel models.}
 \description{
-Computes the positions for the nodes in the diagram.
+Computes the positions for the nodes and anchors for edges in the diagram.
 }
 \examples{
 model <- 'alfa  =~ x_1 + x_2 + x_3     # latent variable
@@ -25,5 +26,5 @@ model <- 'alfa  =~ x_1 + x_2 + x_3     # latent variable
           alfa ~ tt * beta + ss * gamma + yy * Theta_1
           '
 test <- lvp_get_model_info(model)
-nodes <- lvp_position_nodes(test$nodes, test$edges)
+test_positioned <- lvp_position_nodes(test)
 }

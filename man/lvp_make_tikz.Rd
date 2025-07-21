@@ -2,17 +2,19 @@
 \alias{lvp_make_tikz}
 \title{Creates diagram code for tikz}
 \usage{
-lvp_make_tikz(nodes, edges, cex = 1.3, sloped_labels = TRUE, outfile = NULL)
+lvp_make_tikz(nodes_edges, outfile, cex = 1.3,
+          sloped_labels = TRUE, standalone = FALSE)
 }
 \arguments{
-\item{nodes}{The nodes data.frame as returned from position_nodes}
-\item{edges}{The edges data.frame as returned from get_model_info}
+\item{nodes_edges}{The list with nodes, edges and mlrij as returned from
+    lvp_position_nodes}
+\item{outfile}{Where to write the result.}
 \item{cex}{Minimum distance between nodes in cm.}
 \item{sloped_labels}{logical, sloped labels above (or under) the edges}
-\item{outfile}{Where to write the result.}
+\item{standalone}{logical, add code to make TeX file standalone?}
 }
 \value{
-A character array - invisible - with the generated code.
+NULL, invisible
 }
 \description{
 Creates the code to make a tikz diagram in tikz.
@@ -29,10 +31,6 @@ model <- 'alpha  =~ x_1 + x_2 + x_3     # latent variable
           alpha ~ yy * Theta_1 + tt * beta + ss * gamma
           '
 test <- lvp_get_model_info(model)
-nodes <- lvp_position_nodes(test$nodes, test$edges)
-print(nodes)
-nodes$kolom[19L] <- 2 # move Theta_1 one position to the left
-print(test$edges)
-test$edges$labelbelow[19L] <- TRUE # label of arrow below the line
-tikzcode <- lvp_make_tikz(nodes, test$edges)
+testpos <- lvp_position_nodes(test)
+lvp_make_tikz(testpos, stdout())
 }

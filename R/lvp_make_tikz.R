@@ -1,5 +1,6 @@
-lvp_make_tikz <- function(nodes, edges, cex = 1.3, sloped_labels = TRUE,
-                          outfile = NULL) {
+lvp_make_tikz <- function(nodes_edges, outfile, cex = 1.3,
+                          sloped_labels = TRUE, standalone = FALSE) {
+  #TODO: better handling for 1 output file !!!
   latexsymbols <- c(
     "varGamma", "varSigma", "varDelta", "varUpsilon", "varTheta", "varPhi",
     "varLambda", "varPsi", "varXi", "varOmega", "varPi", "varepsilon", "varphi",
@@ -21,8 +22,10 @@ lvp_make_tikz <- function(nodes, edges, cex = 1.3, sloped_labels = TRUE,
     nm <- gsub("_([[:digit:]]*)", "_{\\1}", nm)
     paste0("$", nm, "$")
   }
-  mlrij <- attr(nodes, "mlrij", exact = TRUE)
-  if (is.null(mlrij)) stop("nodes hasn't been processed by position_nodes !")
+  mlrij <- nodes_edges$mlrij
+  if (is.null(mlrij)) stop("nodes_edges hasn't been processed by position_nodes!")
+  nodes <- nodes_edges$nodes
+  edges <- nodes_edges$edges
   tikzmid <- character(0) # to avoid warning in package check
   zz <- textConnection("tikzmid", "w", local = TRUE)
   texstart <- c(
@@ -102,7 +105,7 @@ lvp_make_tikz <- function(nodes, edges, cex = 1.3, sloped_labels = TRUE,
     } else {
       bending <- " "
       anchorv <- anchorn <- ""
-      if (edges$tiepe[j] == "ip") {
+      if (edges$tiepe[j] %in% c("=~", "<~")) {
         edges$tiepe[j] <- "p"
         if (nodes$voorkeur[van] %in% c("l", "r") ||
              nodes$voorkeur[naar] %in% c("l", "r")) {
@@ -125,7 +128,7 @@ lvp_make_tikz <- function(nodes, edges, cex = 1.3, sloped_labels = TRUE,
           anchorv <- ".north"
           anchorn <- ".south"
         }}
-      } else if (nodes$tiepe[van] == nodes$tiepe[naar] && edges$tiepe[j] == "d")  {
+      } else if (nodes$tiepe[van] == nodes$tiepe[naar] && edges$tiepe[j] == "~~")  {
         if (nodes$kolom[van] == nodes$kolom[naar] && nodes$kolom[van] %in% c(1L, maxcol)) {
           if (nodes$kolom[van] == 1L) anchorv <- anchorn <- ".west"
           if (nodes$kolom[van] == maxcol) anchorv <- anchorn <- ".east"
@@ -152,7 +155,7 @@ lvp_make_tikz <- function(nodes, edges, cex = 1.3, sloped_labels = TRUE,
                            ifelse(sloped_labels, ",sloped", ""),
                            "] {", thelabel, "} ")
       }
-      pijl <- ifelse(edges$tiepe[j] %in% c("p", "ip"), "->", "<->")
+      pijl <- ifelse(edges$tiepe[j] %in% c("~~", "~~~"), "<->", "->")
       writeLines(paste("\\path[", pijl, "] (", vannaam, anchorv, ") edge",
                 bending, thelabel, "(", naarnaam, anchorn, ");", sep = ""), zz)
     }
@@ -160,9 +163,11 @@ lvp_make_tikz <- function(nodes, edges, cex = 1.3, sloped_labels = TRUE,
   writeLines("\\end{tikzpicture}", zz)
   texend <- "\\end{document}"
   close(zz)
-  if (!is.null(outfile)) {
+  if (standalone) {
     cat(paste(c(texstart, tikzstart, texmid, tikzmid, texend), collapse="\n"),
         file=outfile)
-    }
-  return(invisible(c(tikzstart, tikzmid)))
+  } else {
+    cat(paste(c(tikzstart, tikzmid), collapse="\n"), file=outfile)
+  }
+  return(invisible(NULL))
 }

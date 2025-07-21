@@ -47,8 +47,9 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
     label = character(maxedges),
     van = integer(maxedges),
     naar = integer(maxedges),
-    tiepe = character(maxedges), # p = pijl, d = dubbele pijl, s = self,
-                                 # ip = indicator pijl
+    vananker = rep(NA_character_, maxedges),
+    naaranker = rep(NA_character_, maxedges),
+    tiepe = character(maxedges), # lavaan operator, behalve ~~ self -> "~~~"
     labelbelow = rep(FALSE, maxedges)
   )
   curnode <- 0L
@@ -91,7 +92,7 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
       edges$label[curedge] <- edge_label(tbl$label[i], tbl$fixed[i])
       edges$van[curedge] <- jl
       edges$naar[curedge] <- jr
-      edges$tiepe[curedge] <- "ip"
+      edges$tiepe[curedge] <- tbl$op[i]
     } else if (tbl$op[i] == "<~") {
       #### <~ : is a result of ####
       # lhs node
@@ -129,7 +130,7 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
       edges$label[curedge] <- edge_label(tbl$label[i], tbl$fixed[i])
       edges$van[curedge] <- jr
       edges$naar[curedge] <- jl
-      edges$tiepe[curedge] <- "ip"
+      edges$tiepe[curedge] <- tbl$op[i]
     } else if (tbl$op[i] == "~") {
       #### ~ : is regressed on ####
       # lhs node
@@ -179,7 +180,7 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
       edges$label[curedge] <- edge_label(tbl$label[i], tbl$fixed[i])
       edges$van[curedge] <- jr
       edges$naar[curedge] <- jl
-      edges$tiepe[curedge] <- "p"
+      edges$tiepe[curedge] <- tbl$op[i]
     } else if (tbl$op[i] == "~1") {
       #### ~1 : intercept ####
       # lhs node
@@ -221,7 +222,7 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
       edges$label[curedge] <- edge_label(tbl$label[i], tbl$fixed[i])
       edges$van[curedge] <- jr
       edges$naar[curedge] <- jl
-      edges$tiepe[curedge] <- "p"
+      edges$tiepe[curedge] <- "~"
     } else if (tbl$op[i] == "~~") {
       #### ~~ : is correlated with ####
       # lhs node
@@ -264,13 +265,13 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
       edges$label[curedge] <- edge_label(tbl$label[i], tbl$fixed[i])
       edges$van[curedge] <- jr
       edges$naar[curedge] <- jl
-      edges$tiepe[curedge] <- ifelse(jl == jr, "s", "d")
+      edges$tiepe[curedge] <- ifelse(jl == jr, "~~~", tbl$op[i])
     }
   }
   # aanpassingen voor varlv
-  if (varlv && any(edges$tiepe == "s")) {
+  if (varlv && any(edges$tiepe == "~~~")) {
     #       wijzigen varianties
-    welke <- which(edges$tiepe == "s")
+    welke <- which(edges$tiepe == "~~~")
     varlvnodes <- rep(0L, length(welke))
     lvnodes <- rep(0L, length(welke))
     for (ji in seq_along(welke)) {
@@ -284,15 +285,15 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
       varlvnodes[ji] <- curnode
       lvnodes[ji] <- edges$van[j]
       edges$van[j] <- curnode
-      edges$tiepe[j] <- "p"
+      edges$tiepe[j] <- "~"
       edges$label[j] <- ifelse(grepl("=", edges$label[j]),
                                gsub("^.*=","",edges$label[j]), "")
     }
     #       wijzigen covarianties
     for (j1 in seq_along(welke)) {
       for (j2 in seq_along(welke)) {
-        if (j1 != j2 && any(edges$tiepe == "d" & edges$van == lvnodes[j1] & edges$naar == lvnodes[j2])) {
-          edg <- which(edges$tiepe == "d" &  edges$van == lvnodes[j1] & edges$naar == lvnodes[j2])[[1L]]
+        if (j1 != j2 && any(edges$tiepe == "~~" & edges$van == lvnodes[j1] & edges$naar == lvnodes[j2])) {
+          edg <- which(edges$tiepe == "~~" &  edges$van == lvnodes[j1] & edges$naar == lvnodes[j2])[[1L]]
           edges$van[edg] <- varlvnodes[j1]
           edges$naar[edg] <- varlvnodes[j2]
         }

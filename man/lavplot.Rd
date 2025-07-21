@@ -3,8 +3,11 @@
 \title{Creates diagram code for tikz, svg or diagram}
 \usage{
 lavplot(model = NULL, infile = NULL, varlv = FALSE,
-        allowbottom = FALSE, cex = 1.3, outfile = NULL,
-        outformat = c("tikz", "svg", "diagram"),
+        allowbottom = FALSE, cex = 1.3,
+        texfile = NULL,
+        standalone = FALSE,
+        pngfile = NULL,
+        svgfile = NULL,
         sloped_labels = TRUE,
         placenodes = NULL,
         edgelabelsbelow = NULL,
@@ -23,18 +26,21 @@ plotted as covariance between the latent variables for the variance.}
 \item{allowbottom}{A logical indicating if indicators can be placed at the
 bottom of the graph.}
 \item{cex}{Minimum distance between nodes in cm.}
-\item{outfile}{Where to write the result.}
-\item{outformat}{format for the generated code: tikz, svg or diagram}
+\item{texfile}{Character, path to file to store the diagram in tikz.}
+\item{standalone}{Logical, add code to make TeX file standalone}
+\item{pngfile}{Character, path to file to store the diagram in PNG.}
+\item{svgfile}{Character, path to file to store the diagram in SVG.}
 \item{sloped_labels}{logical, sloped labels above (or under) the edges}
 \item{placenodes}{optional list with members nodename = c(row, column)}
 \item{edgelabelsbelow}{optional list with members c(nodename1, nodename2)}
 \item{verbose}{logical, if TRUE intermediate results are printed}
 }
 \value{
-A character array - invisible - with the generated code.
+NULL, invisible
 }
 \description{
-Creates the code to make a tikz diagram in tikz.
+Creates the code to make a dagram in tikz or svg, plot the diagram or store
+it in a png file.
 }
 \examples{
 model <- 'alpha_11  =~ 1 * x_1 + x_2 + x_3     # latent variable
@@ -42,12 +48,14 @@ model <- 'alpha_11  =~ 1 * x_1 + x_2 + x_3     # latent variable
           gamma =~ 1 * x_7 + x_8 + x_9     # latent variable
           xi =~ 1 * x_10 + x_11 + x_12 + x_13  # latent variable
           x_1 ~~ x_3
-          x_4 ~~ vx4 * x_4
+          x_2 ~~ epsilon_2 * x_2
+          x_12 ~~ epsilon_12 * x_12
+          x_4 ~~ epsilon_4 * x_4
           x_7 ~~ x_9
           x_10 ~~ x_11 + x_13
           # regressions
           xi ~ v * alpha_11 + t * alpha_12 + 1
-          alpha_11 ~ yy * Theta_1 + tt_1 * 0.11234 * alpha_12 + ss * gamma
+          alpha_11 ~ yy * Theta_1 + tt_1 * 0.12 * alpha_12 + ss * gamma
           '
 tikzcode <- lavplot(model)
 modelml <- '

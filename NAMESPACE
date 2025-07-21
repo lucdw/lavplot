@@ -1,8 +1,10 @@
 importFrom("lavaan", "lavParseModelString")
-importFrom("graphics", "abline", "lines", "par", "plot.default")
+importFrom("graphics", "abline", "lines", "par", "plot.default",
+           "polygon", "text")
+importFrom("grDevices", "dev.off", "png")
 export("lvp_get_model_info")
 export("lvp_position_nodes")
 export("lvp_make_tikz")
-export("lvp_make_diagram")
+export("lvp_plot")
 export("lvp_make_svg")
 export("lavplot")

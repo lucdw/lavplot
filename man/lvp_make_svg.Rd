@@ -2,11 +2,12 @@
 \alias{lvp_make_svg}
 \title{Creates code to show a diagram in svg format.}
 \usage{
-lvp_make_svg(nodes, edges, outfile = "")
+lvp_make_svg(nodes_edges, sloped_labels, outfile = "")
 }
 \arguments{
-\item{nodes}{The nodes data.frame as returned from position_nodes}
-\item{edges}{The edges data.frame as returned from get_model_info}
+\item{nodes_edges}{The list with nodes, edges and mlrij as returned from
+    lvp_position_nodes}
+\item{sloped_labels}{logical, sloped labels above (or under) the edges}
 \item{outfile}{A connection or a character string naming the file to print to.}
 }
 \value{
@@ -25,8 +26,8 @@ model <- 'alpha  =~ x_1 + x_2 + x_3     # latent variable
           alpha ~ yy * Theta_1 + tt * beta + ss * gamma
           '
 test <- lvp_get_model_info(model)
-nodes <- lvp_position_nodes(test$nodes, test$edges)
-lvp_make_svg(nodes, test$edges)
+test <- lvp_position_nodes(test)
+lvp_make_svg(test)
 modelml <- '
         level: 1
         fw =~ 1*y_1 + y_2 + y_3 + y_5

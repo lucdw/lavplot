@@ -1,13 +1,14 @@
-\name{lvp_make_diagram}
-\alias{lvp_make_diagram}
-\title{Creates code to show a diagram in an R-plot via package diagram}
+\name{lvp_plot}
+\alias{lvp_plot}
+\title{Plots a diagram.}
 \usage{
-lvp_make_diagram(nodes, edges, outfile = "")
+lvp_plot(nodes_edges, sloped_labels = TRUE, addgrid = TRUE, pngfile = NULL)
 }
 \arguments{
-\item{nodes}{The nodes data.frame as returned from position_nodes}
-\item{edges}{The edges data.frame as returned from get_model_info}
-\item{outfile}{A connection or a character string naming the file to print to.}
+\item{nodes_edges}{The data.frames and mlrij as returned from position_nodes}
+\item{sloped_labels}{logical, sloped labels above (or under) the edges}
+\item{addgrid}{Logical, add a grid with indicated 'positions' to the graph?}
+\item{pngfile}{A character string naming the file to store the diagram in PNG.}
 }
 \value{
 NULL (invisible)}
@@ -24,8 +25,8 @@ model <- 'alpha  =~ x_1 + x_2 + x_3     # latent variable
           alpha ~ yy * Theta_1 + tt * beta + ss * gamma
           '
 test <- lvp_get_model_info(model)
-nodes <- lvp_position_nodes(test$nodes, test$edges)
-lvp_make_diagram(nodes, test$edges)
+test <- lvp_position_nodes(test)
+lvp_plot(test)
 modelml <- '
         level: 1
         fw =~ 1*y_1 + y_2 + y_3 + y_5
@@ -33,7 +34,7 @@ modelml <- '
         fb =~ 1*y_1 + y_2 + y_3 + y_4
         y_2 ~~ cv24 * y_4
   '
-testml <- lvp_get_model_info(modelml)
-nodesml <- lvp_position_nodes(testml$nodes, testml$edges)
-lvp_make_diagram(nodesml, testml$edges)
+test <- lvp_get_model_info(modelml)
+test <- lvp_position_nodes(test)
+lvp_plot(test)
 }
