@@ -78,6 +78,7 @@ lvp_plot <- function(nodes_edges,
                         bend = 0, below = FALSE, txtcex = 0.9) {
     labele <- sub("_([[:digit:]]*)", "[\\1]", label)
     labele <- sub("varepsilon", "epsilon", labele, fixed = TRUE)
+    labele <- sub("=(.*)$", "(\\1)", labele)
     labele <- str2expression(labele)
     unitvec <- (naar - van) / sqrt(sum((naar - van) * (naar - van)))
     theta <- atan2(naar[2] - van[2], naar[1] - van[1])
@@ -150,7 +151,7 @@ lvp_plot <- function(nodes_edges,
   plot_var <- function(waar, noderadius, label = "", side = "n", txtcex = 0.9) {
     labele <- sub("_([[:digit:]]*)", "[\\1]", label)
     labele <- sub("varepsilon", "epsilon", labele, fixed = TRUE)
-    labele <- sub("=", " ", labele, fixed = TRUE)
+    labele <- sub("=(.*)$", "(\\1)", labele)
     labele <- str2expression(labele)
     thetarange <- c(pi / 6, 11 * pi / 6)
     if (side == "s") thetarange <- thetarange + pi / 2
