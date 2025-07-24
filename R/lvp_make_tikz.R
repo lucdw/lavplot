@@ -1,6 +1,5 @@
 lvp_make_tikz <- function(nodes_edges, outfile, cex = 1.3,
                           sloped_labels = TRUE, standalone = FALSE) {
-  #TODO: better handling for 1 output file !!!
   latexsymbols <- c(
     "varGamma", "varSigma", "varDelta", "varUpsilon", "varTheta", "varPhi",
     "varLambda", "varPsi", "varXi", "varOmega", "varPi", "varepsilon", "varphi",
@@ -26,9 +25,14 @@ lvp_make_tikz <- function(nodes_edges, outfile, cex = 1.3,
   if (is.null(mlrij)) stop("nodes_edges hasn't been processed by position_nodes!")
   nodes <- nodes_edges$nodes
   edges <- nodes_edges$edges
-  tikzmid <- character(0) # to avoid warning in package check
-  zz <- textConnection("tikzmid", "w", local = TRUE)
-  texstart <- c(
+  if (is.character(outfile)) {
+    zz <- file(outfile, open = "w")
+    closezz <- TRUE
+  } else {
+    zz <- outfile
+    closezz <- FALSE
+  }
+  if (standalone) writeLines(c(
     "\\documentclass{article}",
     "\\usepackage{amsmath, amssymb}",
     "\\usepackage{amsfonts}",
@@ -36,9 +40,9 @@ lvp_make_tikz <- function(nodes_edges, outfile, cex = 1.3,
     "\\usepackage[english]{babel}",
     "\\usepackage{xcolor}",
     "\\usepackage{color}",
-    "\\usepackage{tikz}")
+    "\\usepackage{tikz}"), zz)
   commstyle <- paste0("draw, minimum size=", round(6 * cex), "mm")
-  tikzstart <- c(
+  writeLines (c(
     "\\usetikzlibrary {shapes.geometric}",
     "\\tikzset{",
     "bend angle=45,",">=stealth,",
@@ -51,11 +55,9 @@ lvp_make_tikz <- function(nodes_edges, outfile, cex = 1.3,
     paste0("wov/.style={rectangle, rounded corners, ", commstyle, ", thick},"),
     paste0("bov/.style={rectangle, rounded corners, ", commstyle, ", thick},"),
     paste0("const/.style={regular polygon, regular polygon sides=3, ", commstyle, ", thick}"),
-    "}")
-  texmid <- "\\begin{document}"
-  writeLines(
-    "\\begin{tikzpicture}",
-    zz)
+    "}"), zz)
+  if (standalone) writeLines("\\begin{document}", zz)
+  writeLines("\\begin{tikzpicture}", zz)
   maxrij <- max(nodes$rij)
   maxcol <- max(nodes$kolom)
   if (mlrij > 0L) {
@@ -161,13 +163,7 @@ lvp_make_tikz <- function(nodes_edges, outfile, cex = 1.3,
     }
   }
   writeLines("\\end{tikzpicture}", zz)
-  texend <- "\\end{document}"
-  close(zz)
-  if (standalone) {
-    cat(paste(c(texstart, tikzstart, texmid, tikzmid, texend), collapse="\n"),
-        file=outfile)
-  } else {
-    cat(paste(c(tikzstart, tikzmid), collapse="\n"), file=outfile)
-  }
+  if(standalone) writeLines("\\end{document}", zz)
+  if (closezz) close(zz)
   return(invisible(NULL))
 }
