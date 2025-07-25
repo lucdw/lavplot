@@ -7,7 +7,7 @@ lavplot(model = NULL, infile = NULL, varlv = FALSE,
         texfile = NULL,
         standalone = FALSE,
         pngfile = NULL,
-        svgfile = NULL,
+        htmlfile = NULL,
         sloped_labels = TRUE,
         placenodes = NULL,
         edgelabelsbelow = NULL,
@@ -29,7 +29,8 @@ bottom of the graph.}
 \item{texfile}{Character, path to file to store the diagram in tikz.}
 \item{standalone}{Logical, add code to make TeX file standalone}
 \item{pngfile}{Character, path to file to store the diagram in PNG.}
-\item{svgfile}{Character, path to file to store the diagram in SVG.}
+\item{htmlfile}{Character, path to file to store the diagram in SVG,
+embedded in basic HTML.}
 \item{sloped_labels}{logical, sloped labels above (or under) the edges}
 \item{placenodes}{optional list with members nodename = c(row, column)}
 \item{edgelabelsbelow}{optional list with members c(nodename1, nodename2)}
@@ -57,7 +58,7 @@ model <- 'alpha_11  =~ 1 * x_1 + x_2 + x_3     # latent variable
           xi ~ v * alpha_11 + t * alpha_12 + 1
           alpha_11 ~ yy * Theta_1 + tt_1 * 0.12 * alpha_12 + ss * gamma
           '
-tikzcode <- lavplot(model)
+lavplot(model, texfile=stdout());
 modelml <- '
         level: 1
         fw =~ y_1 + y_2 + y_3 + y_4
@@ -65,5 +66,5 @@ modelml <- '
         fb =~ y_1 + y_2 + y_3 + y_5
         y_2 ~~ cv24 * y_5
   '
-tikzcodeml <- lavplot(modelml)
+tikzcodeml <- lavplot(modelml, htmlfile=stdout())
 }
