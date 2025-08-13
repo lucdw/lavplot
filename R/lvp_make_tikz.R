@@ -1,26 +1,9 @@
 lvp_make_tikz <- function(nodes_edges, outfile, cex = 1.3,
                           sloped_labels = TRUE, standalone = FALSE) {
-  latexsymbols <- c(
-    "varGamma", "varSigma", "varDelta", "varUpsilon", "varTheta", "varPhi",
-    "varLambda", "varPsi", "varXi", "varOmega", "varPi", "varepsilon", "varphi",
-    "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta",
-    "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho",
-    "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega",
-    "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta",
-    "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho",
-    "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega"
-  )
   nodenaam <- function(nm, blk) {
     if (blk > 0L) return(gsub("_", "", paste0("B", blk, nm)))
     return(gsub("_", "", nm))
     }
-  nodelabel <- function(nm) {
-    if (nm == "") return("")
-    startnm <- strsplit(nm, "_", fixed = TRUE)[[1L]][1L]
-    if (startnm %in% latexsymbols) nm <- paste0("\\", nm)
-    nm <- gsub("_([[:digit:]]*)", "_{\\1}", nm)
-    paste0("$", nm, "$")
-  }
   mlrij <- nodes_edges$mlrij
   if (is.null(mlrij)) stop("nodes_edges hasn't been processed by position_nodes!")
   nodes <- nodes_edges$nodes
@@ -70,7 +53,7 @@ lvp_make_tikz <- function(nodes_edges, outfile, cex = 1.3,
     writeLines(paste(
       "\\node[", nodes$tiepe[j], "] (", nodenaam(nodes$naam[j], nodes$blok[j]),
       ") at (", xpos, ",", ypos, ") {",
-      nodelabel(nodes$naam[j]), "};", sep = ""), zz)
+      lvp_format_label(nodes$naam[j], show = FALSE)$tikz, "};", sep = ""), zz)
   }
   varlv <-any(nodes$tiepe == "varlv")
   for (j in seq.int(nrow(edges))) {
@@ -78,29 +61,30 @@ lvp_make_tikz <- function(nodes_edges, outfile, cex = 1.3,
     vannaam <- nodenaam(nodes$naam[van], nodes$blok[van])
     naar <- which(nodes$id == edges$naar[j])
     naarnaam <- nodenaam(nodes$naam[naar], nodes$blok[naar])
+    nodelabel <- lvp_format_label(edges$label[j], show = FALSE)$tikz
     if (van == naar) { # self
       if (nodes$kolom[van] == 1L) {
         writeLines(paste("\\path[<->] (", vannaam,
                          ") edge [in=160, out=-160, looseness=8] node[right] {",
-                         nodelabel(edges$label[j]), "} (",
+                         nodelabel, "} (",
                          vannaam, ");",
                          sep = ""), zz)
       } else if (nodes$rij[van] == maxrij) {
         writeLines(paste("\\path[<->] (", vannaam,
                          ") edge [in=-110, out=-70, looseness=8] node[above] {",
-                         nodelabel(edges$label[j]), "} (",
+                         nodelabel, "} (",
                          vannaam, ");",
                          sep = ""), zz)
       } else if (nodes$kolom[van] == maxcol) {
         writeLines(paste("\\path[<->] (", vannaam,
                          ") edge [in=20, out=-20, looseness=8] node[left] {",
-                         nodelabel(edges$label[j]), "} (",
+                         nodelabel, "} (",
                          vannaam, ");",
                          sep = ""), zz)
       } else {
         writeLines(paste("\\path[<->] (", vannaam,
                          ") edge [in=110, out=70, looseness=8] node[below] {",
-                         nodelabel(edges$label[j]), "} (",
+                         nodelabel, "} (",
                          vannaam, ");",
                          sep = ""), zz)
       }
@@ -150,7 +134,7 @@ lvp_make_tikz <- function(nodes_edges, outfile, cex = 1.3,
           }
         }
       }
-      thelabel <- nodelabel(edges$label[j])
+      thelabel <- lvp_format_label(edges$label[j], show = FALSE)$tikz
       if (thelabel != "") {
         thelabel <- paste0("node[" ,
                            ifelse(edges$labelbelow[j], "below", "above"),

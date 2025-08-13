@@ -54,7 +54,7 @@ lavplot <- function(model = NULL,
   }
   addgrid <- TRUE
   if (!is.null(pngfile)) addgrid <- FALSE
-  lvp_plot(tmp, sloped_labels = sloped_labels, pngfile = pngfile,
+  lvp_make_rplot(tmp, sloped_labels = sloped_labels, pngfile = pngfile,
            addgrid = addgrid)
   if (!is.null(texfile))
     lvp_make_tikz(tmp, texfile, cex, sloped_labels, standalone)

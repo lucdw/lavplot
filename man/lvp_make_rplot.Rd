@@ -1,8 +1,8 @@
-\name{lvp_plot}
-\alias{lvp_plot}
+\name{lvp_make_rplot}
+\alias{lvp_make_rplot}
 \title{Plots a diagram.}
 \usage{
-lvp_plot(nodes_edges, sloped_labels = TRUE, addgrid = TRUE, pngfile = NULL)
+lvp_make_rplot(nodes_edges, sloped_labels = TRUE, addgrid = TRUE, pngfile = NULL)
 }
 \arguments{
 \item{nodes_edges}{The data.frames and mlrij as returned from position_nodes}
@@ -26,7 +26,7 @@ model <- 'alpha  =~ x_1 + x_2 + x_3     # latent variable
           '
 test <- lvp_get_model_info(model)
 test <- lvp_position_nodes(test)
-lvp_plot(test)
+lvp_make_rplot(test)
 modelml <- '
         level: 1
         fw =~ 1*y_1 + y_2 + y_3 + y_5
@@ -36,5 +36,5 @@ modelml <- '
   '
 test <- lvp_get_model_info(modelml)
 test <- lvp_position_nodes(test)
-lvp_plot(test)
+lvp_make_rplot(test)
 }

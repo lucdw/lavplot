@@ -77,43 +77,6 @@ node_elements_svg <- function(nodetiepe, noderadius, waar) {
        se = se, s = s, sw = sw, w = w, nw = nw)
 }
 lvp_make_svg <- function(nodes_edges, sloped_labels, outfile = "") {
-  latexsymbols <- c("varepsilon",
-    "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta",
-    "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho",
-    "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega",
-    "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta",
-    "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho",
-    "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega"
-  )
-  unicodes <- c("1013",
-    "913", "914", "915", "916", "917", "918", "919", "920",
-    "921", "922", "923", "924", "925", "926", "927", "928", "929",
-    "931", "932", "933", "934", "935", "936", "937",
-    "945", "946", "947", "948", "949", "950", "951", "952",
-    "953", "954", "955", "956", "957", "958", "959", "960", "961",
-    "963", "964", "965", "966", "967", "968", "969"
-  )
-  editlabel <- function(lbl) {
-    if (lbl == "") return("")
-    splitequal <- strsplit(lbl, "=", fixed = TRUE)[[1L]]
-    splitunderscore <- strsplit(splitequal[1L], "_", TRUE)[[1L]]
-    rv <- splitunderscore[1L]
-    if (rv %in% latexsymbols) {
-      rv <- paste0("&#", unicodes[latexsymbols == rv], ";")
-    }
-    if (length(splitunderscore) > 1L) {
-      rv <- paste0(rv, '<tspan dy="7" font-size="20">',
-                   splitunderscore[2L], '</tspan>')
-      if (length(splitequal) > 1L) {
-        rv <- paste0(rv, '<tspan dy="-7">=', splitequal[2], '</tspan>')
-      }
-    } else {
-      if (length(splitequal) > 1L) {
-        rv <- paste0(rv, '=', splitequal[2])
-      }
-    }
-    rv
-  }
   mlrij <- nodes_edges$mlrij
   if (is.null(mlrij))
     stop("nodes_edges hasn't been processed by lvp_position_nodes!")
@@ -156,8 +119,7 @@ lvp_make_svg <- function(nodes_edges, sloped_labels, outfile = "") {
   }
   plot_edge <- function(van, naar, label = "", dubbel = FALSE,
                         bend = 0, below = FALSE, txtcex = 0.9, id = 0) {
-    labele <- editlabel(label)
-    labele <- sub("varepsilon;", "epsilon;", labele, fixed = TRUE)
+    labele <- lvp_format_label(label, show = FALSE)$svg
     unitvec <- (naar - van) / sqrt(sum((naar - van) * (naar - van)))
     theta <- atan2(naar[2] - van[2], naar[1] - van[1])
     if (bend == 0) { # line
@@ -232,8 +194,7 @@ lvp_make_svg <- function(nodes_edges, sloped_labels, outfile = "") {
     }
   }
   plot_var <- function(waar, noderadius, label = "", side = "n", txtcex = 0.9) {
-    labele <- editlabel(label)
-    labele <- sub("varepsilon;", "epsilon;", labele, fixed = TRUE)
+    labele <- lvp_format_label(label, show = FALSE)$svg
     thetarange <- c(pi / 6, 11 * pi / 6)
     if (side == "s") thetarange <- thetarange + pi / 2
     if (side == "e") thetarange <- thetarange + pi
@@ -252,7 +213,7 @@ lvp_make_svg <- function(nodes_edges, sloped_labels, outfile = "") {
     writeLines(paste0(
       '<path d="M ', xs[1L], ' ', ys[1L], ' A ', straal, ' ', straal ,
       ' 0 1,1 ', xs[2L], ' ', ys[2L] , ' stroke-width="2" stroke="black" ',
-      ' marker-start="url(#sarrow)" marker-end="url(#arrow") >'
+      ' marker-start="url(#sarrow)" marker-end="url(#arrow)" />'
     ), zz)
     # label
     if (label != "") {
@@ -262,8 +223,7 @@ lvp_make_svg <- function(nodes_edges, sloped_labels, outfile = "") {
     }
   }
   plot_node <- function(waar, tiepe, label = "", txtcex = 0.9) {
-    labele <- editlabel(label)
-    labele <- sub("varepsilon;", "epsilon;", labele, fixed = TRUE)
+    labele <- lvp_format_label(label, show = FALSE)$svg
     elems <- node_elements_svg(tiepe, nodedist * noderadius, waar)
     writeLines(c(
       elems$drawit,
