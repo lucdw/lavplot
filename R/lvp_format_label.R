@@ -16,14 +16,6 @@ lvp_format_label <- function(label = "", value = "", show = TRUE,
     "953", "954", "955", "956", "957", "958", "959", "960",
     "961", "963", "964", "965", "966", "967", "968", "969"
   )
-  unicodesH <- c("\u3f5",
-    "\u391", "\u392", "\u393", "\u394", "\u395", "\u396", "\u397", "\u398",
-    "\u399", "\u39a", "\u39b", "\u39c", "\u39d", "\u39e", "\u39f", "\u3a0",
-    "\u3a1", "\u3a3", "\u3a4", "\u3a5", "\u3a6", "\u3a7", "\u3a8", "\u3a9",
-    "\u3b1", "\u3b2", "\u3b3", "\u3b4", "\u3b5", "\u3b6", "\u3b7", "\u3b8",
-    "\u3b9", "\u3ba", "\u3bb", "\u3bc", "\u3bd", "\u3be", "\u3bf", "\u3c0",
-    "\u3c1", "\u3c3", "\u3c4", "\u3c5", "\u3c6", "\u3c7", "\u3c8", "\u3c9"
-  )
   if (label == "" && value == "") return(list(svg="", tikz="", r=""))
   if (value == "") {
     splitted <- strsplit(label, "=", fixed =  TRUE)[[1L]]
@@ -32,19 +24,25 @@ lvp_format_label <- function(label = "", value = "", show = TRUE,
       value <- splitted[2L]
     }
   }
+  if (label == "") {
+    label <- value
+    value <- ""
+  }
   svgpart <- tikzpart <- rpart <- character(3)
-  rpart[3] <- tikzpart[3] <- svgpart[3] <- value
+  rpart[3L] <- tikzpart[3L] <- svgpart[3L] <- value
   if (label != "") {
     # separate label and value by equal sign
-    if (svgpart[3] != "") svgpart[3] = paste0('=', svgpart[3])
-    if (tikzpart[3] != "") tikzpart[3] = paste0('=', tikzpart[3])
+    if (svgpart[3L] != "") svgpart[3L] <- paste0('=', svgpart[3L])
+    if (tikzpart[3L] != "") tikzpart[3L] <- paste0('=', tikzpart[3L])
+    if (rpart[3L] != "") rpart[3L] <- paste0(" == ", rpart[3L])
     # subscript and greek character set handling
     splitunderscore <- strsplit(label, "_", TRUE)[[1L]]
     svgpart[1] <- tikzpart[1] <- rpart[1] <- splitunderscore[1L]
     if (rpart[1] %in% latexsymbols) {
       svgpart[1] <- paste0("&#", unicodes[latexsymbols == svgpart[1]], ";")
       tikzpart[1] <- paste0("\\", tikzpart[1])
-      rpart[1] <- unicodesH[latexsymbols == rpart[1]]
+      if (rpart[1] == "varepsilon") rpart[1] <- "epsilon"
+      rpart[1] <- str2expression(rpart[1])
     }
     if (length(splitunderscore) > 1L) {
       svgpart[2L] <- paste0('<tspan dy="', svgDy  ,'" font-size="', svgIdxFontSize,
@@ -53,34 +51,14 @@ lvp_format_label <- function(label = "", value = "", show = TRUE,
         svgpart[3L] <- paste0('<tspan dy="-', svgDy, '">', svgpart[3L], '</tspan>')
       }
       tikzpart[2L] <- paste0('_{', splitunderscore[2L], '}')
-      rpart[2L] <- paste0(splitunderscore[2L])
-    }
-  }
-  if (rpart[1L] == "") {
-    rexpr <- substitute(val, list(val = rpart[3L]))
-  } else {
-    if (rpart[3L] == "") {
-      if (rpart[2L] == "") {
-        rexpr <- substitute(naam, list(naam = rpart[1L]))
-      } else {
-        rexpr <- substitute(naam[index],
-                            list(naam = rpart[1], index = rpart[2]))
-      }
-    } else {
-      if (rpart[2L] == "") {
-        rexpr <- substitute(naam == val,
-                            list(naam = rpart[1L], val = rpart[3L]))
-      } else {
-        rexpr <- substitute(naam[index] == val,
-                            list(naam = rpart[1], index = rpart[2], val = rpart[3L]))
-      }
+      rpart[2L] <- paste0('["', splitunderscore[2L], '"]')
     }
   }
   if (show) {
     plot(c(0,3), c(0,2), type = "n")
-    text(1, 1, rexpr)
+    text(1, 1, str2expression(paste(rpart, collapse = "")))
   }
   list(svg = paste(svgpart, collapse = ""),
        tikz = paste(c("$", tikzpart, "$"), collapse = ""),
-       r = rexpr)
+       r = str2expression(paste(rpart, collapse = "")))
 }

@@ -15,8 +15,7 @@ value is empty, the value in the label will be used.}
 \item{svgDy}{An integer specifying the distance to move the baseline of the subscript in svg.}
 }
 \value{
-a list with members svg (character), tikz (character) and r (expression),
-giving the result.
+a list with members svg, tikz and r, giving the result.
 }
 \description{
 Creates the code to use in tikz, svg or R to show the label. The label is
