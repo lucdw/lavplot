@@ -6,7 +6,7 @@ lavplot <- function(model = NULL,
                     texfile = NULL,
                     standalone = FALSE,
                     pngfile = NULL,
-                    htmlfile = NULL,
+                    svgfile = NULL,
                     sloped_labels = TRUE,
                     placenodes = NULL,
                     edgelabelsbelow = NULL,
@@ -58,6 +58,7 @@ lavplot <- function(model = NULL,
            addgrid = addgrid)
   if (!is.null(texfile))
     lvp_make_tikz(tmp, texfile, cex, sloped_labels, standalone)
-  if (!is.null(htmlfile))
-    lvp_make_svg(tmp, sloped_labels = sloped_labels, htmlfile)
+  if (!is.null(svgfile))
+    lvp_make_svg(tmp, sloped_labels = sloped_labels, svgfile,
+                 standalone = standalone)
 }

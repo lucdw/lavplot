@@ -2,8 +2,8 @@ node_elements_svg <- function(nodetiepe, noderadius, waar) {
   # define form, color and anchors for a node
   localradius <- noderadius
   if (nodetiepe == "varlv") localradius <- noderadius * .8
-  ovxy <- as.integer(localradius * sqrt(0.5))
-  cvxy <- as.integer(localradius * c(0.5, sqrt(0.75)))
+  ovxy <- localradius * sqrt(0.5)
+  cvxy <- localradius * c(0.5, sqrt(0.75))
   constxy <- cvxy
   drawit <- switch(nodetiepe,
                    lv = ,
@@ -36,50 +36,62 @@ node_elements_svg <- function(nodetiepe, noderadius, waar) {
                           waar[1] - constxy[2], ',', waar[2] + constxy[1],
                                 '" stroke-width="2" stroke="black" fill="none" />')
   )
-  n <- as.integer(c(waar[1], switch(nodetiepe,
+  n <- c(waar[1], switch(nodetiepe,
                    lv = , varlv = , const = waar[2] - localradius,
                    ov = , wov = , bov = waar[2] - ovxy,
-                   cv = waar[2] - cvxy[2])))
-  s <- as.integer(c(waar[1], switch(nodetiepe,
+                   cv = waar[2] - cvxy[2]))
+  s <- c(waar[1], switch(nodetiepe,
                    lv = , varlv = waar[2] + localradius,
                    ov = , wov = , bov = waar[2] + ovxy,
                    cv = waar[2]  + cvxy[2],
-                   const = waar[2] + constxy[1])))
-  e <- as.integer(switch(nodetiepe,
+                   const = waar[2] + constxy[1]))
+  e <- switch(nodetiepe,
               lv = , varlv = , cv = waar + c(localradius, 0),
               ov = , wov = , bov = waar + c(ovxy, 0),
-              const = waar + c(constxy[2], constxy[1])))
-  w <- as.integer(switch(nodetiepe,
+              const = waar + c(constxy[2], constxy[1]))
+  w <- switch(nodetiepe,
                          lv = , varlv = , cv = waar + c(-localradius, 0),
                          ov = , wov = , bov = waar + c(-ovxy, 0),
-                         const = waar + c(-constxy[2], constxy[1])))
-  ne <- as.integer(switch(nodetiepe,
+                         const = waar + c(-constxy[2], constxy[1]))
+  ne <- switch(nodetiepe,
                lv = , varlv = , ov = , wov = ,
                bov = waar + ovxy * c(1, -1),
                cv = waar + c(cvxy[1], -cvxy[2]),
-               const = e))
-  nw <- as.integer(switch(nodetiepe,
+               const = e)
+  nw <- switch(nodetiepe,
                           lv = , varlv = , ov = , wov = ,
                           bov = waar + ovxy * c(-1, -1),
                           cv = waar + c(-cvxy[1], -cvxy[2]),
-                          const = w))
-  se <- as.integer(switch(nodetiepe,
+                          const = w)
+  se <- switch(nodetiepe,
                lv = , varlv = , ov = , wov = ,
                bov = waar + ovxy * c(1, 1),
                cv = waar + cvxy,
-               const = e))
-  sw <- as.integer(switch(nodetiepe,
+               const = e)
+  sw <- switch(nodetiepe,
                           lv = , varlv = , ov = , wov = ,
                           bov = waar + ovxy * c(-1, 1),
                           cv = waar + c(-cvxy[1L], cvxy[2L]),
-                          const = w))
+                          const = w)
   list(drawit = drawit, n = n, ne = ne, e = e,
        se = se, s = s, sw = sw, w = w, nw = nw)
 }
-lvp_make_svg <- function(nodes_edges, sloped_labels, outfile = "") {
+get_file_extension <- function(path) {
+  if (path == "") return("")
+  delen <- strsplit(path, ".", fixed = TRUE)[[1]]
+  if (length(delen) > 1L) return(tolower(delen[length(delen)]))
+  return("")
+}
+lvp_make_svg <- function(nodes_edges, sloped_labels, outfile = "",
+                         standalone = FALSE) {
+  if (is.character(outfile) && outfile != "") {
+    stopifnot(standalone || get_file_extension(outfile) == "svg",
+              !standalone || get_file_extension(outfile) %in% c("htm", "html"))
+  }
   mlrij <- nodes_edges$mlrij
   if (is.null(mlrij))
     stop("nodes_edges hasn't been processed by lvp_position_nodes!")
+  if (outfile == "") outfile <- stdout()
   if (is.character(outfile)) {
     zz <- file(outfile, open = "w")
     closezz <- TRUE
@@ -94,14 +106,19 @@ lvp_make_svg <- function(nodes_edges, sloped_labels, outfile = "") {
   rijen <- max(nodes$rij)
   kolommen <- max(nodes$kolom)
 
+  if (standalone) {
+    writeLines(c(
+      '<!DOCTYPE html>',
+      '<html>',
+      '<body>',
+      '<h2>SVG diagram created by lavplot R package</h2>'),
+      zz)
+  }
   writeLines(c(
-    '<!DOCTYPE html>',
-    '<html>',
-    '<body>',
-    '<h2>SVG diagram created by lavplot R package</h2>',
     paste0('<svg width="', (kolommen + 1) * nodedist, '" height="',
            (rijen + 1) * nodedist,
-           '" version="1.1" xmlns="http://www.w3.org/2000/svg">'),
+           '" version="1.1" xmlns="http://www.w3.org/2000/svg"',
+           ' xmlns:xlink="http://www.w3.org/1999/xlink">'),
     '<defs>',
     '  <marker id="arrow" markerWidth="12" markerHeight="8"',
     '          refX="11" refY="4" orient="auto">',
@@ -162,7 +179,7 @@ lvp_make_svg <- function(nodes_edges, sloped_labels, outfile = "") {
       if (sloped_labels) {
         writeLines(
           c('<text font-size="25" text-anchor="middle">',
-            paste0('<textPath href="#L', id, '" startOffset="50%">',
+            paste0('<textPath xlink:href="#L', id, '" startOffset="50%">',
                    labele, '</textPath>'),
             '</text>'), zz)
       } else {
@@ -212,7 +229,7 @@ lvp_make_svg <- function(nodes_edges, sloped_labels, outfile = "") {
     ys <- middelpt[2] + sin(thetarange) * straal
     writeLines(paste0(
       '<path d="M ', xs[1L], ' ', ys[1L], ' A ', straal, ' ', straal ,
-      ' 0 1,1 ', xs[2L], ' ', ys[2L] , ' stroke-width="2" stroke="black" ',
+      ' 0 1,1 ', xs[2L], ' ', ys[2L] , '" stroke-width="1" stroke="black" ',
       ' marker-start="url(#sarrow)" marker-end="url(#arrow)" />'
     ), zz)
     # label
@@ -240,7 +257,7 @@ lvp_make_svg <- function(nodes_edges, sloped_labels, outfile = "") {
   }
   yrange <- nodedist * range(nodes$rij)
   xrange <- nodedist * range(nodes$kolom)
-  midxy <- as.integer(c(mean(xrange), mean(yrange)))
+  midxy <- c(mean(xrange), mean(yrange))
   for (j in seq.int(nrow(edges))) {
     if (edges$naar[j] != edges$van[j]) {
       van <- which(nodes$id == edges$van[j])
@@ -279,8 +296,8 @@ lvp_make_svg <- function(nodes_edges, sloped_labels, outfile = "") {
               nodes$tiepe[j],
               nodes$naam[j])
   }
-
-  writeLines(c("</svg>", "</body>", "</html>"), zz)
+  writeLines("</svg>", zz)
+  if (standalone) writeLines(c("</body>", "</html>"), zz)
   if (closezz) close(zz)
   return(invisible(NULL))
 }

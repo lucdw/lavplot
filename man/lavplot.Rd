@@ -7,7 +7,7 @@ lavplot(model = NULL, infile = NULL, varlv = FALSE,
         texfile = NULL,
         standalone = FALSE,
         pngfile = NULL,
-        htmlfile = NULL,
+        svgfile = NULL,
         sloped_labels = TRUE,
         placenodes = NULL,
         edgelabelsbelow = NULL,
@@ -29,8 +29,8 @@ bottom of the graph.}
 \item{texfile}{Character, path to file to store the diagram in tikz.}
 \item{standalone}{Logical, add code to make TeX file standalone}
 \item{pngfile}{Character, path to file to store the diagram in PNG.}
-\item{htmlfile}{Character, path to file to store the diagram in SVG,
-embedded in basic HTML.}
+\item{svgfile}{Character, path to file to store the diagram in SVG,
+embedded in basic HTML if standalone = TRUE.}
 \item{sloped_labels}{logical, sloped labels above (or under) the edges}
 \item{placenodes}{optional list with members nodename = c(row, column)}
 \item{edgelabelsbelow}{optional list with members c(nodename1, nodename2)}
@@ -66,5 +66,5 @@ modelml <- '
         fb =~ y_1 + y_2 + y_3 + y_5
         y_2 ~~ cv24 * y_5
   '
-tikzcodeml <- lavplot(modelml, htmlfile=stdout())
+tikzcodeml <- lavplot(modelml, svgfile=stdout())
 }
