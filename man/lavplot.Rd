@@ -1,6 +1,6 @@
 \name{lavplot}
 \alias{lavplot}
-\title{Creates diagram code for tikz, svg or diagram}
+\title{Creates diagram code for tikz, svg or Rplot}
 \usage{
 lavplot(model = NULL, infile = NULL, varlv = FALSE,
         allowbottom = FALSE, cex = 1.3,
@@ -32,7 +32,8 @@ bottom of the graph.}
 \item{svgfile}{Character, path to file to store the diagram in SVG,
 embedded in basic HTML if standalone = TRUE.}
 \item{sloped_labels}{logical, sloped labels above (or under) the edges}
-\item{placenodes}{optional list with members nodename = c(row, column)}
+\item{placenodes}{optional list with members nodename = c(row, column),
+row and colom don't have to be integers}
 \item{edgelabelsbelow}{optional list with members c(nodename1, nodename2)}
 \item{verbose}{logical, if TRUE intermediate results are printed}
 }
@@ -59,6 +60,7 @@ model <- 'alpha_11  =~ 1 * x_1 + x_2 + x_3     # latent variable
           alpha_11 ~ yy * Theta_1 + tt_1 * 0.12 * alpha_12 + ss * gamma
           '
 lavplot(model, texfile=stdout());
+lavplot(model, texfile=stdout(), placenodes=list(Theta_1 = c(2, 2.5)));
 modelml <- '
         level: 1
         fw =~ y_1 + y_2 + y_3 + y_4

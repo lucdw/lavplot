@@ -114,7 +114,7 @@ lvp_make_tikz <- function(nodes_edges, outfile, cex = 1.3,
           anchorv <- ".north"
           anchorn <- ".south"
         }}
-      } else if (nodes$tiepe[van] == nodes$tiepe[naar] && edges$tiepe[j] == "~~")  {
+      } else if (edges$tiepe[j] == "~~")  {
         if (nodes$kolom[van] == nodes$kolom[naar] && nodes$kolom[van] %in% c(1L, maxcol)) {
           if (nodes$kolom[van] == 1L) anchorv <- anchorn <- ".west"
           if (nodes$kolom[van] == maxcol) anchorv <- anchorn <- ".east"
