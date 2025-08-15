@@ -211,7 +211,7 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
       curnode <- curnode + 1L
       jr <- curnode
       nodes$id[curnode] <- curnode
-      nodes$naam[curnode] <- "1"
+      nodes$naam[curnode] <- paste0("1van", tbl$lhs[i])
       nodes$tiepe[curnode] <- "const"
       nodes$blok[curnode] <- tbl$block[i]
       nodes$tmp[curnode] <- paste(nodes$blok[curnode], nodes$naam[curnode])
@@ -312,5 +312,7 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
   edges <- edges[seq.int(curedge), ]
   nodes$voorkeur[nodes$voorkeur == "" & nodes$tiepe == "lv"] <- "l"
   edges$label <- trimws(edges$label)
+  if (any(grepl("[<>&]", c(edges$label, nodes$naam))))
+    warning("some labels contain '<', '>' or '&', which can result in errors!")
   return(list(nodes = nodes, edges = edges))
 }

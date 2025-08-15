@@ -3,9 +3,14 @@ node_elements <- function(nodetiepe, noderadius) {
   thetas <- switch(nodetiepe,
                    lv = ,
                    varlv = seq(0, 2 * pi, length.out = 50L),
-                   ov = ,
+                   ov = seq(pi / 4, 2 * pi, by = pi / 2),
                    wov = ,
-                   bov = seq(pi / 4, 2 * pi, by = pi / 2),
+                   bov =c(
+                     seq(pi / 4 - pi / 10, pi / 4 + pi / 10, by = pi / 60),
+                     seq(3 * pi / 4 - pi / 10, 3 * pi / 4 + pi / 10, by = pi / 60),
+                     seq(5 * pi / 4 - pi / 10, 5 * pi / 4 + pi / 10, by = pi / 60),
+                     seq(7 * pi / 4 - pi / 10, 7 * pi / 4 + pi / 10, by = pi / 60)
+                     ),
                    cv = seq(0, 2 * pi, by = pi / 3),
                    const = seq(pi / 2, 2 * pi, by = 2 * pi / 3 )
   )
@@ -13,6 +18,7 @@ node_elements <- function(nodetiepe, noderadius) {
   if (nodetiepe == "varlv") localradius <- noderadius * .8
   drawx <- localradius * cos(thetas)
   drawy <- localradius * sin(thetas)
+  wovbovflat <- max(drawx)
   boxcol <- switch(nodetiepe,
                    lv = NA_integer_,
                    varlv = NA_integer_,
@@ -23,18 +29,21 @@ node_elements <- function(nodetiepe, noderadius) {
                    const = NA_integer_)
   n <- c(0, switch(nodetiepe,
                    lv = , varlv = , const = localradius,
-                   ov = , wov = , bov = localradius * sqrt(2) / 2,
+                   ov = localradius * sqrt(2) / 2,
+                   wov = , bov = wovbovflat,
                    cv = localradius * sqrt(3) / 2))
   s <- c(0, switch(nodetiepe,
                    lv = , varlv = -localradius,
-                   ov = , wov = , bov = -localradius * sqrt(2) / 2,
+                   ov = -localradius * sqrt(2) / 2,
+                   wov = , bov = -wovbovflat,
                    cv = -localradius * sqrt(3) / 2,
                    const = -localradius * 0.5))
   e <- switch(nodetiepe,
               lv = , varlv = , cv = c(localradius, 0),
-              ov = , wov = , bov = c(localradius * sqrt(2) / 2, 0),
+              ov = c(localradius * sqrt(2) / 2, 0),
+              wov = , bov = c(wovbovflat, 0),
               const = c(localradius * sqrt(3) / 2, -localradius * 0.5))
-  w <- -e
+  w <- c(-e[1L], e[2L])
   ne <- switch(nodetiepe,
                lv = , varlv = , ov = , wov = ,
                bov = localradius * sqrt(0.5) * c(1, 1),

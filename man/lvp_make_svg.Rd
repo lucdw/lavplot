@@ -2,7 +2,10 @@
 \alias{lvp_make_svg}
 \title{Creates code to show a diagram in svg format.}
 \usage{
-lvp_make_svg(nodes_edges, sloped_labels, outfile = "", standalone = FALSE)
+lvp_make_svg(nodes_edges, sloped_labels, outfile = "",
+                         standalone = FALSE,
+                         strokeWidth = 2L, svgFontSize = 20L,
+                         svgIdxFontSize = 15L, svgDy = 5L)
 }
 \arguments{
 \item{nodes_edges}{The list with nodes, edges and mlrij as returned from
@@ -12,6 +15,10 @@ lvp_make_svg(nodes_edges, sloped_labels, outfile = "", standalone = FALSE)
 \item{standalone}{logical, add code to make a html file with svg in it? If
 FALSE (default) the outfile - if specified - must have a file extension
 'svg', if TRUE the file extension must be 'htm' or 'html'.}
+\item{strokeWidth}{Value for stroke-width parameter in svg.}
+\item{svgFontSize}{An integer specifying normal font size to use in svg.}
+\item{svgIdxFontSize}{An integer specifying font size to use for a subscript in svg.}
+\item{svgDy}{An integer specifying the distance to move the baseline of the subscript in svg.}
 }
 \value{
 NULL (invisible)}

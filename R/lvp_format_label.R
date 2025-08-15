@@ -17,6 +17,7 @@ lvp_format_label <- function(label = "", value = "", show = TRUE,
     "961", "963", "964", "965", "966", "967", "968", "969"
   )
   if (label == "" && value == "") return(list(svg="", tikz="", r=""))
+  if (grepl("1van", label)) label <- "1"
   if (value == "") {
     splitted <- strsplit(label, "=", fixed =  TRUE)[[1L]]
     if (length(splitted) > 1L) {
