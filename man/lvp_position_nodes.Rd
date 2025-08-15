@@ -2,11 +2,17 @@
 \alias{lvp_position_nodes}
 \title{Position the nodes in the diagram}
 \usage{
-lvp_position_nodes(nodes_edges, allowbottom = FALSE)
+lvp_position_nodes(nodes_edges,
+                   placenodes = NULL,
+                   edgelabelsbelow = NULL,
+                   allowbottom = FALSE)
 }
 \arguments{
 \item{nodes_edges}{The nodes and edges data.frames in a list as
         returned from lvp_get_model_info}
+ \item{placenodes}{optional list with members nodename = c(row, column),
+row and colom don't have to be integers}
+\item{edgelabelsbelow}{optional list with members c(nodename1, nodename2)}
 \item{allowbottom}{A logical indicating if indicators can be placed at the
       bottom of the graph.}
 }

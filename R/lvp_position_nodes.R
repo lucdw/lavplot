@@ -146,7 +146,10 @@ complete_anchors <- function(nodes, edges) {
   edges
 }
 
-lvp_position_nodes <- function(nodes_edges, allowbottom = FALSE) {
+lvp_position_nodes <- function(nodes_edges,
+                               placenodes = NULL,
+                               edgelabelsbelow = NULL,
+                               allowbottom = FALSE) {
   #### lvp_position_nodes MAIN ####
   nodes <- nodes_edges$nodes
   edges <- nodes_edges$edges
@@ -442,6 +445,44 @@ lvp_position_nodes <- function(nodes_edges, allowbottom = FALSE) {
   if (minkol != 1L) nodes$kolom <- nodes$kolom - minkol + 1L
   #### fill anchors structural edges ####
   edges <- complete_anchors(nodes, edges)
+  #### place nodes demanded by user ? ####
+  if (!is.null(placenodes)) {
+    for (nn in names(placenodes)) {
+      w <- which(nodes$naam == nn)
+      if (length(w) == 0) {
+        warning("placenodes: node name", nn, "not found!")
+      }
+      nodes$rij[w] <- placenodes[[nn]][1L]
+      nodes$kolom[w] <- placenodes[[nn]][2L]
+      edg <- which((edges$van == nodes$id[w] |
+                     edges$naar == nodes$id[w]) &
+                     edges$tiepe == "~")
+      if (length(edg) > 0L) edges$vananker[edg] <- NA_character_
+    }
+    edges <- complete_anchors(nodes, edges)
+  }
+  #### labelsbelow demanded by user ? ####
+  if (!is.null(edgelabelsbelow)) {
+    for (i in seq_along(edgelabelsbelow)) {
+      n1 <- which(nodes$naam == edgelabelsbelow[[i]][1L])
+      if (length(n1) == 0) {
+        warning("edgelabelsbelow: node name", edgelabelsbelow[[i]][1L], "not found!")
+      }
+      n2 <- which(nodes$naam == edgelabelsbelow[[i]][2L])
+      if (length(n2) == 0) {
+        warning("edgelabelsbelow: node name", edgelabelsbelow[[i]][2L], "not found!")
+      }
+      ed <- which(edges$van == nodes$id[n1] & edges$naar == nodes$id[n2])
+      if (length(ed) == 0L) {
+        ed <- which(edges$naar == nodes$id[n1] & edges$van == nodes$id[n2])
+      }
+      if (length(ed) == 0L) {
+        warning("edgelabelsbelow: edge", nodes$naam[n1], "--", nodes$naam[n2], "not found!")
+      }
+      edges$labelbelow[ed] <- TRUE
+    }
+  }
+
   #### RETURN ####
   return(list(nodes = nodes, edges = edges, mlrij = 0L))
 }

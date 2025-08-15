@@ -10,8 +10,7 @@ lavplot(model = NULL, infile = NULL, varlv = FALSE,
         svgfile = NULL,
         sloped_labels = TRUE,
         placenodes = NULL,
-        edgelabelsbelow = NULL,
-        verbose = FALSE)
+        edgelabelsbelow = NULL)
 }
 \arguments{
 \item{model}{A character vector specifying the model in lavaan syntax or a list
@@ -35,7 +34,6 @@ embedded in basic HTML if standalone = TRUE.}
 \item{placenodes}{optional list with members nodename = c(row, column),
 row and colom don't have to be integers}
 \item{edgelabelsbelow}{optional list with members c(nodename1, nodename2)}
-\item{verbose}{logical, if TRUE intermediate results are printed}
 }
 \value{
 NULL, invisible

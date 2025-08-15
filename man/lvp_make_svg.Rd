@@ -26,7 +26,6 @@ NULL (invisible)}
 Create svg code to show a diagram of the model.
 }
 \examples{
-\dontrun{
 model <- 'alpha  =~ x_1 + x_2 + x_3     # latent variable
           beta <~ x_4 + x_5 + x_6      # composite
           gamma =~ x_7 + x_8 + x_9     # latent variable
@@ -46,7 +45,6 @@ modelml <- '
         y_2 ~~ cv24 * y_4
   '
 testml <- lvp_get_model_info(modelml)
-nodesml <- lvp_position_nodes(testml$nodes, testml$edges)
-lvp_make_svg(nodesml, testml$edges)
-}
+testml <- lvp_position_nodes(testml)
+lvp_make_svg(testml)
 }

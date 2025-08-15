@@ -88,7 +88,7 @@ get_file_extension <- function(path) {
   if (length(delen) > 1L) return(tolower(delen[length(delen)]))
   return("")
 }
-lvp_make_svg <- function(nodes_edges, sloped_labels, outfile = "",
+lvp_make_svg <- function(nodes_edges, sloped_labels = TRUE, outfile = "",
                          standalone = FALSE,
                          strokeWidth = 2L, svgFontSize = 20L,
                          svgIdxFontSize = 15L, svgDy = 5L) {
