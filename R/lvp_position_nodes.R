@@ -16,7 +16,6 @@ delta_node_edge <- function(edgevan, edgenaar, node) {
                   (sum(edgevec*edgevec)*sum(van*van))))
 }
 search_position <- function(j, nodes, edges) {
-  # TODO: check also edges to placed node don't go over other nodes !
   if (all(is.na(nodes$rij))) {
     availcols <- availrows <- c(1L, 3L)
   } else {
@@ -54,7 +53,41 @@ search_position <- function(j, nodes, edges) {
         99
       }
     }, 0.0)
-    if (min(distances) > 0.5) return(TRUE)
+
+    distances2 <- vapply(seq_len(nrow(edges)), function(i) {
+      if (edges$van[i] != edges$naar[i] &&
+          !is.na(nodes$rij[edges$van[i]]) &&
+          edges$naar[i] == nodes$naam[j]) {
+        afstand <- min(vapply(seq_along(nodestocheck$rij), function(k) {
+          delta_node_edge(
+            c(nodes$rij[edges$van[i]], nodes$kolom[edges$van[i]]),
+            availpos,
+            c(nodes$rij[k], nodes$kolom[k]))
+          }, 0.0)
+        )
+        afstand
+      } else {
+        99
+      }
+    }, 0.0)
+
+    distances3 <- vapply(seq_len(nrow(edges)), function(i) {
+      if (edges$van[i] != edges$naar[i] &&
+          !is.na(nodes$rij[edges$naar[i]]) &&
+          edges$van[i] == nodes$naam[j]) {
+        afstand <- min(vapply(seq_along(nodestocheck$rij), function(k) {
+          delta_node_edge(
+            c(nodes$rij[edges$naar[i]], nodes$kolom[edges$naar[i]]),
+            availpos,
+            c(nodes$rij[k], nodes$kolom[k]))
+        }, 0.0)
+        )
+        afstand
+      } else {
+        99
+      }
+    }, 0.0)
+    if (min(c(distances, distances2, distances3)) > 0.5) return(TRUE)
     FALSE
   }, TRUE)
   availpositions <- availpositions[mogelijk]

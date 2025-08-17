@@ -13,6 +13,12 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
     stopifnot(file.exists(infile))
     model <- readLines(infile)
   }
+  if (inherits(model, "lavaan")) {
+    model <- model@ParTable
+    model$fixed <- round(model$est, 3L)
+    if (max(model$block) == 1L) model$block <- rep(0L, length(model$block))
+    model$est <- NULL
+  }
   if (is.list(model) && !is.null(model$op) && !is.null(model$lhs) &&
         !is.null(model$rhs) && !is.null(model$label) &&
         !is.null(model$fixed)) {

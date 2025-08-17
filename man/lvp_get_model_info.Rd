@@ -6,8 +6,9 @@ lvp_get_model_info(model = NULL, infile = NULL, varlv = FALSE)
 }
 \arguments{
 \item{model}{A character vector specifying the model in lavaan syntax or a list
-(or data.frame) with at least members lhs, op, rhs, label and fixed. Optional if
-infile is given.}
+(or data.frame) with at least members lhs, op, rhs, label and fixed or a fitted
+lavaan object (in which case the column 'est' is used as value to show.
+Should be NULL if infile is given.}
 \item{infile}{A character string specifying the file which contains the model
 syntax.}
 \item{varlv}{A logical indicating that the (residual) variance of a variable
