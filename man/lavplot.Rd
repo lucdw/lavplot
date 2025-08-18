@@ -3,7 +3,7 @@
 \title{Creates diagram code for tikz, svg or Rplot}
 \usage{
 lavplot(model = NULL, infile = NULL, varlv = FALSE,
-        allowbottom = FALSE, cex = 1.3,
+        cex = 1.3,
         texfile = NULL,
         standalone = FALSE,
         pngfile = NULL,
@@ -23,8 +23,6 @@ syntax.}
 should be plotted as a seperate latent variable (with a smaller circle then
 ordinary LV's). In this case covariances between two such variables will be
 plotted as covariance between the latent variables for the variance.}
-\item{allowbottom}{A logical indicating if indicators can be placed at the
-bottom of the graph.}
 \item{cex}{Minimum distance between nodes in cm.}
 \item{texfile}{Character, path to file to store the diagram in tikz.}
 \item{standalone}{Logical, add code to make TeX file standalone}

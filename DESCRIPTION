@@ -1,7 +1,7 @@
 Package: lavplot
 Type: Package
 Title: Utility to create tikz,  svg and diagram code for plotting lavaan models
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
   person(given = "Luc", family = "De Wilde",
   role = c("aut", "cre"),

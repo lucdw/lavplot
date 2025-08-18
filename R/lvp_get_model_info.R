@@ -314,9 +314,9 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
   }
   nodes$tmp <- NULL
   nodes$voorkeur[nodes$voorkeur == "" & nodes$tiepe == "lv"] <- "m"
+  nodes$voorkeur[nodes$voorkeur == "" & nodes$tiepe == "cv"] <- "m"
   nodes <- nodes[seq.int(curnode), ]
   edges <- edges[seq.int(curedge), ]
-  nodes$voorkeur[nodes$voorkeur == "" & nodes$tiepe == "lv"] <- "l"
   edges$label <- trimws(edges$label)
   if (any(grepl("[<>&]", c(edges$label, nodes$naam))))
     warning("some labels contain '<', '>' or '&', which can result in errors!")

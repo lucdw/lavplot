@@ -41,8 +41,8 @@ search_position <- function(j, nodes, edges) {
   mogelijk <- vapply(availpositions, function(availpos) {
     distances <- vapply(seq_len(nrow(edges)), function(i) {
       if (edges$van[i] != edges$naar[i] &&
-            !is.na(nodes$rij[edges$van[i]]) &&
-            !is.na(nodes$rij[edges$naar[i]])) {
+          !is.na(nodes$rij[edges$van[i]]) &&
+          !is.na(nodes$rij[edges$naar[i]])) {
         afstand <- delta_node_edge(
           c(nodes$rij[edges$van[i]], nodes$kolom[edges$van[i]]),
           c(nodes$rij[edges$naar[i]], nodes$kolom[edges$naar[i]]),
@@ -63,7 +63,7 @@ search_position <- function(j, nodes, edges) {
             c(nodes$rij[edges$van[i]], nodes$kolom[edges$van[i]]),
             availpos,
             c(nodes$rij[k], nodes$kolom[k]))
-          }, 0.0)
+        }, 0.0)
         )
         afstand
       } else {
@@ -146,7 +146,8 @@ complete_anchors <- function(nodes, edges) {
       next
     }
     if (edges$tiepe[i] == "~~") {
-      if (nodes$kolom[nodevan] == nodes$kolom[nodenaar]) {
+      if (nodes$kolom[nodevan] == nodes$kolom[nodenaar] &&
+          nodes$kolom[nodevan] %in% range(nodes$kolom, na.rm=TRUE)) {
         midden <- mean(range(nodes$kolom))
         if (nodes$kolom[nodevan] < midden) {
           edges$vananker[i] <- "w"
@@ -156,7 +157,8 @@ complete_anchors <- function(nodes, edges) {
           edges$naaranker[i] <- "e"
         }
         next
-      } else if (nodes$rij[nodevan] == nodes$rij[nodenaar]) {
+      } else if (nodes$rij[nodevan] == nodes$rij[nodenaar] &&
+                 nodes$rij[nodevan] %in% range(nodes$rij, na.rm=TRUE)) {
         midden <- mean(range(nodes$rij))
         if (nodes$rij[nodevan] < midden) {
           edges$vananker[i] <- "n"
@@ -178,20 +180,18 @@ complete_anchors <- function(nodes, edges) {
   }
   edges
 }
-
 lvp_position_nodes <- function(nodes_edges,
                                placenodes = NULL,
-                               edgelabelsbelow = NULL,
-                               allowbottom = FALSE) {
+                               edgelabelsbelow = NULL) {
   #### lvp_position_nodes MAIN ####
   nodes <- nodes_edges$nodes
   edges <- nodes_edges$edges
-  if (length(nodes$rij) == 1L) {
+  if (length(nodes$rij) == 1L) { # Only 1 node !
     nodes$rij[1L] <- 1L
     nodes$kolom[1L] <- 1L
-    return(nodes)
+    return(list(nodes = nodes, edges = edges, mlrij = 0L))
   }
-  if (any(nodes$blok > 0L)) { # multilevel, only level:1 and level:2 accepted
+  if (any(nodes$blok > 0L)) { # Multilevel, only level:1 and level:2 accepted
     nodes1 <- nodes[nodes$blok >= 2L, ]
     edges1 <- edges[edges$van %in% nodes1$id, ]
     nodes1$blok <- 0L
@@ -208,201 +208,148 @@ lvp_position_nodes <- function(nodes_edges,
     edges <- rbind(result1$edges, result2$edges)
     return(list(nodes = nodes, edges = edges, mlrij = rijen1 + 1L))
   }
+  structnodes <- setdiff(nodes$id, union(edges$naar[edges$tiepe == "=~"],
+                                         edges$van[edges$tiepe == "<~"]))
+  structnodeindicators <- lapply(structnodes, function(sn) {
+    union(edges$naar[edges$tiepe == "=~" & edges$van == sn],
+          edges$van[edges$tiepe == "<~" & edges$naar == sn])
+  })
+
+  # create partition of structnodes via column sidegroup
+  nodes$sidegroup <- rep(0L, length(nodes$naam))
+  for (j in seq_along(structnodes)) {
+    k <- which(nodes$id == structnodes[j])
+    if (j == 1L) {
+      nodes$sidegroup[k] <- j
+      next
+    }
+    for (jj in seq.int(1L, j - 1L)) {
+      if (any(structnodeindicators[[j]] %in% structnodeindicators[[jj]])) {
+        nodes$sidegroup[k] <- nodes$sidegroup[structnodes[jj]]
+        next
+      }
+      if (any(outer(structnodeindicators[[j]], structnodeindicators[[jj]],
+                    function(ind1, ind2) {
+                      sapply(seq_along(ind1), function(i) {
+                      length(edges$id[edges$van == ind1[i] & edges$naar == ind2[i]]) +
+                      length(edges$id[edges$naar == ind1[i] & edges$van == ind2[i]]) >
+                        0L
+                        })
+                    }))) {
+        nodes$sidegroup[k] <- nodes$sidegroup[structnodes[jj]]
+      }
+      if (nodes$sidegroup[k] > 0L) break
+    }
+    if (nodes$sidegroup[k] == 0L) nodes$sidegroup[k] <- j
+  }
+
+  # modify voorkeur to be the same within each partition group
+  for (groep in unique(nodes$sidegroup)) {
+    if (groep > 0L) {
+      if (any(nodes$voorkeur[nodes$sidegroup == groep] == "l")) {
+        nodes$voorkeur[nodes$sidegroup == groep] = "l"
+      }
+      if (any(nodes$voorkeur[nodes$sidegroup == groep] == "r")) {
+        nodes$voorkeur[nodes$sidegroup == groep] = "r"
+      }
+    }
+  }
+  # number of groups per side (l, m or r)
+  sides <- c("l", "m", "r")
+  nbgroup <- rep(0L, 3)
+  nbindic <- rep(0L, 3)
+  for (k in seq_along(sides)) {
+    nbgroup[k] <- length(unique(nodes$sidegroup[nodes$voorkeur == sides[k]]))
+    welke <- nodes$id[nodes$voorkeur == sides[k]]
+    nbindic[k] <-
+      length(unique(edges$naar[edges$tiepe=="=~" & edges$van %in% welke])) +
+      length(unique(edges$van[edges$tiepe=="<~" & edges$naar %in% welke]))
+  }
+  # move last 'm' groups to bottom if possible
+  bottomoccupied <- FALSE
+  if (nbgroup[2L] > 1L && nbindic[2L] > 8L) {
+    mgroepen <- nodes$sidegroup[nodes$voorkeur == "m"]
+    mgroep <- mgroepen[length(mgroepen)]
+    nodes$voorkeur[nodes$sidegroup == mgroep] <- "b"
+    bottomoccupied <- TRUE
+  } else {
+    # move last 'l' group to bottom if possible
+    if (nbgroup[1L] > 1L && nbindic[1L] > 8L) {
+      lgroepen <- nodes$sidegroup[nodes$voorkeur == "l"]
+      lgroep <- lgroepen[length(lgroepen)]
+      nodes$voorkeur[nodes$sidegroup == lgroep] <- "b"
+      bottomoccupied <- TRUE
+    }
+    # move first 'r' group to top or last r group to bottom, if possible
+    if (nbgroup[3L] > 1L && nbindic[3L] > 8L) {
+      rgroepen <- nodes$sidegroup[nodes$voorkeur == "r"]
+      if (nbgroup[2L] == 0L) {
+        rgroep <- lgroepen[1L]
+        nodes$voorkeur[nodes$sidegroup == rgroep] <- "m"
+      } else {
+        if (!bottomoccupied) {
+          rgroep <- lgroepen[length(rgroepen)]
+          nodes$voorkeur[nodes$sidegroup == rgroep] <- "b"
+          bottomoccupied <- TRUE
+        }
+      }
+    }
+  }
+  nodes$sidegroup <- NULL
   varlvs <- which(nodes$tiepe == "varlv")
   varlv <- length(varlvs) > 0L
   d_lv <- ifelse(varlv, 3L, 2L)  # distance from border
   d_ind <- ifelse(varlv, 2L, 1L) # depends on presence varlv's
-  # structural part
+  # structural part + measurement
   lvcvs <- nodes$tiepe %in% c("lv", "cv")
-  if (any(lvcvs)) { # lv's or cv's present
-    if (any(nodes$voorkeur == "l" & lvcvs)) {
-      strucs <- which(nodes$voorkeur == "l" & lvcvs)
-      maxindicatoren <- max(nodes$indicatoren[strucs])
-      nodes$rij[strucs] <- d_lv + seq.int(length(strucs)) * maxindicatoren
-      nodes$kolom[strucs] <- d_lv
-    }
-    if (any(nodes$voorkeur == "r" & lvcvs)) {
-      strucs <- which(nodes$voorkeur == "r" & lvcvs)
-      maxindicatoren <- max(nodes$indicatoren[strucs])
-      nodes$rij[strucs] <- d_lv + seq.int(length(strucs)) * maxindicatoren
-      nodes$kolom[strucs] <- 101L - d_lv
-    }
-    if (any(nodes$voorkeur == "m" & lvcvs)) {
-      strucs <- which(nodes$voorkeur == "m" & lvcvs)
-      if (length(strucs) > 1L && allowbottom) {
-        vanaf <- as.integer(1L + length(strucs) / 2)
-        nodes$voorkeur[strucs[seq.int(vanaf, length(strucs))]] <- "b"
-      }
-    }
-    if (any(nodes$voorkeur == "m" & lvcvs)) {
-      strucs <- which(nodes$voorkeur == "m" & lvcvs)
-      maxindicatoren <- max(nodes$indicatoren[strucs])
-      nodes$kolom[strucs] <- d_lv + seq.int(length(strucs)) * maxindicatoren
-      nodes$rij[strucs] <- d_lv
-    }
-    if (any(nodes$voorkeur == "b" & lvcvs)) {
-      strucs <- which(nodes$voorkeur == "b" & lvcvs)
-      maxindicatoren <- max(nodes$indicatoren[strucs])
-      nodes$kolom[strucs] <- d_lv + seq.int(length(strucs)) * maxindicatoren
-      nodes$rij[strucs] <- 101L - d_lv
-    }
-    # indicators
-    #### LEFT INDICATORS ####
-    # allindicators <- nodes$id[nodes$voorkeur == ""] anders, HIER VERDER !!!!
-    strucs <- which(nodes$voorkeur == "l" & lvcvs)
-    for (j in strucs) {
-      cvedges <- edges$naar == nodes$id[j] & edges$tiepe == "<~"
-      edges$vananker[cvedges] <- "e"
-      edges$naaranker[cvedges] <- "w"
-      cvindicatorids <- edges$van[cvedges]
-      lvedges <- edges$van == nodes$id[j] & edges$tiepe == "=~"
-      edges$vananker[lvedges] <- "w"
-      edges$naaranker[lvedges] <- "e"
-      lvindicatorids <- edges$naar[lvedges]
-      indicatorids <- union(cvindicatorids, lvindicatorids)
-      indicators <- which(nodes$id %in% indicatorids)
-      rijtje <- nodes$rij[j]
-      addedindicators <- 0L
-      for (k in indicators) {
-        if (is.na(nodes$rij[k])) {
-          nodes$rij[k] <- rijtje
-          rijtje <- rijtje + 1L
-          nodes$kolom[k] <- d_ind
-          addedindicators <- addedindicators + 1L
-          if (varlv) { # variances of indicators?
-            varlvedges <- which(edges$naar == nodes$id[k] &
-                                  edges$van %in% varlvs)
-            if (length(varlvedges) > 0L) {
-              lvvarid <- edges$van[varlvedges[1L]]
-              nodes$kolom[lvvarid] <- 1L          # kolom 1
-              nodes$rij[lvvarid] <- nodes$rij[k]  # zelfde rij als indicator
-              edges$vananker[varlvedges[1L]] <- "e"
-              edges$naaranker[varlvedges[1L]] <- "w"
-            }
-          }
+  if (any(lvcvs)) {
+    for (side in c("l", "r", "m", "b")) {
+      curi <- d_lv
+      indicatorsassigned <- integer(0L)
+      strucs <- which(nodes$voorkeur == side & lvcvs)
+      for (k in strucs) {
+        lvs <- edges$tiepe == "=~" & edges$van == nodes$id[k]
+        cvs <- edges$tiepe == "<~" & edges$naar ==  nodes$id[k]
+        edges$vananker[lvs] <- switch(side, l="w", r="e", m="n", b="s")
+        edges$naaranker[lvs] <- switch(side, l="e", r="w", m="s", b="n")
+        edges$vananker[cvs] <- switch(side, l="e", r="w", m="s", b="n")
+        edges$naaranker[cvs] <- switch(side, l="w", r="e", m="n", b="s")
+        indics <- unique(c(edges$naar[lvs], edges$van[cvs]))
+        indicstoplace <- setdiff(indics, indicatorsassigned)
+        indicatorsassigned <- union(indicatorsassigned, indics)
+        if (side == "l" || side == "r") {
+          nodes$rij[k] <- curi + as.integer(length(indicstoplace)/2.01)
+          nodes$kolom[k] <- ifelse(side=="l", d_lv, 101L - d_lv)
+        } else {
+          nodes$kolom[k] <- curi + as.integer(length(indicstoplace)/2.01)
+          nodes$rij[k] <- ifelse(side=="m", d_lv, 101L - d_lv)
         }
-      }
-      if (addedindicators > 2) {
-        nodes$rij[j] <- nodes$rij[j] + as.integer((addedindicators - 1) / 2)
-      }
-    }
-    #### RIGHT INDICATORS ####
-    strucs <- which(nodes$voorkeur == "r" & lvcvs)
-    for (j in strucs) {
-      cvedges <- edges$naar == nodes$id[j] & edges$tiepe == "<~"
-      edges$vananker[cvedges] <- "w"
-      edges$naaranker[cvedges] <- "e"
-      cvindicatorids <- edges$van[cvedges]
-      lvedges <- edges$van == nodes$id[j] & edges$tiepe == "=~"
-      edges$vananker[lvedges] <- "e"
-      edges$naaranker[lvedges] <- "w"
-      lvindicatorids <- edges$naar[lvedges]
-      indicatorids <- union(cvindicatorids, lvindicatorids)
-      indicators <- which(nodes$id %in% indicatorids)
-      rijtje <- nodes$rij[j]
-      addedindicators <- 0L
-      for (k in indicators) {
-        if (is.na(nodes$rij[k])) {
-          nodes$rij[k] <- rijtje
-          rijtje <- rijtje + 1L
-          nodes$kolom[k] <- 101L - d_ind
-          addedindicators <- addedindicators + 1L
-          if (varlv) { # variances of indicators?
-            varlvedges <- which(edges$naar == nodes$id[k] &
-                                  edges$van %in% varlvs)
-            if (length(varlvedges) > 0L) {
-              lvvarid <- edges$van[varlvedges[1L]]
-              nodes$kolom[lvvarid] <- 100L        # kolom 100
-              nodes$rij[lvvarid] <- nodes$rij[k]  # zelfde rij als indicator
-              edges$vananker[varlvedges[1L]] <- "w"
-              edges$naaranker[varlvedges[1L]] <- "e"
-            }
+        for (kk in seq_along(indicstoplace)) {
+          kkk <- which(nodes$id == indicstoplace[kk])
+          if (side == "l" || side == "r") {
+            nodes$rij[kkk] <- curi
+            nodes$kolom[kkk] <- ifelse(side=="l", d_ind, 101L - d_ind)
+          } else {
+            nodes$kolom[kkk] <- curi
+            nodes$rij[kkk] <- ifelse(side=="m", d_ind, 101L - d_ind)
           }
-        }
-      }
-      if (addedindicators > 2) {
-        nodes$rij[j] <- nodes$rij[j] + as.integer((addedindicators - 1) / 2)
-      }
-    }
-    #### TOP INDICATORS ####
-    strucs <- which(nodes$voorkeur == "m" & lvcvs)
-    for (j in strucs) {
-      cvedges <- edges$naar == nodes$id[j] & edges$tiepe == "<~"
-      edges$vananker[cvedges] <- "s"
-      edges$naaranker[cvedges] <- "n"
-      cvindicatorids <- edges$van[cvedges]
-      lvedges <- edges$van == nodes$id[j] & edges$tiepe == "=~"
-      edges$vananker[lvedges] <- "n"
-      edges$naaranker[lvedges] <- "s"
-      lvindicatorids <- edges$naar[lvedges]
-      indicatorids <- union(cvindicatorids, lvindicatorids)
-      indicators <- which(nodes$id %in% indicatorids)
-      kolompje <- nodes$kolom[j]
-      addedindicators <- 0L
-      for (k in indicators) {
-        if (is.na(nodes$rij[k])) {
-          nodes$kolom[k] <- kolompje
-          kolompje <- kolompje + 1L
-          nodes$rij[k] <- d_ind
-          addedindicators <- addedindicators + 1L
-          if (varlv) { # variances of indicators?
-            varlvedges <- which(edges$naar == nodes$id[k] &
-                                  edges$van %in% varlvs)
-            if (length(varlvedges) > 0L) {
-              lvvarid <- edges$van[varlvedges[1L]]
-              nodes$rij[lvvarid] <- 1L              # rij 1
-              nodes$kolom[lvvarid] <- nodes$kolom[k]  # zelfde kol als indicator
-              edges$vananker[varlvedges[1L]] <- "s"
-              edges$naaranker[varlvedges[1L]] <- "n"
-            }
-          }
-        }
-      }
-      if (addedindicators > 2) {
-        nodes$kolom[j] <- nodes$kolom[j] + as.integer((addedindicators - 1) / 2)
-      }
-    }
-    #### BOTTOM INDICATORS ####
-    strucs <- which(nodes$voorkeur == "b" & lvcvs)
 
-    for (j in strucs) {
-      cvedges <- edges$naar == nodes$id[j] & edges$tiepe == "<~"
-      edges$vananker[cvedges] <- "n"
-      edges$naaranker[cvedges] <- "s"
-      cvindicatorids <- edges$van[cvedges]
-      lvedges <- edges$van == nodes$id[j] & edges$tiepe == "=~"
-      edges$vananker[lvedges] <- "s"
-      edges$naaranker[lvedges] <- "n"
-      lvindicatorids <- edges$naar[lvedges]
-      indicatorids <- union(cvindicatorids, lvindicatorids)
-      indicators <- which(nodes$id %in% indicatorids)
-      kolompje <- nodes$kolom[j]
-      addedindicators <- 0L
-      for (k in indicators) {
-        if (is.na(nodes$rij[k])) {
-          nodes$kolom[k] <- kolompje
-          kolompje <- kolompje + 1L
-          nodes$rij[k] <- 101L - d_ind
-          addedindicators <- addedindicators + 1L
           if (varlv) { # variances of indicators?
-            varlvedges <- which(edges$naar == nodes$id[k] &
+            varlvedges <- which(edges$naar == indicstoplace[kk] &
                                   edges$van %in% varlvs)
             if (length(varlvedges) > 0L) {
+              edges$vananker[varlvedges[1L]] <- switch(side, l="e", r="w", m = "s", b = "n")
+              edges$naaranker[varlvedges[1L]] <- switch(side, l="w", r="e", m = "n", b = "s")
               lvvarid <- edges$van[varlvedges[1L]]
-              nodes$rij[lvvarid] <- 100L              # rij 100
-              nodes$kolom[lvvarid] <- nodes$kolom[k]  # zelfde kol als indicator
-              edges$vananker[varlvedges[1L]] <- "n"
-              edges$naaranker[varlvedges[1L]] <- "s"
+              nodes$kolom[lvvarid] <- switch(side, l = 1L, r = 100L, m =, b = curi)
+              nodes$rij[lvvarid] <- switch(side, m = 1L, b = 100L, l =, r = curi)
             }
           }
+          curi <- curi + 1L
         }
       }
-      if (addedindicators > 2) {
-        nodes$kolom[j] <- nodes$kolom[j] + as.integer((addedindicators - 1) / 2)
-      }
     }
-  } else {
-    #### only observed variables ####
+  } else {  #### only observed variables ####
     if (any(nodes$voorkeur == "l")) {
       strucs <- which(nodes$voorkeur == "l")
       nodes$rij[strucs] <- 1L + seq.int(length(strucs))
@@ -412,13 +359,6 @@ lvp_position_nodes <- function(nodes_edges,
       strucs <- which(nodes$voorkeur == "r")
       nodes$rij[strucs] <- 1L + seq.int(length(strucs))
       nodes$kolom[strucs] <- 100L
-    }
-    if (any(nodes$voorkeur == "m")) {
-      strucs <- which(nodes$voorkeur == "m")
-      if (length(strucs) > 1L && allowbottom) {
-        vanaf <- as.integer(1L + length(strucs) / 2)
-        nodes$voorkeur[strucs[seq.int(vanaf, length(strucs))]] <- "b"
-      }
     }
     if (any(nodes$voorkeur == "m")) {
       strucs <- which(nodes$voorkeur == "m")
@@ -435,10 +375,10 @@ lvp_position_nodes <- function(nodes_edges,
   if (all(nodes$voorkeur == "")) { # no regressions defined
     # do nothing, should be covered by search_position subroutine
   } else {
-    # remove the holes in rows and columns
-    rijen <- sort(unique(nodes$rij))
+    # remove the holes in rows and columns, always include row/col in the middle
+    rijen <- sort(unique(c(d_lv + 1L, nodes$rij)))
     nodes$rij <- match(nodes$rij, rijen)
-    kolommen <- sort(unique(nodes$kolom))
+    kolommen <- sort(unique(c(d_lv + 1L, nodes$kolom)))
     nodes$kolom <- match(nodes$kolom, kolommen)
   }
   #### handle nodes which are not yet placed ####

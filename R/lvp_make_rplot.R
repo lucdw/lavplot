@@ -226,7 +226,7 @@ lvp_make_rplot <- function(nodes_edges,
       adrnaar <- c(nodes$kolom[naar], rijen - nodes$rij[naar] + 1)
       elems <- node_elements(nodes$tiepe[naar], noderadius)
       adrnaar <- adrnaar + elems[[edges$naaranker[j]]]
-      if (edges$tiepe[j] != "~~") {
+      if (edges$tiepe[j] != "~~" || edges$vananker[j] != edges$naaranker[j]) {
         plot_edge(adrvan, adrnaar, edges$label[j], dubbel = FALSE,
                   below = edges$labelbelow[j])
       } else {

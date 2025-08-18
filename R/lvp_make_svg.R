@@ -113,6 +113,8 @@ lvp_make_svg <- function(nodes_edges, sloped_labels = TRUE, outfile = "",
   noderadius <- 0.3
   rijen <- max(nodes$rij)
   kolommen <- max(nodes$kolom)
+  nodes$rij <- nodes$rij + 1
+  nodes$kolom <- nodes$kolom + 1
 
   if (standalone) {
     writeLines(c(
@@ -123,10 +125,11 @@ lvp_make_svg <- function(nodes_edges, sloped_labels = TRUE, outfile = "",
       zz)
   }
   writeLines(c(
-    paste0('<svg width="', (kolommen + 1) * nodedist, '" height="',
-           (rijen + 1) * nodedist,
+    paste0('<svg width="', (kolommen + 3) * nodedist, '" height="',
+           (rijen + 3) * nodedist,
            '" version="1.1" xmlns="http://www.w3.org/2000/svg"',
            ' xmlns:xlink="http://www.w3.org/1999/xlink">'),
+    '<rect width="100%" height="100%" fill="white" />',
     '<defs>',
     '  <marker id="arrow" markerWidth="12" markerHeight="8"',
     '          refX="11" refY="4" orient="auto">',
@@ -316,8 +319,9 @@ lvp_make_svg <- function(nodes_edges, sloped_labels = TRUE, outfile = "",
       adrnaar <- c(nodedist * nodes$kolom[naar], nodedist * nodes$rij[naar])
       elems <- node_elements_svg(nodes$tiepe[naar], nodedist * noderadius, adrnaar, strokeWidth)
       adrnaar <- elems[[edges$naaranker[j]]]
-      if (edges$tiepe[j] != "~~") {
-        plot_edge(adrvan, adrnaar, edges$label[j], dubbel = FALSE,
+      if (edges$tiepe[j] != "~~" | edges$vananker[j] != edges$naaranker[j]) {
+        plot_edge(adrvan, adrnaar, edges$label[j],
+                  dubbel = (edges$tiepe[j] == "~~"),
                   below = edges$labelbelow[j], id = j)
       } else {
         thetavan <- atan2(adrvan[2] - midxy[2], adrvan[1] - midxy[1])
@@ -325,7 +329,8 @@ lvp_make_svg <- function(nodes_edges, sloped_labels = TRUE, outfile = "",
         deltatheta <- thetanaar - thetavan
         if (deltatheta < 0) deltatheta <- deltatheta + 2 * pi
         benddirection <- ifelse(deltatheta < pi, -1, 1)
-        plot_edge(adrvan, adrnaar, edges$label[j], dubbel = TRUE,
+        plot_edge(adrvan, adrnaar, edges$label[j],
+                  dubbel = (edges$tiepe[j] == "~~"),
                   below = edges$labelbelow[j],
                   bend = benddirection * pi/4,
                   id = j

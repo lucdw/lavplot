@@ -1,7 +1,6 @@
 lavplot <- function(model = NULL,
                     infile = NULL,
                     varlv = FALSE,
-                    allowbottom = FALSE,
                     cex = 1.3,
                     texfile = NULL,
                     standalone = FALSE,
@@ -12,7 +11,6 @@ lavplot <- function(model = NULL,
                     edgelabelsbelow = NULL) {
   tmp <- lvp_get_model_info(model, infile = infile, varlv = varlv)
   tmp <- lvp_position_nodes(tmp,
-                            allowbottom = allowbottom,
                             placenodes = placenodes,
                             edgelabelsbelow = edgelabelsbelow)
   addgrid <- TRUE
