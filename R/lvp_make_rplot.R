@@ -62,7 +62,7 @@ node_elements <- function(nodetiepe, noderadius) {
 lvp_make_rplot <- function(nodes_edges,
                            sloped_labels = TRUE,
                            addgrid = TRUE,
-                           pngfile = NULL) {
+                           pngfile = NA_character_) {
   mlrij <- nodes_edges$mlrij
   if (is.null(mlrij))
     stop("nodes_edges hasn't been processed by lvp_position_nodes!")
@@ -86,10 +86,6 @@ lvp_make_rplot <- function(nodes_edges,
   plot_edge <- function(van, naar, label = "", dubbel = FALSE,
                         bend = 0, below = FALSE, txtcex = 0.9) {
     labele <- lvp_format_label(label, show=FALSE)$r
-#    labele <- sub("_([[:digit:]]*)", "[\\1]", label)
-#    labele <- sub("varepsilon", "epsilon", labele, fixed = TRUE)
-#    labele <- sub("=(.*)$", "(\\1)", labele)
-#    labele <- str2expression(labele)
     unitvec <- (naar - van) / sqrt(sum((naar - van) * (naar - van)))
     theta <- atan2(naar[2] - van[2], naar[1] - van[1])
     srt <- ifelse(sloped_labels, 180 * theta / pi, 0)
@@ -190,9 +186,6 @@ lvp_make_rplot <- function(nodes_edges,
   }
   plot_node <- function(waar, tiepe, label = "", txtcex = 0.9) {
     labele <- lvp_format_label(label, show=FALSE)$r
-#    labele <- sub("_([[:digit:]]*)$", "[\\1]", label)
-#    labele <- sub("varepsilon", "epsilon", labele, fixed = TRUE)
-#    labele <- str2expression(labele)
     elems <- node_elements(tiepe, noderadius)
     x <- waar[1] + elems$drawx
     y <- waar[2] + elems$drawy
@@ -202,7 +195,7 @@ lvp_make_rplot <- function(nodes_edges,
 
   rijen <- max(nodes$rij)
   kolommen <- max(nodes$kolom)
-  if (!is.null(pngfile)) png(pngfile, 960, 960, "px")
+  if (!is.na(pngfile)) png(pngfile, 960, 960, "px")
   opar <- par(mar = c(1L,1L, 1L,1L) + 0.1)
   plot.default(x = c(0.25, kolommen + 0.75), c(0.25, rijen + 0.75), type="n",
                xlab = "", ylab = "", axes = FALSE, asp = 1)
@@ -253,6 +246,6 @@ lvp_make_rplot <- function(nodes_edges,
               nodes$tiepe[j],
               nodes$naam[j])
   }
-  if (!is.null(pngfile)) dev.off()
+  if (!is.na(pngfile)) dev.off()
   return(invisible(NULL))
 }

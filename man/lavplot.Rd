@@ -2,13 +2,14 @@
 \alias{lavplot}
 \title{Creates diagram code for tikz, svg or Rplot}
 \usage{
-lavplot(model = NULL, infile = NULL, varlv = FALSE,
-        cex = 1.3,
+lavplot(model = NULL, infile = NULL,
+        varlv = FALSE,
         texfile = NULL,
-        standalone = FALSE,
-        pngfile = NULL,
+        cex = 1.3,
+        pngfile = NA_character_,
         svgfile = NULL,
         sloped_labels = TRUE,
+        standalone = FALSE,
         placenodes = NULL,
         edgelabelsbelow = NULL)
 }
@@ -23,13 +24,14 @@ syntax.}
 should be plotted as a seperate latent variable (with a smaller circle then
 ordinary LV's). In this case covariances between two such variables will be
 plotted as covariance between the latent variables for the variance.}
-\item{cex}{Minimum distance between nodes in cm.}
 \item{texfile}{Character, path to file to store the diagram in tikz.}
-\item{standalone}{Logical, add code to make TeX file standalone}
-\item{pngfile}{Character, path to file to store the diagram in PNG.}
+\item{cex}{Minimum distance between nodes in cm.}
+\item{pngfile}{Character, path to file to store the diagram in PNG or NA to
+show the diagram in R. Set to NULL if no Rplot is required.}
 \item{svgfile}{Character, path to file to store the diagram in SVG,
 embedded in basic HTML if standalone = TRUE.}
 \item{sloped_labels}{logical, sloped labels above (or under) the edges}
+\item{standalone}{Logical, add code to make TeX file standalone}
 \item{placenodes}{optional list with members nodename = c(row, column),
 row and colom don't have to be integers}
 \item{edgelabelsbelow}{optional list with members c(nodename1, nodename2)}

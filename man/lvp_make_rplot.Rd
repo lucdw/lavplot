@@ -2,13 +2,15 @@
 \alias{lvp_make_rplot}
 \title{Plots a diagram.}
 \usage{
-lvp_make_rplot(nodes_edges, sloped_labels = TRUE, addgrid = TRUE, pngfile = NULL)
+lvp_make_rplot(nodes_edges, sloped_labels = TRUE, addgrid = TRUE,
+                pngfile = NA_character_)
 }
 \arguments{
 \item{nodes_edges}{The data.frames and mlrij as returned from position_nodes}
 \item{sloped_labels}{logical, sloped labels above (or under) the edges}
 \item{addgrid}{Logical, add a grid with indicated 'positions' to the graph?}
-\item{pngfile}{A character string naming the file to store the diagram in PNG.}
+\item{pngfile}{A character string naming the file to store the diagram in PNG or
+  NA to show the plot in R.}
 }
 \value{
 NULL (invisible)}
