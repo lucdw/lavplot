@@ -318,10 +318,12 @@ lvp_make_svg <- function(nodes_edges,
       van <- which(nodes$id == edges$van[j])
       naar <- which(nodes$id == edges$naar[j])
       adrvan <- c(nodedist * nodes$kolom[van], nodedist * nodes$rij[van])
-      elems <- node_elements_svg(nodes$tiepe[van], nodedist * noderadius, adrvan, strokeWidth)
+      elems <- node_elements_svg(nodes$tiepe[van], nodedist * noderadius,
+                                 adrvan, strokeWidth)
       adrvan <- elems[[edges$vananker[j]]]
       adrnaar <- c(nodedist * nodes$kolom[naar], nodedist * nodes$rij[naar])
-      elems <- node_elements_svg(nodes$tiepe[naar], nodedist * noderadius, adrnaar, strokeWidth)
+      elems <- node_elements_svg(nodes$tiepe[naar], nodedist * noderadius,
+                                 adrnaar, strokeWidth)
       adrnaar <- elems[[edges$naaranker[j]]]
       if (edges$tiepe[j] != "~~" | edges$vananker[j] != edges$naaranker[j]) {
         plot_edge(adrvan, adrnaar, edges$label[j],

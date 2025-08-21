@@ -183,7 +183,7 @@ lvp_make_rplot <- function(nodes_edges,
     plot_arrow(c(xs[40], ys[40]), c(-sin(thetarange[2]), cos(thetarange[2])))
     # label
     if (label != "")
-      text(middelpt[1L], middelpt[2L], labele, adj <- 0.5, cex = txtcex * 0.8)
+      text(middelpt[1L], middelpt[2L], labele, adj = 0.5, cex = txtcex * 0.8)
   }
   plot_node <- function(waar, tiepe, label = "", txtcex = 0.9) {
     labele <- lvp_format_label(label, show=FALSE)$r
@@ -191,7 +191,7 @@ lvp_make_rplot <- function(nodes_edges,
     x <- waar[1] + elems$drawx
     y <- waar[2] + elems$drawy
     polygon(x, y, col = elems$boxcol, lwd = 1)
-    text(waar[1L], waar[2L], labele, adj <- 0.5, cex = txtcex)
+    text(waar[1L], waar[2L], labele, adj = 0.5, cex = txtcex)
   }
 
   rijen <- max(nodes$rij)
@@ -247,6 +247,7 @@ lvp_make_rplot <- function(nodes_edges,
               nodes$tiepe[j],
               nodes$naam[j])
   }
+  par(opar)
   if (!is.na(pngfile)) dev.off()
   return(invisible(NULL))
 }

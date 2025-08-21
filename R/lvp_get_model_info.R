@@ -298,8 +298,10 @@ lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
     #       wijzigen covarianties
     for (j1 in seq_along(welke)) {
       for (j2 in seq_along(welke)) {
-        if (j1 != j2 && any(edges$tiepe == "~~" & edges$van == lvnodes[j1] & edges$naar == lvnodes[j2])) {
-          edg <- which(edges$tiepe == "~~" &  edges$van == lvnodes[j1] & edges$naar == lvnodes[j2])[[1L]]
+        if (j1 != j2 && any(edges$tiepe == "~~" & 
+        edges$van == lvnodes[j1] & edges$naar == lvnodes[j2])) {
+          edg <- which(edges$tiepe == "~~" &  
+                      edges$van == lvnodes[j1] & edges$naar == lvnodes[j2])[[1L]]
           edges$van[edg] <- varlvnodes[j1]
           edges$naar[edg] <- varlvnodes[j2]
         }
