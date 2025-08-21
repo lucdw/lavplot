@@ -1,7 +1,7 @@
 Package: lavplot
 Type: Package
-Title: Create tikz and svg code for plotting lavaan models
-Version: 0.1-2
+Title: Create TIKZ and SVG code for Plotting 'lavaan' Models
+Version: 0.1-3
 Authors@R: c(
   person(given = "Luc", family = "De Wilde",
   role = c("aut", "cre"),

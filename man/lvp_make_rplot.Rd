@@ -2,20 +2,23 @@
 \alias{lvp_make_rplot}
 \title{Plots a diagram.}
 \usage{
-lvp_make_rplot(nodes_edges, sloped_labels = TRUE, addgrid = TRUE,
-                pngfile = NA_character_)
+lvp_make_rplot(nodes_edges,
+               sloped_labels = TRUE,
+               pngfile = NA_character_,
+               addgrid = is.na(pngfile)
+               )
 }
 \arguments{
 \item{nodes_edges}{The data.frames and mlrij as returned from position_nodes}
-\item{sloped_labels}{logical, sloped labels above (or under) the edges}
-\item{addgrid}{Logical, add a grid with indicated 'positions' to the graph?}
-\item{pngfile}{A character string naming the file to store the diagram in PNG or
+\item{sloped_labels}{Logical, sloped labels above (or under) the edges}
+\item{pngfile}{Character string naming the file to store the diagram in PNG or
   NA to show the plot in R.}
+\item{addgrid}{Logical, add a grid with indicated 'positions' to the graph?}
 }
 \value{
 NULL (invisible)}
 \description{
-Create R code to show a simple diagram of the model as an R-plot.
+Creates a plot in R showing a simple diagram of the model.
 }
 \examples{
 model <- 'alpha  =~ x_1 + x_2 + x_3     # latent variable
@@ -38,5 +41,9 @@ modelml <- '
   '
 test <- lvp_get_model_info(modelml)
 test <- lvp_position_nodes(test)
-lvp_make_rplot(test)
+lvp_make_rplot(test, sloped_labels = FALSE, addgrid = FALSE)
+\dontrun{
+# example where plot is stored in a PNG file
+lvp_make_rplot(test, pngfile="demo_rplot.png")
+}
 }

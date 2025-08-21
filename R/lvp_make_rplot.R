@@ -61,8 +61,9 @@ node_elements <- function(nodetiepe, noderadius) {
 }
 lvp_make_rplot <- function(nodes_edges,
                            sloped_labels = TRUE,
-                           addgrid = TRUE,
-                           pngfile = NA_character_) {
+                           pngfile = NA_character_,
+                           addgrid = is.na(pngfile)
+                           ) {
   mlrij <- nodes_edges$mlrij
   if (is.null(mlrij))
     stop("nodes_edges hasn't been processed by lvp_position_nodes!")

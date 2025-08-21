@@ -1,5 +1,8 @@
-lvp_make_tikz <- function(nodes_edges, outfile, cex = 1.3,
-                          sloped_labels = TRUE, standalone = FALSE) {
+lvp_make_tikz <- function(nodes_edges,
+                          outfile = "",
+                          cex = 1.3,
+                          sloped_labels = TRUE,
+                          standalone = FALSE) {
   nodenaam <- function(nm, blk) {
     if (blk > 0L) return(gsub("_", "", paste0("B", blk, nm)))
     return(gsub("_", "", nm))

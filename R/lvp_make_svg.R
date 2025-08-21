@@ -88,10 +88,14 @@ get_file_extension <- function(path) {
   if (length(delen) > 1L) return(tolower(delen[length(delen)]))
   return("")
 }
-lvp_make_svg <- function(nodes_edges, sloped_labels = TRUE, outfile = "",
+lvp_make_svg <- function(nodes_edges,
+                         outfile = "",
+                         sloped_labels = TRUE,
                          standalone = FALSE,
-                         strokeWidth = 2L, svgFontSize = 20L,
-                         svgIdxFontSize = 15L, svgDy = 5L) {
+                         strokeWidth = 2L,
+                         svgFontSize = 20L,
+                         svgIdxFontSize = 15L,
+                         svgDy = 5L) {
   if (is.character(outfile) && outfile != "") {
     stopifnot(standalone || get_file_extension(outfile) == "svg",
               !standalone || get_file_extension(outfile) %in% c("htm", "html"))
