@@ -1,76 +1,72 @@
-node_elements <- function(nodetiepe, noderadius) {
-  # define form, color and anchors for a node type
-  thetas <- switch(nodetiepe,
-                   lv = ,
-                   varlv = seq(0, 2 * pi, length.out = 50L),
-                   ov = seq(pi / 4, 2 * pi, by = pi / 2),
-                   wov = ,
-                   bov =c(
-                     seq(pi / 4 - pi / 10, pi / 4 + pi / 10, by = pi / 60),
-                     seq(3 * pi / 4 - pi / 10, 3 * pi / 4 + pi / 10, by = pi / 60),
-                     seq(5 * pi / 4 - pi / 10, 5 * pi / 4 + pi / 10, by = pi / 60),
-                     seq(7 * pi / 4 - pi / 10, 7 * pi / 4 + pi / 10, by = pi / 60)
-                     ),
-                   cv = seq(0, 2 * pi, by = pi / 3),
-                   const = seq(pi / 2, 2 * pi, by = 2 * pi / 3 )
-  )
-  localradius <- noderadius
-  if (nodetiepe == "varlv") localradius <- noderadius * .8
-  drawx <- localradius * cos(thetas)
-  drawy <- localradius * sin(thetas)
-  wovbovflat <- max(drawx)
-  boxcol <- switch(nodetiepe,
-                   lv = NA_integer_,
-                   varlv = NA_integer_,
-                   ov = NA_integer_,
-                   wov = "lightgreen",
-                   bov = "lightblue",
-                   cv = NA_integer_,
-                   const = NA_integer_)
-  n <- c(0, switch(nodetiepe,
-                   lv = , varlv = , const = localradius,
-                   ov = localradius * sqrt(2) / 2,
-                   wov = , bov = wovbovflat,
-                   cv = localradius * sqrt(3) / 2))
-  s <- c(0, switch(nodetiepe,
-                   lv = , varlv = -localradius,
-                   ov = -localradius * sqrt(2) / 2,
-                   wov = , bov = -wovbovflat,
-                   cv = -localradius * sqrt(3) / 2,
-                   const = -localradius * 0.5))
-  e <- switch(nodetiepe,
-              lv = , varlv = , cv = c(localradius, 0),
-              ov = c(localradius * sqrt(2) / 2, 0),
-              wov = , bov = c(wovbovflat, 0),
-              const = c(localradius * sqrt(3) / 2, -localradius * 0.5))
-  w <- c(-e[1L], e[2L])
-  ne <- switch(nodetiepe,
-               lv = , varlv = , ov = , wov = ,
-               bov = localradius * sqrt(0.5) * c(1, 1),
-               cv = localradius * c(0.5, sqrt(3) / 2),
-               const = e)
-  nw <- c(-ne[1L], ne[2L])
-  se <- switch(nodetiepe,
-               lv = , varlv = , ov = , wov = ,
-               bov = localradius * sqrt(0.5) * c(1, -1),
-               cv = localradius * c(-0.5, sqrt(3) / 2),
-               const = e)
-  sw <- c(-se[1L], se[2L])
-  list(drawx = drawx, drawy = drawy, boxcol = boxcol, n = n, ne = ne, e = e,
-       se = se, s = s, sw = sw, w = w, nw = nw)
-}
+
 lvp_make_rplot <- function(nodes_edges,
                            sloped_labels = TRUE,
-                           pngfile = NA_character_,
-                           addgrid = is.na(pngfile)
+                           outfile = "",
+                           addgrid = TRUE,
+                           mlovcolors = c("lightgreen", "lightblue")
                            ) {
-  mlrij <- nodes_edges$mlrij
-  if (is.null(mlrij))
-    stop("nodes_edges hasn't been processed by lvp_position_nodes!")
-  nodes <- nodes_edges$nodes
-  edges <- nodes_edges$edges
-  noderadius <- 0.3
-  arrowlength <- noderadius / 3
+  node_elements <- function(nodetiepe, noderadius) {
+    # define form, color and anchors for a node type
+    thetas <- switch(nodetiepe,
+                     lv = ,
+                     varlv = seq(0, 2 * pi, length.out = 50L),
+                     ov = seq(pi / 4, 2 * pi, by = pi / 2),
+                     wov = ,
+                     bov =c(
+                       seq(pi / 4 - pi / 10, pi / 4 + pi / 10, by = pi / 60),
+                       seq(3 * pi / 4 - pi / 10, 3 * pi / 4 + pi / 10, by = pi / 60),
+                       seq(5 * pi / 4 - pi / 10, 5 * pi / 4 + pi / 10, by = pi / 60),
+                       seq(7 * pi / 4 - pi / 10, 7 * pi / 4 + pi / 10, by = pi / 60)
+                     ),
+                     cv = seq(0, 2 * pi, by = pi / 3),
+                     const = seq(pi / 2, 2 * pi, by = 2 * pi / 3 )
+    )
+    localradius <- noderadius
+    if (nodetiepe == "varlv") localradius <- noderadius * .8
+    drawx <- localradius * cos(thetas)
+    drawy <- localradius * sin(thetas)
+    wovbovflat <- max(drawx)
+    boxcol <- switch(nodetiepe,
+                     lv = NA_integer_,
+                     varlv = NA_integer_,
+                     ov = NA_integer_,
+                     wov = mlovcolors[1L],
+                     bov = mlovcolors[2L],
+                     cv = NA_integer_,
+                     const = NA_integer_)
+    n <- c(0, switch(nodetiepe,
+                     lv = , varlv = , const = localradius,
+                     ov = localradius * sqrt(2) / 2,
+                     wov = , bov = wovbovflat,
+                     cv = localradius * sqrt(3) / 2))
+    s <- c(0, switch(nodetiepe,
+                     lv = , varlv = -localradius,
+                     ov = -localradius * sqrt(2) / 2,
+                     wov = , bov = -wovbovflat,
+                     cv = -localradius * sqrt(3) / 2,
+                     const = -localradius * 0.5))
+    e <- switch(nodetiepe,
+                lv = , varlv = , cv = c(localradius, 0),
+                ov = c(localradius * sqrt(2) / 2, 0),
+                wov = , bov = c(wovbovflat, 0),
+                const = c(localradius * sqrt(3) / 2, -localradius * 0.5))
+    w <- c(-e[1L], e[2L])
+    ne <- switch(nodetiepe,
+                 lv = , varlv = , ov = , wov = ,
+                 bov = localradius * sqrt(0.5) * c(1, 1),
+                 cv = localradius * c(0.5, sqrt(3) / 2),
+                 const = e)
+    nw <- c(-ne[1L], ne[2L])
+    se <- switch(nodetiepe,
+                 lv = , varlv = , ov = , wov = ,
+                 bov = localradius * sqrt(0.5) * c(1, -1),
+                 cv = localradius * c(-0.5, sqrt(3) / 2),
+                 const = e)
+    sw <- c(-se[1L], se[2L])
+    list(drawx = drawx, drawy = drawy, boxcol = boxcol, n = n, ne = ne, e = e,
+         se = se, s = s, sw = sw, w = w, nw = nw)
+  }
+
   vecrotate <- function(vec, angle) {
     c(cos(angle)*vec[1]+sin(angle)*vec[2],
       -sin(angle)*vec[1]+cos(angle)*vec[2])
@@ -157,10 +153,6 @@ lvp_make_rplot <- function(nodes_edges,
   }
   plot_var <- function(waar, noderadius, label = "", side = "n", txtcex = 0.9) {
     labele <- lvp_format_label(label, show=FALSE)$r
-#    labele <- sub("_([[:digit:]]*)", "[\\1]", label)
-#    labele <- sub("varepsilon", "epsilon", labele, fixed = TRUE)
-#    labele <- sub("=(.*)$", "(\\1)", labele)
-#    labele <- str2expression(labele)
     thetarange <- c(pi / 6, 11 * pi / 6)
     if (side == "s") thetarange <- thetarange + pi / 2
     if (side == "e") thetarange <- thetarange + pi
@@ -193,10 +185,16 @@ lvp_make_rplot <- function(nodes_edges,
     polygon(x, y, col = elems$boxcol, lwd = 1)
     text(waar[1L], waar[2L], labele, adj = 0.5, cex = txtcex)
   }
-
+  mlrij <- nodes_edges$mlrij
+  if (is.null(mlrij))
+    stop("nodes_edges hasn't been processed by lvp_position_nodes!")
+  nodes <- nodes_edges$nodes
+  edges <- nodes_edges$edges
+  noderadius <- 0.3
+  arrowlength <- noderadius / 3
   rijen <- max(nodes$rij)
   kolommen <- max(nodes$kolom)
-  if (!is.na(pngfile)) png(pngfile, 960, 960, "px")
+  if (outfile != "") png(outfile, 960, 960, "px")
   opar <- par(mar = c(1L,1L, 1L,1L) + 0.1)
   plot.default(x = c(0.25, kolommen + 0.75), c(0.25, rijen + 0.75), type="n",
                xlab = "", ylab = "", axes = FALSE, asp = 1)
@@ -248,6 +246,6 @@ lvp_make_rplot <- function(nodes_edges,
               nodes$naam[j])
   }
   par(opar)
-  if (!is.na(pngfile)) dev.off()
+  if (outfile != "") dev.off()
   return(invisible(NULL))
 }

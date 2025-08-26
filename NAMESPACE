@@ -1,7 +1,7 @@
 importFrom("lavaan", "lavParseModelString")
 importFrom("graphics", "abline", "lines", "par", "plot.default",
            "polygon", "text")
-importFrom("grDevices", "dev.off", "png")
+importFrom("grDevices", "dev.off", "png", "col2rgb")
 export("lvp_format_label")
 export("lvp_get_model_info")
 export("lvp_position_nodes")

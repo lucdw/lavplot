@@ -1,24 +1,40 @@
-lavplot <- function(model = NULL, infile = NULL,
+lavplot <- function(model = NULL,
+                    infile = NULL,
                     varlv = FALSE,
-                    texfile = NULL,
-                    cex = 1.3,
-                    pngfile = NA_character_,
-                    svgfile = NULL,
-                    sloped_labels = TRUE,
-                    standalone = FALSE,
                     placenodes = NULL,
-                    edgelabelsbelow = NULL) {
-  tmp <- lvp_get_model_info(model, infile = infile, varlv = varlv)
+                    edgelabelsbelow = NULL,
+                    common_opts = list(sloped_labels = TRUE,
+                                       mlovcolors = c("lightgreen", "lightblue")),
+                    rplot = list(outfile = "",
+                                 addgrid = TRUE),
+                    tikz = list(outfile = "",
+                                cex = 1.3,
+                                standalone = FALSE),
+                    svg = list(outfile = "",
+                               strokeWidth = 2L,
+                               svgFontSize = 20L,
+                               svgIdxFontSize = 15L,
+                               svgDy = 5L,
+                               standalone = FALSE)
+) {
+  tmp <- lvp_get_model_info(model,
+                            infile = infile,
+                            varlv = varlv)
   tmp <- lvp_position_nodes(tmp,
                             placenodes = placenodes,
                             edgelabelsbelow = edgelabelsbelow)
-  addgrid <- is.na(pngfile)
-  if (!is.null(pngfile))
-    lvp_make_rplot(tmp, sloped_labels = sloped_labels, pngfile = pngfile,
-           addgrid = addgrid)
-  if (!is.null(texfile))
-    lvp_make_tikz(tmp, texfile, cex, sloped_labels, standalone)
-  if (!is.null(svgfile))
-    lvp_make_svg(tmp, sloped_labels = sloped_labels, svgfile,
-                 standalone = standalone)
+  mc <- match.call()
+  create_rplot <- !is.null(mc$rplot) || (is.null(mc$tikz) && is.null(mc$svg))
+  if (create_rplot)
+    do.call(lvp_make_rplot, c(list(nodes_edges = tmp),
+                                   common_opts,
+                                   rplot))
+  if (!is.null(mc$tikz))
+    do.call(lvp_make_tikz, c(list(nodes_edges = tmp),
+                             common_opts,
+                             tikz))
+  if (!is.null(mc$svg))
+    do.call(lvp_make_svg, c(list(nodes_edges = tmp),
+                             common_opts,
+                             svg))
 }

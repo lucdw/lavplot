@@ -4,16 +4,19 @@
 \usage{
 lvp_make_rplot(nodes_edges,
                sloped_labels = TRUE,
-               pngfile = NA_character_,
-               addgrid = is.na(pngfile)
+               outfile = "",
+               addgrid = TRUE,
+               mlovcolors = c("lightgreen", "lightblue")
                )
 }
 \arguments{
 \item{nodes_edges}{The data.frames and mlrij as returned from position_nodes}
 \item{sloped_labels}{Logical, sloped labels above (or under) the edges}
-\item{pngfile}{Character string naming the file to store the diagram in PNG or
+\item{outfile}{Character string naming the file to store the diagram in PNG or
   NA to show the plot in R.}
 \item{addgrid}{Logical, add a grid with indicated 'positions' to the graph?}
+\item{mlovcolors}{Array of two colors for distinguishing ov nodes with same name
+between the levels in a  multilevel model.}
 }
 \value{
 NULL (invisible)}
@@ -44,6 +47,6 @@ test <- lvp_position_nodes(test)
 lvp_make_rplot(test, sloped_labels = FALSE, addgrid = FALSE)
 \dontrun{
 # example where plot is stored in a PNG file
-lvp_make_rplot(test, pngfile="demo_rplot.png")
+lvp_make_rplot(test, outfile="demo_rplot.png")
 }
 }

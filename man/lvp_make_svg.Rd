@@ -9,7 +9,9 @@ lvp_make_svg(nodes_edges,
              strokeWidth = 2L,
              svgFontSize = 20L,
              svgIdxFontSize = 15L,
-             svgDy = 5L)
+             svgDy = 5L,
+             mlovcolors = c("lightgreen", "lightblue")
+             )
 }
 \arguments{
 \item{nodes_edges}{The list with nodes, edges and mlrij as returned from
@@ -23,6 +25,8 @@ FALSE (default) the outfile - if specified - must have a file extension
 \item{svgFontSize}{An integer specifying normal font size to use.}
 \item{svgIdxFontSize}{An integer specifying font size to use for a subscript.}
 \item{svgDy}{An integer specifying the distance to move the baseline of the subscript.}
+\item{mlovcolors}{Array of two colors for distinguishing ov nodes with same name
+between the levels in a  multilevel model.}
 }
 \value{
 NULL (invisible)}

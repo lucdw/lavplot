@@ -2,7 +2,12 @@ lvp_make_tikz <- function(nodes_edges,
                           outfile = "",
                           cex = 1.3,
                           sloped_labels = TRUE,
-                          standalone = FALSE) {
+                          standalone = FALSE,
+                          mlovcolors = c("lightgreen", "lightblue")
+                          ) {
+  tmpcol <- col2rgb(mlovcolors)
+  wovcol <- paste(round(tmpcol[, 1L]/255, 2), collapse = ",")
+  bovcol <- paste(round(tmpcol[, 2L]/255, 2), collapse = ",")
   nodenaam <- function(nm, blk) {
     if (blk > 0L) return(gsub("_", "", paste0("B", blk, nm)))
     return(gsub("_", "", nm))
@@ -24,12 +29,13 @@ lvp_make_tikz <- function(nodes_edges,
     "\\usepackage{amsfonts}",
     "\\usepackage[utf8]{inputenc}",
     "\\usepackage[english]{babel}",
-    "\\usepackage{xcolor}",
     "\\usepackage{color}",
     "\\usepackage{tikz}"), zz)
   commstyle <- paste0("draw, minimum size=", round(6 * cex), "mm")
   writeLines (c(
     "\\usetikzlibrary {shapes.geometric}",
+    paste0("\\definecolor{wovcol}{rgb}{", wovcol, "}"),
+    paste0("\\definecolor{bovcol}{rgb}{", bovcol, "}"),
     "\\tikzset{",
     "bend angle=45,",">=stealth,",
     paste0("x={(", cex, "cm,0cm)}, y={(0cm,", cex, "cm)},"),
@@ -37,9 +43,8 @@ lvp_make_tikz <- function(nodes_edges,
     paste0("varlv/.style={circle, draw, minimum size=", round(4 * cex), "mm, semithick},"),
     paste0("cv/.style={regular polygon, regular polygon sides=6, ", commstyle, ", thick},"),
     paste0("ov/.style={rectangle, ", commstyle,", thick},"),
-    paste0("av/.style={rectangle, fill=black!10, ", commstyle,", thick},"),
-    paste0("wov/.style={rectangle, rounded corners, ", commstyle, ", thick},"),
-    paste0("bov/.style={rectangle, rounded corners, ", commstyle, ", thick},"),
+    paste0("wov/.style={rectangle, rounded corners, fill=wovcol, ", commstyle, ", thick},"),
+    paste0("bov/.style={rectangle, rounded corners, fill=bovcol, ", commstyle, ", thick},"),
     paste0("const/.style={regular polygon, regular polygon sides=3, ", commstyle, ", thick}"),
     "}"), zz)
   if (standalone) writeLines("\\begin{document}", zz)

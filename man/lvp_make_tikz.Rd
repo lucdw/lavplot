@@ -6,7 +6,9 @@ lvp_make_tikz(nodes_edges,
               outfile = "",
               cex = 1.3,
               sloped_labels = TRUE,
-              standalone = FALSE)
+              standalone = FALSE,
+              mlovcolors = c("lightgreen", "lightblue")
+              )
 }
 \arguments{
 \item{nodes_edges}{The list with nodes, edges and mlrij as returned from
@@ -15,6 +17,8 @@ lvp_make_tikz(nodes_edges,
 \item{cex}{Minimum distance between nodes in cm.}
 \item{sloped_labels}{logical, sloped labels for the edges}
 \item{standalone}{logical, add code to make teX file standalone?}
+\item{mlovcolors}{Array of two colors for distinguishing ov nodes with same name
+between the levels in a  multilevel model.}
 }
 \value{
 NULL, invisible
