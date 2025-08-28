@@ -1,8 +1,8 @@
-\name{lvp_make_rplot}
-\alias{lvp_make_rplot}
+\name{lav_make_rplot}
+\alias{lav_make_rplot}
 \title{Plots a diagram.}
 \usage{
-lvp_make_rplot(nodes_edges,
+lav_make_rplot(nodes_edges,
                sloped_labels = TRUE,
                outfile = "",
                addgrid = TRUE,
@@ -32,9 +32,9 @@ model <- 'alpha  =~ x_1 + x_2 + x_3     # latent variable
           Xi ~ v * alpha + t * beta + 1
           alpha ~ yy * Theta_1 + tt * beta + ss * gamma
           '
-test <- lvp_get_model_info(model)
-test <- lvp_position_nodes(test)
-lvp_make_rplot(test)
+test <- lav_get_model_info(model)
+test <- lav_position_nodes(test)
+lav_make_rplot(test)
 modelml <- '
         level: 1
         fw =~ 1*y_1 + y_2 + y_3 + y_5
@@ -42,11 +42,11 @@ modelml <- '
         fb =~ 1*y_1 + y_2 + y_3 + y_4
         y_2 ~~ cv24 * y_4
   '
-test <- lvp_get_model_info(modelml)
-test <- lvp_position_nodes(test)
-lvp_make_rplot(test, sloped_labels = FALSE, addgrid = FALSE)
+test <- lav_get_model_info(modelml)
+test <- lav_position_nodes(test)
+lav_make_rplot(test, sloped_labels = FALSE, addgrid = FALSE)
 \dontrun{
 # example where plot is stored in a PNG file
-lvp_make_rplot(test, outfile="demo_rplot.png")
+lav_make_rplot(test, outfile="demo_rplot.png")
 }
 }

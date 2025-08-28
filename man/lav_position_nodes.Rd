@@ -1,14 +1,14 @@
-\name{lvp_position_nodes}
-\alias{lvp_position_nodes}
+\name{lav_position_nodes}
+\alias{lav_position_nodes}
 \title{Position the nodes in the diagram}
 \usage{
-lvp_position_nodes(nodes_edges,
+lav_position_nodes(nodes_edges,
                    placenodes = NULL,
                    edgelabelsbelow = NULL)
 }
 \arguments{
 \item{nodes_edges}{The nodes and edges data.frames in a list as
-        returned from lvp_get_model_info}
+        returned from lav_get_model_info}
  \item{placenodes}{optional list with members nodename = c(row, column),
 row and colom don't have to be integers}
 \item{edgelabelsbelow}{optional list with members c(nodename1, nodename2)}
@@ -23,7 +23,7 @@ Computes the positions for the nodes and anchors for edges in the diagram.
 This functions tries to arrange the nodes and anchor points for the edges in
 a way that gives a not-to-large diagram and taking into account the \code{voorkeur}
 column in the input nodes data.frame. If the result is not what you want, you can
-take a look at the plot via \code{lvp_make_rplot} of \code{lavplot} functions and
+take a look at the plot via \code{lav_make_rplot} of \code{lavplot} functions and
 decide yourself to place some nodes at another location (\code{placenodes})
 and/or put some edge labels at the other side of the edge (\code{labelsbelow}).
 
@@ -44,6 +44,6 @@ model <- 'alfa  =~ 1 * x_1 + x_2 + x_3         # latent variable
           x_3 ~~ cc_36 * x_6
           gamma ~~ 0.55 * gamma
           '
-test <- lvp_get_model_info(model)
-(test_positioned <- lvp_position_nodes(test))
+test <- lav_get_model_info(model)
+(test_positioned <- lav_position_nodes(test))
 }

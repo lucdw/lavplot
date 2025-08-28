@@ -1,5 +1,5 @@
 
-lvp_make_rplot <- function(nodes_edges,
+lav_make_rplot <- function(nodes_edges,
                            sloped_labels = TRUE,
                            outfile = "",
                            addgrid = TRUE,
@@ -82,7 +82,7 @@ lvp_make_rplot <- function(nodes_edges,
   }
   plot_edge <- function(van, naar, label = "", dubbel = FALSE,
                         bend = 0, below = FALSE, txtcex = 0.9) {
-    labele <- lvp_format_label(label, show=FALSE)$r
+    labele <- lav_format_label(label, show=FALSE)$r
     unitvec <- (naar - van) / sqrt(sum((naar - van) * (naar - van)))
     theta <- atan2(naar[2] - van[2], naar[1] - van[1])
     srt <- ifelse(sloped_labels, 180 * theta / pi, 0)
@@ -152,7 +152,7 @@ lvp_make_rplot <- function(nodes_edges,
     }
   }
   plot_var <- function(waar, noderadius, label = "", side = "n", txtcex = 0.9) {
-    labele <- lvp_format_label(label, show=FALSE)$r
+    labele <- lav_format_label(label, show=FALSE)$r
     thetarange <- c(pi / 6, 11 * pi / 6)
     if (side == "s") thetarange <- thetarange + pi / 2
     if (side == "e") thetarange <- thetarange + pi
@@ -178,7 +178,7 @@ lvp_make_rplot <- function(nodes_edges,
       text(middelpt[1L], middelpt[2L], labele, adj = 0.5, cex = txtcex * 0.8)
   }
   plot_node <- function(waar, tiepe, label = "", txtcex = 0.9) {
-    labele <- lvp_format_label(label, show=FALSE)$r
+    labele <- lav_format_label(label, show=FALSE)$r
     elems <- node_elements(tiepe, noderadius)
     x <- waar[1] + elems$drawx
     y <- waar[2] + elems$drawy
@@ -187,7 +187,7 @@ lvp_make_rplot <- function(nodes_edges,
   }
   mlrij <- nodes_edges$mlrij
   if (is.null(mlrij))
-    stop("nodes_edges hasn't been processed by lvp_position_nodes!")
+    stop("nodes_edges hasn't been processed by lav_position_nodes!")
   nodes <- nodes_edges$nodes
   edges <- nodes_edges$edges
   noderadius <- 0.3

@@ -180,10 +180,10 @@ complete_anchors <- function(nodes, edges) {
   }
   edges
 }
-lvp_position_nodes <- function(nodes_edges,
+lav_position_nodes <- function(nodes_edges,
                                placenodes = NULL,
                                edgelabelsbelow = NULL) {
-  #### lvp_position_nodes MAIN ####
+  #### lav_position_nodes MAIN ####
   nodes <- nodes_edges$nodes
   edges <- nodes_edges$edges
   if (length(nodes$rij) == 1L) { # Only 1 node !
@@ -198,8 +198,8 @@ lvp_position_nodes <- function(nodes_edges,
     nodes2 <- nodes[nodes$blok == 1L, ]
     edges2 <- edges[edges$van %in% nodes2$id, ]
     nodes2$blok <- 0L
-    result1 <- lvp_position_nodes(list(nodes = nodes1, edges = edges1))
-    result2 <- lvp_position_nodes(list(nodes = nodes2, edges = edges2))
+    result1 <- lav_position_nodes(list(nodes = nodes1, edges = edges1))
+    result2 <- lav_position_nodes(list(nodes = nodes2, edges = edges2))
     rijen1 <- max(result1$nodes$rij)
     result2$nodes$rij <- result2$nodes$rij + rijen1 + 1L
     result1$nodes$blok <- 2L

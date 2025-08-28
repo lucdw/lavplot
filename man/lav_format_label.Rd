@@ -1,8 +1,8 @@
-\name{lvp_format_label}
-\alias{lvp_format_label}
+\name{lav_format_label}
+\alias{lav_format_label}
 \title{Provides formatted label for use in tikz, svg or rplot}
 \usage{
-lvp_format_label(label = "", value = "", show = TRUE,
+lav_format_label(label = "", value = "", show = TRUE,
                  svgIdxFontSize = 20L, svgDy = 7L)
 }
 \arguments{
@@ -40,8 +40,8 @@ used for the subscript in the generated code. If a 'value' is present, it is att
 to show this value after the label, with an equal sign between both.
 }
 \examples{
-lvp_format_label("beta_10", 0.65)
-lvp_format_label("A_i,j=0.45")
-lvp_format_label("Gamma")
-lvp_format_label(value="1.2345")
+lav_format_label("beta_10", 0.65)
+lav_format_label("A_i,j=0.45")
+lav_format_label("Gamma")
+lav_format_label(value="1.2345")
 }

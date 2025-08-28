@@ -1,5 +1,5 @@
 # extract info from model
-lvp_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
+lav_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
   if (is.null(model) == is.null(infile)) {
       stop("either model or infile must be specified")
   }

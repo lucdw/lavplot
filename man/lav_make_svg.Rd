@@ -1,8 +1,8 @@
-\name{lvp_make_svg}
-\alias{lvp_make_svg}
+\name{lav_make_svg}
+\alias{lav_make_svg}
 \title{Creates code to show a diagram in svg format.}
 \usage{
-lvp_make_svg(nodes_edges,
+lav_make_svg(nodes_edges,
              outfile = "",
              sloped_labels = TRUE,
              standalone = FALSE,
@@ -15,7 +15,7 @@ lvp_make_svg(nodes_edges,
 }
 \arguments{
 \item{nodes_edges}{The list with nodes, edges and mlrij as returned from
-    lvp_position_nodes}
+    lav_position_nodes}
 \item{outfile}{A connection or a character string, the file to store the code.}
 \item{sloped_labels}{logical, sloped labels for the edges}
 \item{standalone}{logical, add code to make a html file with svg in it? If
@@ -42,9 +42,9 @@ model <- 'alpha  =~ x_1 + x_2 + x_3       # latent variable
           Xi ~ v * alpha + t * beta + 1
           alpha ~ yy * Theta_1 + tt * beta + ss * gamma
           '
-test <- lvp_get_model_info(model)
-test <- lvp_position_nodes(test)
-lvp_make_svg(test) # no file given, so output to R console
+test <- lav_get_model_info(model)
+test <- lav_position_nodes(test)
+lav_make_svg(test) # no file given, so output to R console
 modelml <- '
         level: 1
         fw =~ 1*y_1 + y_2 + y_3 + y_5
@@ -52,10 +52,10 @@ modelml <- '
         fb =~ 1*y_1 + y_2 + y_3 + y_4
         y_2 ~~ cv24 * y_4
   '
-testml <- lvp_get_model_info(modelml)
-testml <- lvp_position_nodes(testml)
+testml <- lav_get_model_info(modelml)
+testml <- lav_position_nodes(testml)
 # in the line hereunder no file is given, so output to R console
-lvp_make_svg(testml, sloped_labels = FALSE, standalone = TRUE)
+lav_make_svg(testml, sloped_labels = FALSE, standalone = TRUE)
 \dontrun{
 # example creating html file with the above diagrams
 zz <- file("demosvg.html", open="w")
@@ -65,11 +65,11 @@ writeLines(c(
   '<body>',
   '<h2>SVG diagrams created by lavplot R package</h2>'),
   zz)
-lvp_make_svg(test, outfile = "temp.svg")
+lav_make_svg(test, outfile = "temp.svg")
 tmp <- readLines("tmp.svg")
 writeLines(tmp, zz)
 writeLines("<br />", zz)
-lvp_make_svg(testml, outfile = "temp.svg", sloped_labels = FALSE,
+lav_make_svg(testml, outfile = "temp.svg", sloped_labels = FALSE,
              standalone = TRUE)
 tmp <- readLines("tmp.svg")
 writeLines(tmp, zz)

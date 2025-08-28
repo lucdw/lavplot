@@ -1,4 +1,4 @@
-lvp_format_label <- function(label = "", value = "", show = TRUE,
+lav_format_label <- function(label = "", value = "", show = TRUE,
                              svgIdxFontSize = 20L, svgDy = 7L) {
   latexsymbols <- c("varepsilon",
     "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta",

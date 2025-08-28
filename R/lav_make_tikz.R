@@ -1,4 +1,4 @@
-lvp_make_tikz <- function(nodes_edges,
+lav_make_tikz <- function(nodes_edges,
                           outfile = "",
                           cex = 1.3,
                           sloped_labels = TRUE,
@@ -13,7 +13,7 @@ lvp_make_tikz <- function(nodes_edges,
     return(gsub("_", "", nm))
     }
   mlrij <- nodes_edges$mlrij
-  if (is.null(mlrij)) stop("nodes_edges hasn't been processed by position_nodes!")
+  if (is.null(mlrij)) stop("nodes_edges hasn't been processed by lav_position_nodes!")
   nodes <- nodes_edges$nodes
   edges <- nodes_edges$edges
   if (is.character(outfile)) {
@@ -37,7 +37,7 @@ lvp_make_tikz <- function(nodes_edges,
     paste0("\\definecolor{wovcol}{rgb}{", wovcol, "}"),
     paste0("\\definecolor{bovcol}{rgb}{", bovcol, "}"),
     "\\tikzset{",
-    "bend angle=45,",">=stealth,",
+    "bend angle=45,", ">=stealth,",
     paste0("x={(", cex, "cm,0cm)}, y={(0cm,", cex, "cm)},"),
     paste0("lv/.style={circle, ", commstyle, ", thick},"),
     paste0("varlv/.style={circle, draw, minimum size=", round(4 * cex), "mm, semithick},"),
@@ -61,7 +61,7 @@ lvp_make_tikz <- function(nodes_edges,
     writeLines(paste(
       "\\node[", nodes$tiepe[j], "] (", nodenaam(nodes$naam[j], nodes$blok[j]),
       ") at (", xpos, ",", ypos, ") {",
-      lvp_format_label(nodes$naam[j], show = FALSE)$tikz, "};", sep = ""), zz)
+      lav_format_label(nodes$naam[j], show = FALSE)$tikz, "};", sep = ""), zz)
   }
   varlv <-any(nodes$tiepe == "varlv")
   for (j in seq.int(nrow(edges))) {
@@ -69,7 +69,7 @@ lvp_make_tikz <- function(nodes_edges,
     vannaam <- nodenaam(nodes$naam[van], nodes$blok[van])
     naar <- which(nodes$id == edges$naar[j])
     naarnaam <- nodenaam(nodes$naam[naar], nodes$blok[naar])
-    nodelabel <- lvp_format_label(edges$label[j], show = FALSE)$tikz
+    nodelabel <- lav_format_label(edges$label[j], show = FALSE)$tikz
     if (van == naar) { # self
       if (nodes$kolom[van] == 1L) {
         writeLines(paste("\\path[<->] (", vannaam,
@@ -142,7 +142,7 @@ lvp_make_tikz <- function(nodes_edges,
           }
         }
       }
-      thelabel <- lvp_format_label(edges$label[j], show = FALSE)$tikz
+      thelabel <- lav_format_label(edges$label[j], show = FALSE)$tikz
       if (thelabel != "") {
         thelabel <- paste0("node[" ,
                            ifelse(edges$labelbelow[j], "below", "above"),

@@ -1,8 +1,8 @@
-\name{lvp_get_model_info}
-\alias{lvp_get_model_info}
+\name{lav_get_model_info}
+\alias{lav_get_model_info}
 \title{Get model info}
 \usage{
-lvp_get_model_info(model = NULL, infile = NULL, varlv = FALSE)
+lav_get_model_info(model = NULL, infile = NULL, varlv = FALSE)
 }
 \arguments{
 \item{model}{A character vector specifying the model in lavaan syntax or a list
@@ -79,5 +79,5 @@ model <- 'alfa  =~ 1 * x_1 + x_2 + x_3         # latent variable
           x_3 ~~ cc_36 * x_6
           gamma ~~ 0.55 * gamma
           '
-(test <- lvp_get_model_info(model))
+(test <- lav_get_model_info(model))
 }

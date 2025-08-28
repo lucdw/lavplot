@@ -1,8 +1,8 @@
-\name{lvp_make_tikz}
-\alias{lvp_make_tikz}
+\name{lav_make_tikz}
+\alias{lav_make_tikz}
 \title{Creates code to show a diagram in tikz format.}
 \usage{
-lvp_make_tikz(nodes_edges,
+lav_make_tikz(nodes_edges,
               outfile = "",
               cex = 1.3,
               sloped_labels = TRUE,
@@ -12,7 +12,7 @@ lvp_make_tikz(nodes_edges,
 }
 \arguments{
 \item{nodes_edges}{The list with nodes, edges and mlrij as returned from
-    lvp_position_nodes}
+    lav_position_nodes}
 \item{outfile}{A connection or a character string, the file to store the code.}
 \item{cex}{Minimum distance between nodes in cm.}
 \item{sloped_labels}{logical, sloped labels for the edges}
@@ -35,9 +35,9 @@ model <- 'alpha  =~ x_1 + x_2 + x_3       # latent variable
           Xi ~ v * alpha + t * beta + 1
           alpha ~ yy * Theta_1 + tt * beta + ss * gamma
           '
-test <- lvp_get_model_info(model)
-test <- lvp_position_nodes(test)
-lvp_make_tikz(test) # no file given, so output to R console
+test <- lav_get_model_info(model)
+test <- lav_position_nodes(test)
+lav_make_tikz(test) # no file given, so output to R console
 modelml <- '
         level: 1
         fw =~ 1*y_1 + y_2 + y_3 + y_5
@@ -45,10 +45,10 @@ modelml <- '
         fb =~ 1*y_1 + y_2 + y_3 + y_4
         y_2 ~~ cv24 * y_4
   '
-testml <- lvp_get_model_info(modelml)
-testml <- lvp_position_nodes(testml)
+testml <- lav_get_model_info(modelml)
+testml <- lav_position_nodes(testml)
 # in the line hereunder no file is given, so output to R console
-lvp_make_tikz(testml, cex = 1.4, sloped_labels = FALSE, standalone = TRUE)
+lav_make_tikz(testml, cex = 1.4, sloped_labels = FALSE, standalone = TRUE)
 \dontrun{
 # example creating tex file with the above diagrams
 zz <- file("testtikz.tex", open="w")
@@ -64,11 +64,11 @@ writeLines(c(
   '\\usetikzlibrary {shapes.geometric}',
   '\\begin{document}'),
   zz)
-lvp_make_tikz(test, outfile = "temp.tex")
+lav_make_tikz(test, outfile = "temp.tex")
 tmp <- readLines("tmp.tex")
 writeLines(tmp, zz)
 writeLines(" ", zz)
-lvp_make_tikz(testml, outfile = "temp.tex", cex = 1.4, sloped_labels = FALSE)
+lav_make_tikz(testml, outfile = "temp.tex", cex = 1.4, sloped_labels = FALSE)
 tmp <- readLines("tmp.tex")
 writeLines(tmp, zz)
 writeLines("\\end{document}", zz)

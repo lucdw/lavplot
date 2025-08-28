@@ -1,4 +1,4 @@
-lvp_make_svg <- function(nodes_edges,
+lav_make_svg <- function(nodes_edges,
                          outfile = "",
                          sloped_labels = TRUE,
                          standalone = FALSE,
@@ -109,7 +109,7 @@ lvp_make_svg <- function(nodes_edges,
   }
   mlrij <- nodes_edges$mlrij
   if (is.null(mlrij))
-    stop("nodes_edges hasn't been processed by lvp_position_nodes!")
+    stop("nodes_edges hasn't been processed by lav_position_nodes!")
   if (outfile == "") outfile <- stdout()
   if (is.character(outfile)) {
     zz <- file(outfile, open = "w")
@@ -162,7 +162,7 @@ lvp_make_svg <- function(nodes_edges,
      zz)
   plot_edge <- function(van, naar, label = "", dubbel = FALSE,
                         bend = 0, below = FALSE, txtcex = 0.9, id = 0) {
-    labele <- lvp_format_label(label,
+    labele <- lav_format_label(label,
                                show = FALSE,
                                svgIdxFontSize = svgIdxFontSize,
                                svgDy = svgDy)$svg
@@ -266,7 +266,7 @@ lvp_make_svg <- function(nodes_edges,
     }
   }
   plot_var <- function(waar, noderadius, label = "", side = "n", txtcex = 0.9) {
-    labele <- lvp_format_label(label,
+    labele <- lav_format_label(label,
                                show = FALSE,
                                svgIdxFontSize = svgIdxFontSize,
                                svgDy = svgDy)$svg
@@ -299,7 +299,7 @@ lvp_make_svg <- function(nodes_edges,
     }
   }
   plot_node <- function(waar, tiepe, label = "", txtcex = 0.9) {
-    labele <- lvp_format_label(label,
+    labele <- lav_format_label(label,
                                show = FALSE,
                                svgIdxFontSize = svgIdxFontSize,
                                svgDy = svgDy)$svg

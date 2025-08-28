@@ -1,8 +1,28 @@
 \name{lavplot}
 \alias{lavplot}
+\alias{lav_plot}
 \title{Creates diagram code for tikz, svg or Rplot}
 \usage{
 lavplot(model = NULL,
+        infile = NULL,
+        varlv = FALSE,
+        placenodes = NULL,
+        edgelabelsbelow = NULL,
+        common_opts = list(sloped_labels = TRUE,
+                           mlovcolors = c("lightgreen", "lightblue")),
+        rplot = list(outfile = "",
+                     addgrid = TRUE),
+        tikz = list(outfile = "",
+                    cex = 1.3,
+                    standalone = FALSE),
+        svg = list(outfile = "",
+                   strokeWidth = 2L,
+                   svgFontSize = 20L,
+                   svgIdxFontSize = 15L,
+                   svgDy = 5L,
+                   standalone = FALSE)
+        )
+lav_plot(model = NULL,
         infile = NULL,
         varlv = FALSE,
         placenodes = NULL,
@@ -37,9 +57,9 @@ plotted as covariance between the latent variables for the variance.}
 row and colom don't have to be integers.}
 \item{edgelabelsbelow}{optional list with members c(nodename1, nodename2).}
 \item{common_opts}{options common to the three types of generated plots.}
-\item{rplot}{options for creating Rplot, see \code{lvp_make_rplot}.}
-\item{tikz}{options for creating code for tikz plot, see \code{lvp_make_tikz}.}
-\item{svg}{options for creating code for svg plot, see \code{lvp_make_svg}.}
+\item{rplot}{options for creating Rplot, see \code{lav_make_rplot}.}
+\item{tikz}{options for creating code for tikz plot, see \code{lav_make_tikz}.}
+\item{svg}{options for creating code for svg plot, see \code{lav_make_svg}.}
 }
 \details{
 If \code{rplot} is specified or neither \code{tikz} nor \code{svg} are specified
@@ -53,12 +73,12 @@ NULL, invisible
 \description{
 Creates the code to make a diagram in tikz or svg, plot the diagram or store
 it in a png file. More details on the parameters can be found in the help for
-the \code{lvp_...} functions.
+the \code{lav_...} functions.
 }
 \seealso{
-\code{\link{lvp_get_model_info}}, \code{\link{lvp_position_nodes}},
-\code{\link{lvp_make_rplot}}, \code{\link{lvp_make_tikz}},
-\code{\link{lvp_make_svg}}
+\code{\link{lav_get_model_info}}, \code{\link{lav_position_nodes}},
+\code{\link{lav_make_rplot}}, \code{\link{lav_make_tikz}},
+\code{\link{lav_make_svg}}
 }
 \examples{
 model <- 'alpha_11  =~ 1 * x_1 + x_2 + x_3     # latent variable
