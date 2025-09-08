@@ -66,6 +66,17 @@ If \code{rplot} is specified or neither \code{tikz} nor \code{svg} are specified
 an rplot is generated, possibly stored in a png file if the outfile member of
 rplot is set. If \code{tikz} is specified the code for a tikz diagram is stored
 in the specified outfile, and the same for svg.
+
+The lavplot command tries to create a nice plot from the input model, but
+one should keep the names of the variables short and sometimes rearrange the
+nodes in the plot. As an example the (slightly modified) example of the sem
+commando in \code{lavaan} results in the following plot:
+\if{html}{\figure{semex0.svg}{options: width=500 alt="sem example"}}
+\if{latex}{\figure{semex0.pdf}{options: width=3in}}
+
+If we use the placenodes argument, we get the following plot:
+\if{html}{\figure{semex.svg}{options: width=500 alt="sem example"}}
+\if{latex}{\figure{semex.pdf}{options: width=3in}}
 }
 \value{
 NULL, invisible
