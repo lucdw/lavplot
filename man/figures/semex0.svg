@@ -26,40 +26,28 @@
 <path id="L3" d="M 221.213203435596 400 L 270 300" stroke-width="0" stroke="none" fill="none" />
 <path id="L4" d="M 530 300 L 578.786796564404 200" stroke-width="2" stroke="black" marker-end="url(#arrow)" />
 <path id="L5" d="M 530 300 L 578.786796564404 300" stroke-width="2" stroke="black" marker-end="url(#arrow)" />
-<text font-size="
-20
-" text-anchor="middle">
+<text font-size="20" text-anchor="middle">
 <textPath xlink:href="#L5" startOffset="50%">a</textPath>
 </text>
 <path id="L6" d="M 530 300 L 578.786796564404 400" stroke-width="2" stroke="black" marker-end="url(#arrow)" />
-<text font-size="
-20
-" text-anchor="middle">
+<text font-size="20" text-anchor="middle">
 <textPath xlink:href="#L6" startOffset="50%">b</textPath>
 </text>
 <path id="L7" d="M 530 300 L 578.786796564404 500" stroke-width="2" stroke="black" marker-end="url(#arrow)" />
-<text font-size="
-20
-" text-anchor="middle">
+<text font-size="20" text-anchor="middle">
 <textPath xlink:href="#L7" startOffset="50%">c</textPath>
 </text>
 <path id="L8" d="M 530 700 L 578.786796564404 600" stroke-width="2" stroke="black" marker-end="url(#arrow)" />
 <path id="L9" d="M 530 700 L 578.786796564404 700" stroke-width="2" stroke="black" marker-end="url(#arrow)" />
-<text font-size="
-20
-" text-anchor="middle">
+<text font-size="20" text-anchor="middle">
 <textPath xlink:href="#L9" startOffset="50%">a</textPath>
 </text>
 <path id="L10" d="M 530 700 L 578.786796564404 800" stroke-width="2" stroke="black" marker-end="url(#arrow)" />
-<text font-size="
-20
-" text-anchor="middle">
+<text font-size="20" text-anchor="middle">
 <textPath xlink:href="#L10" startOffset="50%">b</textPath>
 </text>
 <path id="L11" d="M 530 700 L 578.786796564404 900" stroke-width="2" stroke="black" marker-end="url(#arrow)" />
-<text font-size="
-20
-" text-anchor="middle">
+<text font-size="20" text-anchor="middle">
 <textPath xlink:href="#L11" startOffset="50%">c</textPath>
 </text>
 <path id="L12" d="M 330 300 L 470 300" stroke-width="2" stroke="black" marker-end="url(#arrow)" />
