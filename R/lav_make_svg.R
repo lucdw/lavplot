@@ -1,6 +1,6 @@
-lav_make_svg <- function(nodes_edges,
+lav_make_svg <- function(nodes.edges,
                          outfile = "",
-                         sloped_labels = TRUE,
+                         sloped.labels = TRUE,
                          standalone = FALSE,
                          strokeWidth = 2L,
                          svgFontSize = 20L,
@@ -107,9 +107,9 @@ lav_make_svg <- function(nodes_edges,
     stopifnot(standalone || get_file_extension(outfile) == "svg",
               !standalone || get_file_extension(outfile) %in% c("htm", "html"))
   }
-  mlrij <- nodes_edges$mlrij
+  mlrij <- nodes.edges$mlrij
   if (is.null(mlrij))
-    stop("nodes_edges hasn't been processed by lav_position_nodes!")
+    stop("nodes.edges hasn't been processed by lav_position_nodes!")
   if (outfile == "") outfile <- stdout()
   if (is.character(outfile)) {
     zz <- file(outfile, open = "w")
@@ -118,8 +118,8 @@ lav_make_svg <- function(nodes_edges,
     zz <- outfile
     closezz <- FALSE
   }
-  nodes <- nodes_edges$nodes
-  edges <- nodes_edges$edges
+  nodes <- nodes.edges$nodes
+  edges <- nodes.edges$edges
   nodedist <- 100
   noderadius <- 0.3
   rijen <- max(nodes$rij)
@@ -161,14 +161,15 @@ lav_make_svg <- function(nodes_edges,
     '</defs>'),
      zz)
   plot_edge <- function(van, naar, label = "", dubbel = FALSE,
-                        bend = 0, below = FALSE, txtcex = 0.9, id = 0) {
+                        control = NA_real_, below = FALSE,
+                        id = 0) {
     labele <- lav_format_label(label,
                                show = FALSE,
                                svgIdxFontSize = svgIdxFontSize,
                                svgDy = svgDy)$svg
-    unitvec <- (naar - van) / sqrt(sum((naar - van) * (naar - van)))
+    dirvec <- naar - van
     theta <- atan2(naar[2] - van[2], naar[1] - van[1])
-    if (bend == 0) { # line
+    if (is.na(control[1L])) { # line
       if (van[1L] <= naar[1L]) {
         writeLines(paste0('<path id="L', id, '" d="M ', van[1L],
                           ' ', van[2L], ' L ', naar[1L], " ", naar[2L],
@@ -188,52 +189,32 @@ lav_make_svg <- function(nodes_edges,
       }
       midden <- (van + naar) * 0.5
     } else {  # path Q (quadratic Bézier)
-      # gebogen lijn (cirkelsegment) door van en naar met raaklijn in
-      # van die hoek van bend ° maakt met unitvec
-      lengte <- sqrt(sum((naar - van) * (naar - van)))
-      orthovec <- c(-unitvec[2], unitvec[1]) # 90° in tegenwijzerzin
-      middelpt <- van + lengte * unitvec / 2  -
-        lengte * tan(pi/2 - bend) * orthovec / 2
-      bezierpunt <- van + lengte * unitvec / 2  +
-        lengte * tan(bend) * orthovec / 2
       if (van[1L] <= naar[1L]) {
         writeLines(paste0('<path id="L', id, '" d="M ', van[1L], ' ',
-                          van[2L], ' Q ', bezierpunt[1L], ' ', bezierpunt[2L],
+                          van[2L], ' Q ', control[1L], ' ', control[2L],
                           ' ', naar[1L], " ", naar[2L],
                           '" stroke-width="', strokeWidth, '" stroke="black" fill="none" ',
                           ifelse(dubbel,'marker-start="url(#sarrow)" ', ''),
                           'marker-end="url(#arrow)" />'), zz)
       } else {
         writeLines(paste0('<path d="M ', van[1L], ' ',
-                          van[2L], ' Q ', bezierpunt[1L], ' ', bezierpunt[2L],
+                          van[2L], ' Q ', control[1L], ' ', control[2L],
                           ' ', naar[1L], " ", naar[2L],
                           '" stroke-width="', strokeWidth, '" stroke="black" fill="none" ',
                           ifelse(dubbel,'marker-start="url(#sarrow)" ', ''),
                           'marker-end="url(#arrow)" />'), zz)
         writeLines(paste0('<path id="L', id, '" d="M ', naar[1L], ' ',
-                          naar[2L], ' Q ', bezierpunt[1L], ' ', bezierpunt[2L],
+                          naar[2L], ' Q ', control[1L], ' ', control[2L],
                           ' ', van[1L], " ", van[2L],
                           '" stroke-width="0" stroke="none" fill="none" />'),
                    zz)
       }
-      vantheta <- atan2(van[2] - middelpt[2], van[1] - middelpt[1])
-      naartheta <- atan2(naar[2] - middelpt[2], naar[1] - middelpt[1])
-      if (abs(naartheta-vantheta) > pi) {
-        if (vantheta < naartheta) {
-          vantheta <- vantheta + 2 * pi
-        } else {
-          naartheta <- naartheta + 2 * pi
-        }
-      }
-      theta <- (vantheta + naartheta) / 2
-      straal <- veclen(van - middelpt)
-      midden <- c(middelpt[1] + cos(theta) * straal,
-                  middelpt[2] + sin(theta) * straal)
+      midden <- 0.25 * (van + naar) + 0.5 * control
     }
     if (label != "") {
-      if (sloped_labels) {
+      if (sloped.labels) {
         writeLines(
-          c('<text font-size="', svgFontSize, '" text-anchor="middle">',
+          c(paste0('<text font-size="', svgFontSize, '" text-anchor="middle">'),
             paste0('<textPath xlink:href="#L', id, '" startOffset="50%">',
                    labele, '</textPath>'),
             '</text>'), zz)
@@ -265,7 +246,7 @@ lav_make_svg <- function(nodes_edges,
       }
     }
   }
-  plot_var <- function(waar, noderadius, label = "", side = "n", txtcex = 0.9) {
+  plot_var <- function(waar, noderadius, label = "", side = "n") {
     labele <- lav_format_label(label,
                                show = FALSE,
                                svgIdxFontSize = svgIdxFontSize,
@@ -298,7 +279,7 @@ lav_make_svg <- function(nodes_edges,
                         '</text>'), zz)
     }
   }
-  plot_node <- function(waar, tiepe, label = "", txtcex = 0.9) {
+  plot_node <- function(waar, tiepe, label = "") {
     labele <- lav_format_label(label,
                                show = FALSE,
                                svgIdxFontSize = svgIdxFontSize,
@@ -332,20 +313,17 @@ lav_make_svg <- function(nodes_edges,
       elems <- node_elements_svg(nodes$tiepe[naar], nodedist * noderadius,
                                  adrnaar, strokeWidth)
       adrnaar <- elems[[edges$naaranker[j]]]
-      if (edges$tiepe[j] != "~~" | edges$vananker[j] != edges$naaranker[j]) {
+      if (is.na(edges$controlpt.rij[j])) {
         plot_edge(adrvan, adrnaar, edges$label[j],
                   dubbel = (edges$tiepe[j] == "~~"),
                   below = edges$labelbelow[j], id = j)
       } else {
-        thetavan <- atan2(adrvan[2] - midxy[2], adrvan[1] - midxy[1])
-        thetanaar <- atan2(adrnaar[2] - midxy[2], adrnaar[1] - midxy[1])
-        deltatheta <- thetanaar - thetavan
-        if (deltatheta < 0) deltatheta <- deltatheta + 2 * pi
-        benddirection <- ifelse(deltatheta < pi, -1, 1)
+        controlpt <- nodedist * c(edges$controlpt.kol[j] + 1,
+                                  edges$controlpt.rij[j] + 1)
         plot_edge(adrvan, adrnaar, edges$label[j],
                   dubbel = (edges$tiepe[j] == "~~"),
                   below = edges$labelbelow[j],
-                  bend = benddirection * pi/4,
+                  control = controlpt,
                   id = j
         )
       }

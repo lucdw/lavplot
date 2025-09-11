@@ -19,15 +19,7 @@ plotted as covariance between the latent variables for the variance.}
 
 \value{
 A list with members nodes and edges, containing the necessary data to create
-a diagram. See section 'Details' above.
-}
-
-\description{
-Gets information from model necessary to produce a plot.
-}
-
-\details{
-The return value consists of a list of two data.frames:
+a diagram. The return value consists of a list of two data.frames:
 \enumerate{
 \item nodes
   \describe{
@@ -42,11 +34,6 @@ The return value consists of a list of two data.frames:
     \item{blok}{integer, level (0 if not a multilevel model)}
     \item{voorkeur}{character, preferred place in the plot, l(left), r(right)
     or m = (middle)}
-    \item{indicatoren}{integer, number of indicators for a latent variable or
-    a composite}
-    \item{rij}{place for the row where the node will be placed, initialized NA}
-    \item{kolom}{place for the column where the node will be placed,
-    initialized NA}
   }
 \item edges
   \describe{
@@ -55,28 +42,28 @@ The return value consists of a list of two data.frames:
     the model and the fixed value if present}
     \item{van}{integer, id of the starting node}
     \item{naar}{integer, id of the destination node}
-    \item{vananker}{character, anchor point for starting node, initialized NA}
-    \item{naaranker}{character, anchor point for destination node,
-    initialized NA}
     \item{tiepe}{character, like op in lavaan model, except (residual)
-    variance, coded here as '~~~'.}
-    \item{labelbelow}{logical, if label has to be positioned under the line,
-    initalized FALSE}
+      variance, coded here as '~~~'.}
   }
 }
 }
 
+\description{
+Gets information from model necessary to produce a plot.
+}
+
 \examples{
-model <- 'alfa  =~ 1 * x_1 + x_2 + x_3         # latent variable
+model <- 'alpha  =~ 1 * x_1 + x_2 + x_3        # latent variable
           beta <~ x_4 + x_5 + x_6              # composite
           gamma =~ 1 * x_7 + x_8 + x_9         # latent variable
           Xi =~ 1 * x_10 + x_11 + x_12 + x_13  # latent variable
           # regressions
-          Xi ~ v * alfa + t * beta + cc * 1
-          alfa ~ tt * beta + ss * gamma + yy * Theta_1
+          Xi ~ v * alpha + t * beta + cc * 1
+          alpha ~ tt * beta + ss * gamma + yy * Theta_1
           # variances and covariances
           x_2 ~~ cc_25 * x_5
           x_3 ~~ cc_36 * x_6
+          x_3 ~~ cc_34 * x_4
           gamma ~~ 0.55 * gamma
           '
 (test <- lav_get_model_info(model))

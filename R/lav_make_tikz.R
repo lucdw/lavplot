@@ -1,7 +1,24 @@
-lav_make_tikz <- function(nodes_edges,
+beziersq2beziersc <- function(x) {
+  # x contains the beziers points P1, P, P2 (P = control) for quadratic beziers
+  # x is a matrix with 2 rows and 3 columns
+  # returns rtval which contains P1, C1, C2, P2 so that the cubic beziers
+  # with control points C1 and C2 is as 'high' as the quadratic one
+  # rtval is a matrix with 2 rows and 4 columns
+  matrix(c(x[ , 1L], x[ , 1L] / 3 + 2 * x[ ,2L] / 3,
+         x[ , 3L] / 3 + 2 * x[ ,2L] / 3, x [ ,3L]), nrow = 2)
+}
+getcoord <- function(nodeid, anker, nodes, maxrij) {
+  nodenr <- which(nodes$id == nodeid)
+  middelpunt <- c(nodes$kolom[nodenr], maxrij - nodes$rij[nodenr])
+  delta <- switch(anker, n = c(0, 0.3), ne = c(0.3, 0.3), e = c(0.3, 0),
+                  se = c(0.3, -0.3), s = c(0, -0.3), sw = c(-0.3, -0.3),
+                  w = c(-0.3, 0), nw = c(-0.3, 0.3))
+  middelpunt + delta
+}
+lav_make_tikz <- function(nodes.edges,
                           outfile = "",
                           cex = 1.3,
-                          sloped_labels = TRUE,
+                          sloped.labels = TRUE,
                           standalone = FALSE,
                           mlovcolors = c("lightgreen", "lightblue")
                           ) {
@@ -12,10 +29,10 @@ lav_make_tikz <- function(nodes_edges,
     if (blk > 0L) return(gsub("_", "", paste0("B", blk, nm)))
     return(gsub("_", "", nm))
     }
-  mlrij <- nodes_edges$mlrij
-  if (is.null(mlrij)) stop("nodes_edges hasn't been processed by lav_position_nodes!")
-  nodes <- nodes_edges$nodes
-  edges <- nodes_edges$edges
+  mlrij <- nodes.edges$mlrij
+  if (is.null(mlrij)) stop("nodes.edges hasn't been processed by lav_position_nodes!")
+  nodes <- nodes.edges$nodes
+  edges <- nodes.edges$edges
   if (is.character(outfile)) {
     zz <- file(outfile, open = "w")
     closezz <- TRUE
@@ -37,7 +54,7 @@ lav_make_tikz <- function(nodes_edges,
     paste0("\\definecolor{wovcol}{rgb}{", wovcol, "}"),
     paste0("\\definecolor{bovcol}{rgb}{", bovcol, "}"),
     "\\tikzset{",
-    "bend angle=45,", ">=stealth,",
+    ">=stealth,",
     paste0("x={(", cex, "cm,0cm)}, y={(0cm,", cex, "cm)},"),
     paste0("lv/.style={circle, ", commstyle, ", thick},"),
     paste0("varlv/.style={circle, draw, minimum size=", round(4 * cex), "mm, semithick},"),
@@ -97,61 +114,34 @@ lav_make_tikz <- function(nodes_edges,
                          sep = ""), zz)
       }
     } else {
-      bending <- " "
-      anchorv <- anchorn <- ""
-      if (edges$tiepe[j] %in% c("=~", "<~")) {
-        edges$tiepe[j] <- "p"
-        if (nodes$voorkeur[van] %in% c("l", "r") ||
-             nodes$voorkeur[naar] %in% c("l", "r")) {
-        if ((nodes$kolom[van] <= 1L + varlv ||           # composite left
-             nodes$kolom[naar] >= maxcol - varlv)) {     # LV right
-          anchorv <- ".east"
-          anchorn <- ".west"
-        } else if (nodes$kolom[naar] <= 1L + varlv ||        # LV left
-                    nodes$kolom[van] >= maxcol - varlv) {    # composite right
-          anchorv <- ".west"
-          anchorn <- ".east"
-        }} else if (nodes$voorkeur[van] %in% c("m", "b") ||
-                    nodes$voorkeur[naar] %in% c("m", "b")) {
-          if (nodes$rij[van] <= 1L + varlv ||           # composite left
-                   nodes$rij[naar] >= maxrij - varlv) { # LV right
-          anchorv <- ".south"
-          anchorn <- ".north"
-        } else if (nodes$rij[naar] <= 1L + varlv ||       # LV left
-                   nodes$rij[van] >= maxrij - varlv) {    # composite right
-          anchorv <- ".north"
-          anchorn <- ".south"
-        }}
-      } else if (edges$tiepe[j] == "~~")  {
-        if (nodes$kolom[van] == nodes$kolom[naar] && nodes$kolom[van] %in% c(1L, maxcol)) {
-          if (nodes$kolom[van] == 1L) anchorv <- anchorn <- ".west"
-          if (nodes$kolom[van] == maxcol) anchorv <- anchorn <- ".east"
-          if ((nodes$kolom[van] == 1L) == (nodes$rij[van] < nodes$rij[naar])) {
-            bending <- " [bend right] "
-          } else {
-            bending <- " [bend left] "
-          }
-        } else if (nodes$rij[van] == nodes$rij[naar] &&
-                  nodes$rij[van] %in% c(1L, maxrij)) {
-          if (nodes$rij[van] == 1) anchorv <- anchorn <- ".north"
-          if (nodes$rij[van] == maxcol) anchorv <- anchorn <- ".south"
-          if ((nodes$rij[van] < 3L) == (nodes$kolom[van] < nodes$kolom[naar])) {
-            bending <- " [bend left] "
-          } else {
-            bending <- " [bend right] "
-          }
-        }
+      anchorv <- switch(edges$vananker[j],
+                        n = ".north", e = ".east", s = ".south", w = ".west")
+      anchorn <- switch(edges$naaranker[j],
+                        n = ".north", e = ".east", s = ".south", w = ".west")
+      if (is.na(edges$controlpt.kol[j])) {
+        pathtype <- " -- "
+      } else {
+        vanadr <- getcoord(edges$van[j], edges$vananker[j], nodes, maxrij)
+        naaradr <- getcoord(edges$naar[j], edges$naaranker[j], nodes, maxrij)
+        controlq <- c(edges$controlpt.kol[j], maxrij - edges$controlpt.rij[j])
+        beziersc <- beziersq2beziersc(
+          matrix(c(vanadr, controlq, naaradr), nrow = 2L)
+        )
+        pathtype <- paste0(" .. controls (", beziersc[1L, 2L] , ",",
+                           beziersc[2L, 2L], ") and (", beziersc[1L, 3L] , ",",
+                           beziersc[2L, 3L], ") .. ")
       }
       thelabel <- lav_format_label(edges$label[j], show = FALSE)$tikz
       if (thelabel != "") {
-        thelabel <- paste0("node[" ,
+        thelabel <- paste0("node[pos=0.5,",
                            ifelse(edges$labelbelow[j], "below", "above"),
-                           ifelse(sloped_labels, ",sloped", ""),
+                           ifelse(sloped.labels, ",sloped", ""),
                            "] {", thelabel, "} ")
       }
       pijl <- ifelse(edges$tiepe[j] %in% c("~~", "~~~"), "<->", "->")
-      writeLines(paste("\\path[", pijl, "] (", vannaam, anchorv, ") edge",
-                bending, thelabel, "(", naarnaam, anchorn, ");", sep = ""), zz)
+      writeLines(paste0("\\draw[", pijl, "] (", vannaam, anchorv, ")",
+                pathtype, "(", naarnaam, anchorn, ") ",
+                thelabel, ";", sep = ""), zz)
     }
   }
   writeLines("\\end{tikzpicture}", zz)

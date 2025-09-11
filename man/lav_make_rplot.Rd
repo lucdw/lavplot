@@ -2,16 +2,16 @@
 \alias{lav_make_rplot}
 \title{Plots a diagram.}
 \usage{
-lav_make_rplot(nodes_edges,
-               sloped_labels = TRUE,
+lav_make_rplot(nodes.edges,
+               sloped.labels = TRUE,
                outfile = "",
                addgrid = TRUE,
                mlovcolors = c("lightgreen", "lightblue")
                )
 }
 \arguments{
-\item{nodes_edges}{The data.frames and mlrij as returned from position_nodes}
-\item{sloped_labels}{Logical, sloped labels above (or under) the edges}
+\item{nodes.edges}{The data.frames and mlrij as returned from position_nodes}
+\item{sloped.labels}{Logical, sloped labels above (or under) the edges}
 \item{outfile}{Character string naming the file to store the diagram in PNG or
   NA to show the plot in R.}
 \item{addgrid}{Logical, add a grid with indicated 'positions' to the graph?}
@@ -44,7 +44,7 @@ modelml <- '
   '
 test <- lav_get_model_info(modelml)
 test <- lav_position_nodes(test)
-lav_make_rplot(test, sloped_labels = FALSE, addgrid = FALSE)
+lav_make_rplot(test, sloped.labels = FALSE, addgrid = FALSE)
 \dontrun{
 # example where plot is stored in a PNG file
 lav_make_rplot(test, outfile="demo_rplot.png")

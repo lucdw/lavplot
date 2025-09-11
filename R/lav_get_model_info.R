@@ -43,9 +43,6 @@ lav_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
     # cv: composite; wov = within; bov = between; const = intercept
     blok = integer(maxnodes),
     voorkeur = character(maxnodes), # l = links, r = rechts, m = midden
-    indicatoren = integer(maxnodes),
-    rij = rep(NA_integer_, maxnodes),
-    kolom = rep(NA_integer_, maxnodes),
     tmp = character(maxnodes)
   )
   edges <- data.frame(
@@ -53,10 +50,7 @@ lav_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
     label = character(maxedges),
     van = integer(maxedges),
     naar = integer(maxedges),
-    vananker = rep(NA_character_, maxedges),
-    naaranker = rep(NA_character_, maxedges),
-    tiepe = character(maxedges), # lavaan operator, behalve ~~ self -> "~~~"
-    labelbelow = rep(FALSE, maxedges)
+    tiepe = character(maxedges) # lavaan operator, behalve ~~ self -> "~~~"
   )
   curnode <- 0L
   curedge <- 0L
@@ -298,9 +292,9 @@ lav_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
     #       wijzigen covarianties
     for (j1 in seq_along(welke)) {
       for (j2 in seq_along(welke)) {
-        if (j1 != j2 && any(edges$tiepe == "~~" & 
+        if (j1 != j2 && any(edges$tiepe == "~~" &
         edges$van == lvnodes[j1] & edges$naar == lvnodes[j2])) {
-          edg <- which(edges$tiepe == "~~" &  
+          edg <- which(edges$tiepe == "~~" &
                       edges$van == lvnodes[j1] & edges$naar == lvnodes[j2])[[1L]]
           edges$van[edg] <- varlvnodes[j1]
           edges$naar[edg] <- varlvnodes[j2]
@@ -309,11 +303,6 @@ lav_get_model_info <- function(model = NULL, infile = NULL, varlv = FALSE) {
     }
   }
 
-  latents <- nodes$id[nodes$tiepe == "lv" | nodes$tiepe == "cv"]
-  for (j in latents) {
-    nodes$indicatoren[j] <- sum(tbl$lhs == nodes$naam[j] &
-                                  (tbl$op == "=~" | tbl$op == "<~"))
-  }
   nodes$tmp <- NULL
   nodes$voorkeur[nodes$voorkeur == "" & nodes$tiepe == "lv"] <- "m"
   nodes$voorkeur[nodes$voorkeur == "" & nodes$tiepe == "cv"] <- "m"

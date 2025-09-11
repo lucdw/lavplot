@@ -8,7 +8,8 @@ lavplot(model = NULL,
         varlv = FALSE,
         placenodes = NULL,
         edgelabelsbelow = NULL,
-        common_opts = list(sloped_labels = TRUE,
+        group.covar.indicators = FALSE,
+        common.opts = list(sloped.labels = TRUE,
                            mlovcolors = c("lightgreen", "lightblue")),
         rplot = list(outfile = "",
                      addgrid = TRUE),
@@ -27,7 +28,8 @@ lav_plot(model = NULL,
         varlv = FALSE,
         placenodes = NULL,
         edgelabelsbelow = NULL,
-        common_opts = list(sloped_labels = TRUE,
+        group.covar.indicators = FALSE,
+        common.opts = list(sloped.labels = TRUE,
                            mlovcolors = c("lightgreen", "lightblue")),
         rplot = list(outfile = "",
                      addgrid = TRUE),
@@ -56,7 +58,10 @@ plotted as covariance between the latent variables for the variance.}
 \item{placenodes}{optional list with members nodename = c(row, column),
 row and colom don't have to be integers.}
 \item{edgelabelsbelow}{optional list with members c(nodename1, nodename2).}
-\item{common_opts}{options common to the three types of generated plots.}
+\item{group.covar.indicators}{logical, should items with indicators which
+have an explicit covariance link be placed in the same group, i.e. forced
+to be on the same side of the diagram?}
+\item{common.opts}{options common to the three types of generated plots.}
 \item{rplot}{options for creating Rplot, see \code{lav_make_rplot}.}
 \item{tikz}{options for creating code for tikz plot, see \code{lav_make_tikz}.}
 \item{svg}{options for creating code for svg plot, see \code{lav_make_svg}.}
@@ -143,7 +148,7 @@ tmp <- readLines("tmp.tex")
 writeLines(tmp, zz)
 writeLines(" ", zz)
 lavplot(modelml,
-        common_opts = list(sloped_labels = FALSE,
+        common.opts = list(sloped.labels = FALSE,
                            mlovcolors = c("lightgreen", "lightblue")),
         tikz = list(outfile = "tmp.tex", cex = 1.4)
         )
@@ -180,7 +185,7 @@ tmp <- readLines("tmp.svg")
 writeLines(tmp, zz)
 writeLines("<br />", zz)
 lavplot(modelml,
-        common_opts = list(sloped_labels = FALSE),
+        common.opts = list(sloped.labels = FALSE),
         tikz = list(outfile = "tmp.svg")
         )
 tmp <- readLines("tmp.svg")

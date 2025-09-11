@@ -2,9 +2,9 @@
 \alias{lav_make_svg}
 \title{Creates code to show a diagram in svg format.}
 \usage{
-lav_make_svg(nodes_edges,
+lav_make_svg(nodes.edges,
              outfile = "",
-             sloped_labels = TRUE,
+             sloped.labels = TRUE,
              standalone = FALSE,
              strokeWidth = 2L,
              svgFontSize = 20L,
@@ -14,10 +14,10 @@ lav_make_svg(nodes_edges,
              )
 }
 \arguments{
-\item{nodes_edges}{The list with nodes, edges and mlrij as returned from
+\item{nodes.edges}{The list with nodes, edges and mlrij as returned from
     lav_position_nodes}
 \item{outfile}{A connection or a character string, the file to store the code.}
-\item{sloped_labels}{logical, sloped labels for the edges}
+\item{sloped.labels}{logical, sloped labels for the edges}
 \item{standalone}{logical, add code to make a html file with svg in it? If
 FALSE (default) the outfile - if specified - must have a file extension
 'svg', if TRUE the file extension must be 'htm' or 'html'.}
@@ -55,7 +55,7 @@ modelml <- '
 testml <- lav_get_model_info(modelml)
 testml <- lav_position_nodes(testml)
 # in the line hereunder no file is given, so output to R console
-lav_make_svg(testml, sloped_labels = FALSE, standalone = TRUE)
+lav_make_svg(testml, sloped.labels = FALSE, standalone = TRUE)
 \dontrun{
 # example creating html file with the above diagrams
 zz <- file("demosvg.html", open="w")
@@ -69,7 +69,7 @@ lav_make_svg(test, outfile = "temp.svg")
 tmp <- readLines("tmp.svg")
 writeLines(tmp, zz)
 writeLines("<br />", zz)
-lav_make_svg(testml, outfile = "temp.svg", sloped_labels = FALSE,
+lav_make_svg(testml, outfile = "temp.svg", sloped.labels = FALSE,
              standalone = TRUE)
 tmp <- readLines("tmp.svg")
 writeLines(tmp, zz)

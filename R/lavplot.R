@@ -4,7 +4,8 @@ lavplot <- lav_plot <- function(
   varlv = FALSE,
   placenodes = NULL,
   edgelabelsbelow = NULL,
-  common_opts = list(sloped_labels = TRUE,
+  group.covar.indicators = FALSE,
+  common.opts = list(sloped.labels = TRUE,
                      mlovcolors = c("lightgreen", "lightblue")),
   rplot = list(outfile = "",
                addgrid = TRUE),
@@ -23,19 +24,20 @@ lavplot <- lav_plot <- function(
                             varlv = varlv)
   tmp <- lav_position_nodes(tmp,
                             placenodes = placenodes,
-                            edgelabelsbelow = edgelabelsbelow)
+                            edgelabelsbelow = edgelabelsbelow,
+                            group.covar.indicators = group.covar.indicators)
   mc <- match.call()
   create_rplot <- !is.null(mc$rplot) || (is.null(mc$tikz) && is.null(mc$svg))
   if (create_rplot)
-    do.call(lav_make_rplot, c(list(nodes_edges = tmp),
-                                   common_opts,
+    do.call(lav_make_rplot, c(list(nodes.edges = tmp),
+                                   common.opts,
                                    rplot))
   if (!is.null(mc$tikz))
-    do.call(lav_make_tikz, c(list(nodes_edges = tmp),
-                             common_opts,
+    do.call(lav_make_tikz, c(list(nodes.edges = tmp),
+                             common.opts,
                              tikz))
   if (!is.null(mc$svg))
-    do.call(lav_make_svg, c(list(nodes_edges = tmp),
-                             common_opts,
+    do.call(lav_make_svg, c(list(nodes.edges = tmp),
+                             common.opts,
                              svg))
 }

@@ -2,20 +2,20 @@
 \alias{lav_make_tikz}
 \title{Creates code to show a diagram in tikz format.}
 \usage{
-lav_make_tikz(nodes_edges,
+lav_make_tikz(nodes.edges,
               outfile = "",
               cex = 1.3,
-              sloped_labels = TRUE,
+              sloped.labels = TRUE,
               standalone = FALSE,
               mlovcolors = c("lightgreen", "lightblue")
               )
 }
 \arguments{
-\item{nodes_edges}{The list with nodes, edges and mlrij as returned from
+\item{nodes.edges}{The list with nodes, edges and mlrij as returned from
     lav_position_nodes}
 \item{outfile}{A connection or a character string, the file to store the code.}
 \item{cex}{Minimum distance between nodes in cm.}
-\item{sloped_labels}{logical, sloped labels for the edges}
+\item{sloped.labels}{logical, sloped labels for the edges}
 \item{standalone}{logical, add code to make teX file standalone?}
 \item{mlovcolors}{Array of two colors for distinguishing ov nodes with same name
 between the levels in a  multilevel model.}
@@ -48,7 +48,7 @@ modelml <- '
 testml <- lav_get_model_info(modelml)
 testml <- lav_position_nodes(testml)
 # in the line hereunder no file is given, so output to R console
-lav_make_tikz(testml, cex = 1.4, sloped_labels = FALSE, standalone = TRUE)
+lav_make_tikz(testml, cex = 1.4, sloped.labels = FALSE, standalone = TRUE)
 \dontrun{
 # example creating tex file with the above diagrams
 zz <- file("testtikz.tex", open="w")
@@ -68,7 +68,7 @@ lav_make_tikz(test, outfile = "temp.tex")
 tmp <- readLines("tmp.tex")
 writeLines(tmp, zz)
 writeLines(" ", zz)
-lav_make_tikz(testml, outfile = "temp.tex", cex = 1.4, sloped_labels = FALSE)
+lav_make_tikz(testml, outfile = "temp.tex", cex = 1.4, sloped.labels = FALSE)
 tmp <- readLines("tmp.tex")
 writeLines(tmp, zz)
 writeLines("\\end{document}", zz)

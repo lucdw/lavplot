@@ -1,6 +1,33 @@
+beziers <- function(x, y = NULL, col = par("col"), lwd = par("lwd")) {
+  if (is.null(y)) {
+    if (dim(x)[1L] == 2) {
+      Px <- x[1L, ]
+      Py <- x[2L, ]
+    } else {
+      Px <- x[, 1L]
+      Py <- x[, 2L]
+    }
+  }
+  else {
+    Px <- x
+    Py <- y
+  }
+  stopifnot(length(Px) == length(Py))
+  t <- seq(0, 1, length.out = 50)
+  if (length(Px) == 3L) {
+    PuntenX <- (1 - t) ^ 2 * Px[1] + 2 * (1-t) * t * Px[2] + t ^ 2 * Px[3]
+    PuntenY <- (1 - t) ^ 2 * Py[1] + 2 * (1-t) * t * Py[2] + t ^ 2 * Py[3]
+  } else {
+    PuntenX <- (1 - t) ^ 3 * Px[1] + 3 * t * (1 - t) ^ 2 * Px[2] +
+      3 * t ^ 2 * (1 - t) * Px[3] + t ^ 3 * Px[4]
+    PuntenY <- (1 - t) ^ 3 * Py[1] + 3 * t * (1 - t) ^ 2 * Py[2] +
+      3 * t ^ 2 * (1 - t) * Py[3] + t ^ 3 * Py[4]
+  }
+  lines(PuntenX, PuntenY, col = col, lwd = lwd)
+}
 
-lav_make_rplot <- function(nodes_edges,
-                           sloped_labels = TRUE,
+lav_make_rplot <- function(nodes.edges,
+                           sloped.labels = TRUE,
                            outfile = "",
                            addgrid = TRUE,
                            mlovcolors = c("lightgreen", "lightblue")
@@ -71,7 +98,8 @@ lav_make_rplot <- function(nodes_edges,
     c(cos(angle)*vec[1]+sin(angle)*vec[2],
       -sin(angle)*vec[1]+cos(angle)*vec[2])
   }
-  plot_arrow <- function(tip, unitvec) {
+  plot_arrow <- function(tip, dirvec) {
+    unitvec <- dirvec / sqrt(sum(dirvec ^ 2))
     arrowangle <- pi * 25 / 180
     arrowinset <- 0.4
     args <- rbind(tip,
@@ -81,43 +109,25 @@ lav_make_rplot <- function(nodes_edges,
     polygon(args, col = "black", border = NA)
   }
   plot_edge <- function(van, naar, label = "", dubbel = FALSE,
-                        bend = 0, below = FALSE, txtcex = 0.9) {
+                        control = NA_real_, below = FALSE, txtcex = 0.9) {
     labele <- lav_format_label(label, show=FALSE)$r
-    unitvec <- (naar - van) / sqrt(sum((naar - van) * (naar - van)))
+    dirvec <- naar - van
     theta <- atan2(naar[2] - van[2], naar[1] - van[1])
-    srt <- ifelse(sloped_labels, 180 * theta / pi, 0)
+    srt <- ifelse(sloped.labels, 180 * theta / pi, 0)
     if (srt > 90) srt <- srt - 180
     if (srt < -90) srt <- srt + 180
-    if (bend == 0) {
+    if (is.na(control[1L])) {
       args <- rbind(van, naar)
       lines(args, lwd = 2)
-      plot_arrow(naar, unitvec)
-      if (dubbel) plot_arrow(van, -unitvec)
+      plot_arrow(naar, dirvec)
+      if (dubbel) plot_arrow(van, -dirvec)
       midden <- (van + naar) * 0.5
     } else {
-      # gebogen lijn (cirkelsegment) door van en naar met raaklijn in
-      # van die hoek van bend °  maakt met unitvec
-      lengte <- sqrt(sum((naar - van) * (naar - van)))
-      orthovec <- c(unitvec[2], -unitvec[1])
-      middelpt <- van + lengte * unitvec / 2  +
-        lengte * tan(pi/2 - bend) * orthovec / 2
-      vantheta <- atan2(van[2] - middelpt[2], van[1] - middelpt[1])
-      naartheta <- atan2(naar[2] - middelpt[2], naar[1] - middelpt[1])
-      if (abs(naartheta-vantheta) > pi) {
-        if (vantheta < naartheta) {
-          vantheta <- vantheta + 2 * pi
-        } else {
-          naartheta <- naartheta + 2 * pi
-        }
-      }
-      thetas <- seq(vantheta, naartheta, length.out = 40)
-      straal <- veclen(van - middelpt)
-      xs <- middelpt[1] + cos(thetas) * straal
-      ys <- middelpt[2] + sin(thetas) * straal
-      midden <- c(xs[20],ys[20])
-      lines(xs, ys)
-      plot_arrow(naar, vecrotate(unitvec, bend))
-      if (dubbel) plot_arrow(van, vecrotate(-unitvec, -bend))
+      # gebogen lijn (quadratic beziers)
+      beziers(rbind(van, control, naar), lwd = 2)
+      midden <- (van + naar) / 4 + control / 2
+      plot_arrow(naar, naar - control)
+      if (dubbel) plot_arrow(van, van - control)
     }
     if (label != "") {
       if (below) {
@@ -185,11 +195,11 @@ lav_make_rplot <- function(nodes_edges,
     polygon(x, y, col = elems$boxcol, lwd = 1)
     text(waar[1L], waar[2L], labele, adj = 0.5, cex = txtcex)
   }
-  mlrij <- nodes_edges$mlrij
+  mlrij <- nodes.edges$mlrij
   if (is.null(mlrij))
-    stop("nodes_edges hasn't been processed by lav_position_nodes!")
-  nodes <- nodes_edges$nodes
-  edges <- nodes_edges$edges
+    stop("nodes.edges hasn't been processed by lav_position_nodes!")
+  nodes <- nodes.edges$nodes
+  edges <- nodes.edges$edges
   noderadius <- 0.3
   arrowlength <- noderadius / 3
   rijen <- max(nodes$rij)
@@ -218,18 +228,17 @@ lav_make_rplot <- function(nodes_edges,
       adrnaar <- c(nodes$kolom[naar], rijen - nodes$rij[naar] + 1)
       elems <- node_elements(nodes$tiepe[naar], noderadius)
       adrnaar <- adrnaar + elems[[edges$naaranker[j]]]
-      if (edges$tiepe[j] != "~~" || edges$vananker[j] != edges$naaranker[j]) {
-        plot_edge(adrvan, adrnaar, edges$label[j], dubbel = FALSE,
+      if (is.na(edges$controlpt.rij[j])) {
+        plot_edge(adrvan, adrnaar, edges$label[j],
+                  dubbel = (edges$tiepe[j] == "~~"),
                   below = edges$labelbelow[j])
       } else {
-        thetavan <- atan2(adrvan[2] - midxy[2], adrvan[1] - midxy[1])
-        thetanaar <- atan2(adrnaar[2] - midxy[2], adrnaar[1] - midxy[1])
-        deltatheta <- thetanaar - thetavan
-        if (deltatheta < 0) deltatheta <- deltatheta + 2 * pi
-        benddirection <- ifelse(deltatheta < pi, -1, 1)
-        plot_edge(adrvan, adrnaar, edges$label[j], dubbel = TRUE,
+        controlpt <- c(edges$controlpt.kol[j],
+                       rijen - edges$controlpt.rij[j] + 1)
+        plot_edge(adrvan, adrnaar, edges$label[j],
+                  dubbel = (edges$tiepe[j] == "~~"),
                   below = edges$labelbelow[j],
-                  bend = benddirection * pi/4
+                  control = controlpt
                   )
       }
     } else {

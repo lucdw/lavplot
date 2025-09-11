@@ -1,3 +1,14 @@
+BeziersControlPunt <- function(van, naar, wvannaar, maxrij, maxcol) {
+  dif <- (abs(van[1L] - naar[1L]) + abs(van[2L] - naar[2L]) - 1) /
+    (maxrij + maxcol - 2)
+  p <- switch(wvannaar,
+              ne = , en = c(1, maxcol) + c(-dif, dif),
+              nw = , wn = c(1, 1) + c(-dif, -dif),
+              se = , es = c(maxrij, maxcol) + c(dif, dif),
+              sw = , ws = c(maxrij, 1) + c(dif, -dif)
+  )
+  2 * (p - 0.25 * (van + naar))
+}
 veclen <- function(x) sqrt(sum(x*x))
 delta_nodes <- function(node1, node2) {
   if (any(is.na(node2))) return(-1)
@@ -8,7 +19,8 @@ delta_node_edge <- function(edgevan, edgenaar, node) {
   van <- edgevan - node
   naar <- edgenaar - node
   edgevec <- edgevan - edgenaar
-  if (sum(van * edgevec)*sum(naar*edgevec) >= 0) { #loodlijn niet op lijnstuk
+  if (sum(van * edgevec) * sum(naar * edgevec) >= 0) {
+    # loodlijn niet op lijnstuk
     return(min(veclen(van), veclen(naar)))
   }
   return(veclen(van) *
@@ -180,12 +192,20 @@ complete_anchors <- function(nodes, edges) {
   }
   edges
 }
-lav_position_nodes <- function(nodes_edges,
+lav_position_nodes <- function(nodes.edges,
                                placenodes = NULL,
-                               edgelabelsbelow = NULL) {
+                               edgelabelsbelow = NULL,
+                               group.covar.indicators = FALSE) {
   #### lav_position_nodes MAIN ####
-  nodes <- nodes_edges$nodes
-  edges <- nodes_edges$edges
+  nodes <- nodes.edges$nodes
+  nodes$rij <- NA_integer_
+  nodes$kolom <- NA_integer_
+  edges <- nodes.edges$edges
+  edges$vananker <- NA_character_
+  edges$naaranker <- NA_character_
+  edges$controlpt.kol <- NA_real_
+  edges$controlpt.rij <- NA_real_
+  edges$labelbelow <- FALSE
   if (length(nodes$rij) == 1L) { # Only 1 node !
     nodes$rij[1L] <- 1L
     nodes$kolom[1L] <- 1L
@@ -228,15 +248,17 @@ lav_position_nodes <- function(nodes_edges,
         nodes$sidegroup[k] <- nodes$sidegroup[structnodes[jj]]
         next
       }
-      if (any(outer(structnodeindicators[[j]], structnodeindicators[[jj]],
-                    function(ind1, ind2) {
-                      sapply(seq_along(ind1), function(i) {
-                      length(edges$id[edges$van == ind1[i] & edges$naar == ind2[i]]) +
-                      length(edges$id[edges$naar == ind1[i] & edges$van == ind2[i]]) >
-                        0L
-                        })
-                    }))) {
-        nodes$sidegroup[k] <- nodes$sidegroup[structnodes[jj]]
+      if (group.covar.indicators) {
+        if (any(outer(structnodeindicators[[j]], structnodeindicators[[jj]],
+            function(ind1, ind2) {
+              sapply(seq_along(ind1), function(i) {
+              length(edges$id[edges$van == ind1[i] & edges$naar == ind2[i]]) +
+              length(edges$id[edges$naar == ind1[i] & edges$van == ind2[i]]) >
+              0L
+              })
+        }))) {
+          nodes$sidegroup[k] <- nodes$sidegroup[structnodes[jj]]
+        }
       }
       if (nodes$sidegroup[k] > 0L) break
     }
@@ -388,8 +410,15 @@ lav_position_nodes <- function(nodes_edges,
     nodes$rij[j] <- x[1L]
     nodes$kolom[j] <- x[2L]
   }
+  #### adapt rij, kolom to be 1: ... ####
+  minrij <- min(nodes$rij)
+  if (minrij != 1L) nodes$rij <- nodes$rij - minrij + 1L
+  maxrij <- max(nodes$rij)
+  minkol <- min(nodes$kolom)
+  if (minkol != 1L) nodes$kolom <- nodes$kolom - minkol + 1L
+  maxkol <- max(nodes$kolom)
   #### adapt anchors for covariances in first or last rows/columns ####
-  adaptableedges <- which(edges$op == "~~" & edges$van != edges$naar)
+  adaptableedges <- which(edges$tiepe == "~~" & edges$van != edges$naar)
   for (i in adaptableedges) {
     nodevan <- which(nodes$id == edges$van[i])
     nodenaar <- which(nodes$id == edges$naar[i])
@@ -397,25 +426,102 @@ lav_position_nodes <- function(nodes_edges,
       if (nodes$rij[nodevan] == 1L) {
         edges$vananker[i] <- "n"
         edges$naaranker[i] <- "n"
+        edges$controlpt.kol[i] <- (nodes$kolom[nodevan] + nodes$kolom[nodenaar]) / 2
+        edges$controlpt.rij[i] <- nodes$rij[nodevan] - 0.3 -
+          abs(nodes$kolom[nodevan] - nodes$kolom[nodenaar]) / 2
       } else {
         edges$vananker[i] <- "s"
         edges$naaranker[i] <- "s"
+        edges$controlpt.kol[i] <- (nodes$kolom[nodevan] + nodes$kolom[nodenaar]) / 2
+        edges$controlpt.rij[i] <- nodes$rij[nodevan] + 0.3 +
+          abs(nodes$kolom[nodevan] - nodes$kolom[nodenaar]) / 2
       }
     } else if (nodes$kolom[nodevan] == nodes$kolom[nodenaar]) {
       if (nodes$kolom[nodevan] == 1L) {
         edges$vananker[i] <- "w"
         edges$naaranker[i] <- "w"
+        edges$controlpt.rij[i] <- (nodes$rij[nodevan] + nodes$rij[nodenaar]) / 2
+        edges$controlpt.kol[i] <- nodes$kolom[nodevan] - 0.3 -
+          abs(nodes$rij[nodevan] - nodes$rij[nodenaar]) / 2
       } else {
         edges$vananker[i] <- "e"
         edges$naaranker[i] <- "e"
+        edges$controlpt.rij[i] <- (nodes$rij[nodevan] + nodes$rij[nodenaar]) / 2
+        edges$controlpt.kol[i] <- nodes$kolom[nodevan] + 0.3 +
+          abs(nodes$rij[nodevan] - nodes$rij[nodenaar]) / 2
       }
+    } else {
+      if (nodes$kolom[nodevan] == 1L) {
+        wvan <- "w"
+      } else if (nodes$kolom[nodevan] == maxkol) {
+        wvan <- "e"
+      } else if (nodes$rij[nodevan] == 1L) {
+        wvan <- "n"
+      } else {
+        wvan <- "s"
+      }
+      if (nodes$kolom[nodenaar] == 1L) {
+        wnaar <- "w"
+      } else if (nodes$kolom[nodenaar] == maxkol) {
+        wnaar <- "e"
+      } else if (nodes$rij[nodenaar] == 1L) {
+        wnaar <- "n"
+      } else {
+        wnaar <- "s"
+      }
+      wvannaar <- paste0(wvan, wnaar)
+      edges$vananker[i] <-
+        switch(wvannaar,
+               nn = , ne = , nw = "n",
+               ns = ifelse(nodes$kolom(nodevan) < nodes$kolom(nodenaar), "e", "w"),
+               ss = , se = , sw = "s",
+               sn = ifelse(nodes$kolom(nodevan) < nodes$kolom(nodenaar), "e", "w"),
+               ww = , wn = , ws = "w",
+               we = ifelse(nodes$rij(nodevan) < nodes$rij(nodenaar), "s", "n"),
+               ee = , en = , es = "e",
+               ew = ifelse(nodes$rij(nodevan) < nodes$rij(nodenaar), "n", "s")
+        )
+      edges$naaranker[i] <-
+        switch(wvannaar,
+               nn = , en = , wn = "n",
+               sn = "s",
+               ss = , es = , ws = "s",
+               ns = "n",
+               ww = , nw = , sw = "w",
+               ew = "e",
+               ee = , ne = , se = "e",
+               we = "w"
+        )
+      edges$controlpt.kol[i] <-
+        switch(wvannaar,
+               nn = , ss = (nodes$kolom[nodevan] + nodes$kolom[nodenaar]) / 2,
+               ee = nodes$kolom[nodevan] + 0.3 +
+                 abs(nodes$rij[nodevan] - nodes$rij[nodenaar]) / 2,
+               ww = nodes$kolom[nodevan] - 0.3 -
+                 abs(nodes$rij[nodevan] - nodes$rij[nodenaar]) / 2,
+               ns = , sn = nodes$kolom[nodenaar],
+               we = , ew = nodes$kolom[nodevan],
+               BeziersControlPunt(
+                 c(nodes$rij[nodevan], nodes$kolom[nodevan]),
+                 c(nodes$rij[nodenaar], nodes$kolom[nodenaar]),
+                 wvannaar, maxrij, maxkol)[2L]
+        )
+      edges$controlpt.rij[i] <-
+        switch(wvannaar,
+               nn =  nodes$rij[nodevan] - 0.3 -
+                 abs(nodes$kolom[nodevan] - nodes$kolom[nodenaar]) / 2,
+               ss =  nodes$rij[nodevan] + 0.3 +
+                 abs(nodes$kolom[nodevan] - nodes$kolom[nodenaar]) / 2,
+               ee = , ww = (nodes$rij[nodevan] + nodes$rij[nodenaar]) / 2,
+               ew = , we = nodes$rij[nodenaar],
+               ns = , sn = nodes$rij[nodevan],
+               BeziersControlPunt(
+                 c(nodes$rij[nodevan], nodes$kolom[nodevan]),
+                 c(nodes$rij[nodenaar], nodes$kolom[nodenaar]),
+                 wvannaar, maxrij, maxkol)[1L]
+               )
     }
   }
-  #### adapt rij, kolom to be 1: ... ####
-  minrij <- min(nodes$rij)
-  if (minrij != 1L) nodes$rij <- nodes$rij - minrij + 1L
-  minkol <- min(nodes$kolom)
-  if (minkol != 1L) nodes$kolom <- nodes$kolom - minkol + 1L
   #### fill anchors structural edges ####
   edges <- complete_anchors(nodes, edges)
   #### place nodes demanded by user ? ####
