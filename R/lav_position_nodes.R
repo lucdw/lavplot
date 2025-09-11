@@ -423,7 +423,7 @@ lav_position_nodes <- function(nodes.edges,
     nodevan <- which(nodes$id == edges$van[i])
     nodenaar <- which(nodes$id == edges$naar[i])
     if (nodes$rij[nodevan] == nodes$rij[nodenaar]) {
-      if (nodes$rij[nodevan] == 1L) {
+      if (nodes$rij[nodevan] <= 2) {
         edges$vananker[i] <- "n"
         edges$naaranker[i] <- "n"
         edges$controlpt.kol[i] <- (nodes$kolom[nodevan] + nodes$kolom[nodenaar]) / 2
@@ -437,7 +437,7 @@ lav_position_nodes <- function(nodes.edges,
           abs(nodes$kolom[nodevan] - nodes$kolom[nodenaar]) / 2
       }
     } else if (nodes$kolom[nodevan] == nodes$kolom[nodenaar]) {
-      if (nodes$kolom[nodevan] == 1L) {
+      if (nodes$kolom[nodevan] <= 2) {
         edges$vananker[i] <- "w"
         edges$naaranker[i] <- "w"
         edges$controlpt.rij[i] <- (nodes$rij[nodevan] + nodes$rij[nodenaar]) / 2
@@ -451,20 +451,20 @@ lav_position_nodes <- function(nodes.edges,
           abs(nodes$rij[nodevan] - nodes$rij[nodenaar]) / 2
       }
     } else {
-      if (nodes$kolom[nodevan] == 1L) {
+      if (nodes$kolom[nodevan] <= 2L) {
         wvan <- "w"
       } else if (nodes$kolom[nodevan] == maxkol) {
         wvan <- "e"
-      } else if (nodes$rij[nodevan] == 1L) {
+      } else if (nodes$rij[nodevan] <= 2L) {
         wvan <- "n"
       } else {
         wvan <- "s"
       }
-      if (nodes$kolom[nodenaar] == 1L) {
+      if (nodes$kolom[nodenaar] <= 2L) {
         wnaar <- "w"
       } else if (nodes$kolom[nodenaar] == maxkol) {
         wnaar <- "e"
-      } else if (nodes$rij[nodenaar] == 1L) {
+      } else if (nodes$rij[nodenaar] <= 2L) {
         wnaar <- "n"
       } else {
         wnaar <- "s"
