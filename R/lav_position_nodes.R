@@ -15,20 +15,73 @@ delta_nodes <- function(node1, node2) {
   delta <- node2 - node1
   veclen(delta)
 }
-delta_node_edge <- function(edgevan, edgenaar, node) {
+distance_node_edge_ok <- function(edgevan, edgenaar, node) {
+  # coordinates edgevan, edgenaar and node are integer,
+  # so if node lies outside the rectangle defined by
+  # edgevan and edgenaar the distance is at least 1, which is OK
+  if ((edgevan[1L] - node[1L]) * (edgenaar[1L]-node[1L]) > 0.001) return (TRUE)
+  if ((edgevan[2L] - node[2L]) * (edgenaar[2L]-node[2L]) > 0.001) return (TRUE)
   van <- edgevan - node
   naar <- edgenaar - node
   edgevec <- edgevan - edgenaar
-  if (sum(van * edgevec) * sum(naar * edgevec) >= 0) {
-    # loodlijn niet op lijnstuk
-    return(min(veclen(van), veclen(naar)))
-  }
-  return(veclen(van) *
-           sqrt(1 - sum(edgevec * (-van))**2 /
-                  (sum(edgevec*edgevec)*sum(van*van))))
+  if (isTRUE(all.equal(edgevec, c(0, 0))) || isTRUE(all.equal(van, c(0,0))))
+             return(FALSE)
+  distancesquared <- sum(van * van) * (1 - sum(edgevec * (-van)) ** 2 /
+                     (sum(edgevec * edgevec) * sum(van * van)))
+  return(distancesquared > 0.25)
 }
 search_position <- function(j, nodes, edges) {
-  if (all(is.na(nodes$rij))) {
+  nodestocheck <- which(!is.na(nodes$rij))    # index in nodes
+  positionednodes <- nodes$id[nodestocheck]   # id of the nodes to check
+  check_position <- function(testpos) {
+    isok <- TRUE
+    for (i in seq_len(nrow(edges))) {
+      if (edges$van[i] != edges$naar[i] &&
+          !is.na(nodes$rij[edges$van[i]]) &&
+          !is.na(nodes$rij[edges$naar[i]])) {
+        if (!distance_node_edge_ok(
+          c(nodes$rij[edges$van[i]], nodes$kolom[edges$van[i]]),
+          c(nodes$rij[edges$naar[i]], nodes$kolom[edges$naar[i]]),
+          testpos
+        )) {
+          isok <- FALSE
+          break
+        }
+      }
+    }
+    if (!isok) return(FALSE)
+    for (i in seq_len(nrow(edges))) {
+      if (edges$van[i] != edges$naar[i] &&
+          !is.na(nodes$rij[edges$van[i]]) &&
+          edges$naar[i] == nodes$naam[j]) {
+        isok <- any(FALSE == vapply(seq_along(nodestocheck$rij), function(k) {
+          distance_node_edge_ok(
+            c(nodes$rij[edges$van[i]], nodes$kolom[edges$van[i]]),
+            testpos,
+            c(nodes$rij[k], nodes$kolom[k]))
+        }, TRUE)
+        )
+        if (!isok) break
+      }
+    }
+    if (!isok) return(FALSE)
+    for (i in seq_len(nrow(edges))) {
+      if (edges$van[i] != edges$naar[i] &&
+          !is.na(nodes$rij[edges$naar[i]]) &&
+          edges$van[i] == nodes$naam[j]) {
+        isok <- any(FALSE == vapply(seq_along(nodestocheck$rij), function(k) {
+          distance_node_edge_ok(
+            c(nodes$rij[edges$naar[i]], nodes$kolom[edges$naar[i]]),
+            testpos,
+            c(nodes$rij[k], nodes$kolom[k]))
+        }, TRUE)
+        )
+        if (!isok) break
+      }
+    }
+    return(isok)
+  }
+  if (length(positionednodes) == 0) {
     availcols <- availrows <- c(1L, 3L)
   } else {
     availrows <- range(nodes$rij, na.rm = TRUE)
@@ -38,93 +91,42 @@ search_position <- function(j, nodes, edges) {
     availcols[1L] <- availcols[1] - 1L
     availcols[2L] <- availcols[2L] + 1L
   }
-  availpositions <- list((availrows[2L] - availrows[1L] + 1L) *
-                           (availcols[2L] - availcols[1L] + 1L))
-  positie <- 0L
-  nodestocheck <- nodes[!is.na(nodes$rij), ]
-  for (trij in seq.int(availrows[1L], availrows[2L])) {
-    for (tkol in seq.int(availcols[1L], availcols[2L])) {
-      if (any(nodestocheck$rij == trij & nodestocheck$kolom == tkol)) next
-      positie <- positie + 1L
-      availpositions[[positie]] <- c(trij, tkol)
+  connectednodes <- intersect(positionednodes,
+              union(edges$naar[edges$van == j], nodes$van[edges$naar == j]))
+  if (length(connectednodes) == 0L) {
+    bestposition <- as.integer(c(mean(availrows), mean(availcols)))
+  } else if (length(connectednodes == 1L)) {
+    bestposition <- as.integer(c(
+      mean(c(mean(availrows), nodes$rij[nodes$id == connectednodes])),
+      mean(c(mean(availcols), nodes$kolom[nodes$id == connectednodes]))
+      ))
+  } else {
+    bestposition <- as.integer(c(
+      mean(nodes$rij[nodes$id == connectednodes]),
+      mean(nodes$kolom[nodes$id == connectednodes])
+    ))
+  }
+  found <- FALSE
+  for (coordist in 0:5) {
+    if (coordist == 0L) {
+      dir1s <- 0L
+    } else {
+      dir1s <- c(-coordist, coordist)
+    }
+    dir2s <- seq.int(-coordist, coordist)
+    dir2s <- dir2s[order(abs(dir2s))]
+    for (dir1 in dir1s) {
+      for (dir2 in dir2s) {
+        testposition <- bestposition + c(dir1, dir2)
+        if (check_position(testposition)) return(testposition)
+        if (dir1 != dir2) {
+          testposition <- bestposition + c(dir2, dir1)
+          if (check_position(testposition)) return(testposition)
+        }
+      }
     }
   }
-  availpositions <- availpositions[seq_len(positie)]
-  mogelijk <- vapply(availpositions, function(availpos) {
-    distances <- vapply(seq_len(nrow(edges)), function(i) {
-      if (edges$van[i] != edges$naar[i] &&
-          !is.na(nodes$rij[edges$van[i]]) &&
-          !is.na(nodes$rij[edges$naar[i]])) {
-        afstand <- delta_node_edge(
-          c(nodes$rij[edges$van[i]], nodes$kolom[edges$van[i]]),
-          c(nodes$rij[edges$naar[i]], nodes$kolom[edges$naar[i]]),
-          availpos
-        )
-        afstand
-      } else {
-        99
-      }
-    }, 0.0)
-
-    distances2 <- vapply(seq_len(nrow(edges)), function(i) {
-      if (edges$van[i] != edges$naar[i] &&
-          !is.na(nodes$rij[edges$van[i]]) &&
-          edges$naar[i] == nodes$naam[j]) {
-        afstand <- min(vapply(seq_along(nodestocheck$rij), function(k) {
-          delta_node_edge(
-            c(nodes$rij[edges$van[i]], nodes$kolom[edges$van[i]]),
-            availpos,
-            c(nodes$rij[k], nodes$kolom[k]))
-        }, 0.0)
-        )
-        afstand
-      } else {
-        99
-      }
-    }, 0.0)
-
-    distances3 <- vapply(seq_len(nrow(edges)), function(i) {
-      if (edges$van[i] != edges$naar[i] &&
-          !is.na(nodes$rij[edges$naar[i]]) &&
-          edges$van[i] == nodes$naam[j]) {
-        afstand <- min(vapply(seq_along(nodestocheck$rij), function(k) {
-          delta_node_edge(
-            c(nodes$rij[edges$naar[i]], nodes$kolom[edges$naar[i]]),
-            availpos,
-            c(nodes$rij[k], nodes$kolom[k]))
-        }, 0.0)
-        )
-        afstand
-      } else {
-        99
-      }
-    }, 0.0)
-    if (min(c(distances, distances2, distances3)) > 0.5) return(TRUE)
-    FALSE
-  }, TRUE)
-  availpositions <- availpositions[mogelijk]
-  meandistances <- vapply(availpositions, function(availpos) {
-    distances <- vapply(seq_len(nrow(edges)), function(i) {
-      if (edges$van[i] == j && edges$naar[i] != j) {
-        return(delta_nodes(availpos, c(nodes$rij[edges$naar[i]],
-                                       nodes$kolom[edges$naar[i]])))
-      }
-      if (edges$naar[i] == j && edges$van[i] != j) {
-        return(delta_nodes(availpos, c(nodes$rij[edges$van[i]],
-                                       nodes$kolom[edges$van[i]])))
-      }
-      -1
-    }, 0.0)
-    if (all(distances < 0)) {
-      bestposition <- as.integer(c(mean(availrows), mean(availcols)))
-      delta_nodes(availpos, bestposition)
-    } else {
-      mean(distances[distances > 0])
-    }
-  }, 0.0)
-  mindistance <- min(meandistances)
-  k <- which(meandistances == mindistance)[1L]
-  availpositions[[k]]
+  return(bestposition) # is very unlikely
 }
 
 complete_anchors <- function(nodes, edges) {
@@ -157,7 +159,7 @@ complete_anchors <- function(nodes, edges) {
       }
       next
     }
-    if (edges$tiepe[i] == "~~") {
+    if (edges$tiepe[i] == "~~" && !is.na(nodes$indicatorside[nodevan])) {
       if (nodes$kolom[nodevan] == nodes$kolom[nodenaar] &&
           nodes$kolom[nodevan] %in% range(nodes$kolom, na.rm=TRUE)) {
         midden <- mean(range(nodes$kolom))
@@ -318,6 +320,7 @@ lav_position_nodes <- function(nodes.edges,
     }
   }
   nodes$sidegroup <- NULL
+  nodes$indicatorside <- NA_character_
   varlvs <- which(nodes$tiepe == "varlv")
   varlv <- length(varlvs) > 0L
   d_lv <- ifelse(varlv, 3L, 2L)  # distance from border
@@ -348,6 +351,7 @@ lav_position_nodes <- function(nodes.edges,
         }
         for (kk in seq_along(indicstoplace)) {
           kkk <- which(nodes$id == indicstoplace[kk])
+          nodes$indicatorside[kkk] <- side
           if (side == "l" || side == "r") {
             nodes$rij[kkk] <- curi
             nodes$kolom[kkk] <- ifelse(side=="l", d_ind, 101L - d_ind)
@@ -363,8 +367,10 @@ lav_position_nodes <- function(nodes.edges,
               edges$vananker[varlvedges[1L]] <- switch(side, l="e", r="w", m = "s", b = "n")
               edges$naaranker[varlvedges[1L]] <- switch(side, l="w", r="e", m = "n", b = "s")
               lvvarid <- edges$van[varlvedges[1L]]
-              nodes$kolom[lvvarid] <- switch(side, l = 1L, r = 100L, m =, b = curi)
-              nodes$rij[lvvarid] <- switch(side, m = 1L, b = 100L, l =, r = curi)
+              lvvarindex <- match(lvvarid, nodes$id)
+              nodes$kolom[lvvarindex] <- switch(side, l = 1L, r = 100L, m =, b = curi)
+              nodes$rij[lvvarindex] <- switch(side, m = 1L, b = 100L, l =, r = curi)
+              nodes$indicatorside[lvvarindex] <- side
             }
           }
           curi <- curi + 1L
@@ -417,13 +423,28 @@ lav_position_nodes <- function(nodes.edges,
   minkol <- min(nodes$kolom)
   if (minkol != 1L) nodes$kolom <- nodes$kolom - minkol + 1L
   maxkol <- max(nodes$kolom)
+  #### place nodes demanded by user ? ####
+  if (!is.null(placenodes)) {
+    for (nn in names(placenodes)) {
+      w <- which(nodes$naam == nn)
+      if (length(w) == 0) {
+        warning("placenodes: node name", nn, "not found!")
+      }
+      nodes$rij[w] <- placenodes[[nn]][1L]
+      nodes$kolom[w] <- placenodes[[nn]][2L]
+    }
+  }
+  indicatorids <- union(union(edges$van[edges$tiepe == "<~"],
+                              edges$naar[edges$tiepe == "=~"]),
+                        nodes$id[nodes$tiepe == "varlv"])
   #### adapt anchors for covariances in first or last rows/columns ####
   adaptableedges <- which(edges$tiepe == "~~" & edges$van != edges$naar)
   for (i in adaptableedges) {
+    if (all(edges$van[i] != indicatorids)) next;
     nodevan <- which(nodes$id == edges$van[i])
     nodenaar <- which(nodes$id == edges$naar[i])
     if (nodes$rij[nodevan] == nodes$rij[nodenaar]) {
-      if (nodes$rij[nodevan] <= 2) {
+      if (nodes$indicatorside[nodevan] == "m") {
         edges$vananker[i] <- "n"
         edges$naaranker[i] <- "n"
         edges$controlpt.kol[i] <- (nodes$kolom[nodevan] + nodes$kolom[nodenaar]) / 2
@@ -437,7 +458,7 @@ lav_position_nodes <- function(nodes.edges,
           abs(nodes$kolom[nodevan] - nodes$kolom[nodenaar]) / 2
       }
     } else if (nodes$kolom[nodevan] == nodes$kolom[nodenaar]) {
-      if (nodes$kolom[nodevan] <= 2) {
+      if (nodes$indicatorside[nodevan] == "l") {
         edges$vananker[i] <- "w"
         edges$naaranker[i] <- "w"
         edges$controlpt.rij[i] <- (nodes$rij[nodevan] + nodes$rij[nodenaar]) / 2
@@ -451,20 +472,20 @@ lav_position_nodes <- function(nodes.edges,
           abs(nodes$rij[nodevan] - nodes$rij[nodenaar]) / 2
       }
     } else {
-      if (nodes$kolom[nodevan] <= 2L) {
+      if (nodes$indicatorside[nodevan] == "l") {
         wvan <- "w"
-      } else if (nodes$kolom[nodevan] == maxkol) {
+      } else if (nodes$indicatorside[nodevan] == "r") {
         wvan <- "e"
-      } else if (nodes$rij[nodevan] <= 2L) {
+      } else if (nodes$indicatorside[nodevan] == "m") {
         wvan <- "n"
       } else {
         wvan <- "s"
       }
-      if (nodes$kolom[nodenaar] <= 2L) {
+      if (nodes$indicatorside[nodenaar] == "l") {
         wnaar <- "w"
-      } else if (nodes$kolom[nodenaar] == maxkol) {
+      } else if (nodes$indicatorside[nodenaar] == "r") {
         wnaar <- "e"
-      } else if (nodes$rij[nodenaar] <= 2L) {
+      } else if (nodes$indicatorside[nodenaar] == "m") {
         wnaar <- "n"
       } else {
         wnaar <- "s"
@@ -473,13 +494,13 @@ lav_position_nodes <- function(nodes.edges,
       edges$vananker[i] <-
         switch(wvannaar,
                nn = , ne = , nw = "n",
-               ns = ifelse(nodes$kolom(nodevan) < nodes$kolom(nodenaar), "e", "w"),
+               ns = ifelse(nodes$kolom[nodevan] < nodes$kolom[nodenaar], "e", "w"),
                ss = , se = , sw = "s",
-               sn = ifelse(nodes$kolom(nodevan) < nodes$kolom(nodenaar), "e", "w"),
+               sn = ifelse(nodes$kolom[nodevan] < nodes$kolom[nodenaar], "e", "w"),
                ww = , wn = , ws = "w",
-               we = ifelse(nodes$rij(nodevan) < nodes$rij(nodenaar), "s", "n"),
+               we = ifelse(nodes$rij[nodevan] < nodes$rij[nodenaar], "s", "n"),
                ee = , en = , es = "e",
-               ew = ifelse(nodes$rij(nodevan) < nodes$rij(nodenaar), "n", "s")
+               ew = ifelse(nodes$rij[nodevan] < nodes$rij[nodenaar], "n", "s")
         )
       edges$naaranker[i] <-
         switch(wvannaar,
@@ -524,22 +545,6 @@ lav_position_nodes <- function(nodes.edges,
   }
   #### fill anchors structural edges ####
   edges <- complete_anchors(nodes, edges)
-  #### place nodes demanded by user ? ####
-  if (!is.null(placenodes)) {
-    for (nn in names(placenodes)) {
-      w <- which(nodes$naam == nn)
-      if (length(w) == 0) {
-        warning("placenodes: node name", nn, "not found!")
-      }
-      nodes$rij[w] <- placenodes[[nn]][1L]
-      nodes$kolom[w] <- placenodes[[nn]][2L]
-      edg <- which((edges$van == nodes$id[w] |
-                     edges$naar == nodes$id[w]) &
-                     edges$tiepe == "~")
-      if (length(edg) > 0L) edges$vananker[edg] <- NA_character_
-    }
-    edges <- complete_anchors(nodes, edges)
-  }
   #### labelsbelow demanded by user ? ####
   if (!is.null(edgelabelsbelow)) {
     for (i in seq_along(edgelabelsbelow)) {
@@ -561,7 +566,7 @@ lav_position_nodes <- function(nodes.edges,
       edges$labelbelow[ed] <- TRUE
     }
   }
-
   #### RETURN ####
+  nodes$indicatorside <- NULL
   return(list(nodes = nodes, edges = edges, mlrij = 0L))
 }

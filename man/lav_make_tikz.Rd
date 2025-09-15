@@ -7,7 +7,8 @@ lav_make_tikz(nodes.edges,
               cex = 1.3,
               sloped.labels = TRUE,
               standalone = FALSE,
-              mlovcolors = c("lightgreen", "lightblue")
+              mlovcolors = c("lightgreen", "lightblue"),
+              lightness = 1
               )
 }
 \arguments{
@@ -19,6 +20,7 @@ lav_make_tikz(nodes.edges,
 \item{standalone}{logical, add code to make teX file standalone?}
 \item{mlovcolors}{Array of two colors for distinguishing ov nodes with same name
 between the levels in a  multilevel model.}
+\item{lightness}{A scalar factor to modify the distances between nodes.}
 }
 \value{
 NULL, invisible

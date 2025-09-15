@@ -6,7 +6,8 @@ lav_make_svg <- function(nodes.edges,
                          svgFontSize = 20L,
                          svgIdxFontSize = 15L,
                          svgDy = 5L,
-                         mlovcolors = c("lightgreen", "lightblue")
+                         mlovcolors = c("lightgreen", "lightblue"),
+                         lightness = 1
                          ) {
   tmpcol <- col2rgb(mlovcolors)
   wovcol <- paste(as.hexmode(tmpcol[, 1L]), collapse = "")
@@ -126,7 +127,13 @@ lav_make_svg <- function(nodes.edges,
   kolommen <- max(nodes$kolom)
   nodes$rij <- nodes$rij + 1
   nodes$kolom <- nodes$kolom + 1
-
+  if (lightness != 1) {
+    mlrij <- lightness * mlrij
+    nodes$kolom <- lightness * nodes$kolom
+    nodes$rij <- lightness * nodes$rij
+    edges$controlpt.kol <- lightness * edges$controlpt.kol
+    edges$controlpt.rij <- lightness * edges$controlpt.rij
+  }
   if (standalone) {
     writeLines(c(
       '<!DOCTYPE html>',
@@ -136,8 +143,8 @@ lav_make_svg <- function(nodes.edges,
       zz)
   }
   writeLines(c(
-    paste0('<svg width="', (kolommen + 3) * nodedist, '" height="',
-           (rijen + 3) * nodedist,
+    paste0('<svg width="', lightness * (kolommen + 3) * nodedist, '" height="',
+           lightness * (rijen + 3) * nodedist,
            '" version="1.1" xmlns="http://www.w3.org/2000/svg"',
            ' xmlns:xlink="http://www.w3.org/1999/xlink">'),
     '<rect width="100%" height="100%" fill="white" />',
@@ -294,8 +301,10 @@ lav_make_svg <- function(nodes.edges,
   }
 
   if (mlrij > 0L) {
+    mlrij <- mlrij + lightness
     writeLines(paste0('<path d="M 1 ', mlrij * nodedist, ' L ',
-                      kolommen * nodedist, ' ', mlrij * nodedist, '"/>'),
+                       (max(nodes$kolom) + lightness) * nodedist,
+                      ' ', mlrij * nodedist, '" stroke="black"/>'),
                zz)
   }
   yrange <- nodedist * range(nodes$rij)

@@ -30,7 +30,8 @@ lav_make_rplot <- function(nodes.edges,
                            sloped.labels = TRUE,
                            outfile = "",
                            addgrid = TRUE,
-                           mlovcolors = c("lightgreen", "lightblue")
+                           mlovcolors = c("lightgreen", "lightblue"),
+                           lightness = 1
                            ) {
   node_elements <- function(nodetiepe, noderadius) {
     # define form, color and anchors for a node type
@@ -206,13 +207,18 @@ lav_make_rplot <- function(nodes.edges,
   kolommen <- max(nodes$kolom)
   if (outfile != "") png(outfile, 960, 960, "px")
   opar <- par(mar = c(1L,1L, 1L,1L) + 0.1)
-  plot.default(x = c(0.25, kolommen + 0.75), c(0.25, rijen + 0.75), type="n",
+  plot.default(x = c(0, lightness * kolommen + 1),
+               c(0, lightness * rijen + 1), type="n",
                xlab = "", ylab = "", axes = FALSE, asp = 1)
   if (addgrid) {
-    abline(v = seq.int(kolommen), h = seq.int(rijen), lwd = 1,
+    abline(v = seq.int(kolommen) * lightness,
+           h = seq.int(rijen) * lightness,
+           lwd = 1,
            lty = "dotted", col = "lightgray")
-    text(seq.int(kolommen), 0.3, labels=seq.int(kolommen), adj = 1, cex = 0.7)
-    text(0.3, seq.int(rijen), labels=seq.int(rijen, 1), adj = 1, cex = 0.7)
+    text(seq.int(kolommen) * lightness, 0.3,
+         labels=seq.int(kolommen), adj = 1, cex = 0.7)
+    text(0.3, seq.int(rijen) * lightness,
+         labels=seq.int(rijen, 1), adj = 1, cex = 0.7)
   }
   if (mlrij > 0L) abline(h = rijen - mlrij + 1, lwd = 2)
   yrange <- rijen - range(nodes$rij) + 1
@@ -222,10 +228,12 @@ lav_make_rplot <- function(nodes.edges,
     if (edges$naar[j] != edges$van[j]) {
       van <- which(nodes$id == edges$van[j])
       naar <- which(nodes$id == edges$naar[j])
-      adrvan <- c(nodes$kolom[van], rijen - nodes$rij[van] + 1)
+      adrvan <- lightness *
+        c(nodes$kolom[van], rijen - nodes$rij[van] + 1)
       elems <- node_elements(nodes$tiepe[van], noderadius)
       adrvan <- adrvan + elems[[edges$vananker[j]]]
-      adrnaar <- c(nodes$kolom[naar], rijen - nodes$rij[naar] + 1)
+      adrnaar <- lightness *
+        c(nodes$kolom[naar], rijen - nodes$rij[naar] + 1)
       elems <- node_elements(nodes$tiepe[naar], noderadius)
       adrnaar <- adrnaar + elems[[edges$naaranker[j]]]
       if (is.na(edges$controlpt.rij[j])) {
@@ -233,7 +241,7 @@ lav_make_rplot <- function(nodes.edges,
                   dubbel = (edges$tiepe[j] == "~~"),
                   below = edges$labelbelow[j])
       } else {
-        controlpt <- c(edges$controlpt.kol[j],
+        controlpt <- lightness * c(edges$controlpt.kol[j],
                        rijen - edges$controlpt.rij[j] + 1)
         plot_edge(adrvan, adrnaar, edges$label[j],
                   dubbel = (edges$tiepe[j] == "~~"),
@@ -243,14 +251,15 @@ lav_make_rplot <- function(nodes.edges,
       }
     } else {
       van <- which(nodes$id == edges$van[j])
-      adrvan <- c(nodes$kolom[van], rijen - nodes$rij[van] + 1)
+      adrvan <- lightness * c(nodes$kolom[van], rijen - nodes$rij[van] + 1)
       elems <- node_elements(nodes$tiepe[van], noderadius)
       adrvan <- adrvan + elems[[edges$vananker[j]]]
       plot_var(adrvan, noderadius, edges$label[j], edges$vananker[j])
     }
   }
   for (j in seq.int(nrow(nodes))) {
-    plot_node(c(nodes$kolom[j], rijen - nodes$rij[j] + 1),
+    plot_node(lightness *
+                c(nodes$kolom[j], rijen - nodes$rij[j] + 1),
               nodes$tiepe[j],
               nodes$naam[j])
   }

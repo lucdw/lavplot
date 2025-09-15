@@ -20,7 +20,8 @@ lav_make_tikz <- function(nodes.edges,
                           cex = 1.3,
                           sloped.labels = TRUE,
                           standalone = FALSE,
-                          mlovcolors = c("lightgreen", "lightblue")
+                          mlovcolors = c("lightgreen", "lightblue"),
+                          lightness = 1
                           ) {
   tmpcol <- col2rgb(mlovcolors)
   wovcol <- paste(round(tmpcol[, 1L]/255, 2), collapse = ",")
@@ -33,6 +34,13 @@ lav_make_tikz <- function(nodes.edges,
   if (is.null(mlrij)) stop("nodes.edges hasn't been processed by lav_position_nodes!")
   nodes <- nodes.edges$nodes
   edges <- nodes.edges$edges
+  if (lightness != 1) {
+    mlrij <- lightness * mlrij
+    nodes$kolom <- lightness * nodes$kolom
+    nodes$rij <- lightness * nodes$rij
+    edges$controlpt.kol <- lightness * edges$controlpt.kol
+    edges$controlpt.rij <- lightness * edges$controlpt.rij
+  }
   if (is.character(outfile)) {
     zz <- file(outfile, open = "w")
     closezz <- TRUE

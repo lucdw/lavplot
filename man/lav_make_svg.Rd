@@ -10,7 +10,8 @@ lav_make_svg(nodes.edges,
              svgFontSize = 20L,
              svgIdxFontSize = 15L,
              svgDy = 5L,
-             mlovcolors = c("lightgreen", "lightblue")
+             mlovcolors = c("lightgreen", "lightblue"),
+             lightness= 1
              )
 }
 \arguments{
@@ -27,6 +28,7 @@ FALSE (default) the outfile - if specified - must have a file extension
 \item{svgDy}{An integer specifying the distance to move the baseline of the subscript.}
 \item{mlovcolors}{Array of two colors for distinguishing ov nodes with same name
 between the levels in a  multilevel model.}
+\item{lightness}{A scalar factor to modify the distances between nodes.}
 }
 \value{
 NULL (invisible)}

@@ -6,7 +6,8 @@ lav_make_rplot(nodes.edges,
                sloped.labels = TRUE,
                outfile = "",
                addgrid = TRUE,
-               mlovcolors = c("lightgreen", "lightblue")
+               mlovcolors = c("lightgreen", "lightblue"),
+               lightness = 1
                )
 }
 \arguments{
@@ -17,6 +18,7 @@ lav_make_rplot(nodes.edges,
 \item{addgrid}{Logical, add a grid with indicated 'positions' to the graph?}
 \item{mlovcolors}{Array of two colors for distinguishing ov nodes with same name
 between the levels in a  multilevel model.}
+\item{lightness}{A scalar factor to modify the distances between nodes.}
 }
 \value{
 NULL (invisible)}
