@@ -409,6 +409,38 @@ lav_position_nodes <- function(nodes.edges,
     kolommen <- sort(unique(c(d_lv + 1L, nodes$kolom)))
     nodes$kolom <- match(nodes$kolom, kolommen)
   }
+  #### adapt rij, kolom to be 1: ... ####
+  minrij <- min(nodes$rij, na.rm = TRUE)
+  if (minrij != 1L) nodes$rij <- nodes$rij - minrij + 1L
+  maxrij <- max(nodes$rij, na.rm = TRUE)
+  minkol <- min(nodes$kolom, na.rm = TRUE)
+  if (minkol != 1L) nodes$kolom <- nodes$kolom - minkol + 1L
+  maxkol <- max(nodes$kolom, na.rm = TRUE)
+  #### compress neighboring rows (columns) if possible ####
+  rijen <- max(nodes$rij, na.rm = TRUE)
+  if (rijen > 2) {
+    for (k in seq.int(rijen, 2)) {
+      nodesk <- which(nodes$rij == k)
+      nodesk1 <- which(nodes$rij == k - 1L)
+      if (length(intersect(nodes$kolom[nodesk],
+                          nodes$kolom[nodesk1])) == 0L) {
+        nodesadapt <- which(nodes$rij >= k)
+        nodes$rij[nodesadapt] <- nodes$rij[nodesadapt] - 1L
+      }
+    }
+  }
+  kolommen <- max(nodes$kolom, na.rm = TRUE)
+  if (kolommen > 2) {
+    for (k in seq.int(kolommen, 2)) {
+      nodesk <- which(nodes$kolom == k)
+      nodesk1 <- which(nodes$kolom == k - 1L)
+      if (length(intersect(nodes$rij[nodesk],
+                           nodes$rij[nodesk1])) == 0L) {
+        nodesadapt <- which(nodes$kolom >= k)
+        nodes$kolom[nodesadapt] <- nodes$kolom[nodesadapt] - 1L
+      }
+    }
+  }
   #### handle nodes which are not yet placed ####
   while (any(is.na(nodes$rij))) {
     j <- which(is.na(nodes$rij))[1L]
@@ -416,12 +448,7 @@ lav_position_nodes <- function(nodes.edges,
     nodes$rij[j] <- x[1L]
     nodes$kolom[j] <- x[2L]
   }
-  #### adapt rij, kolom to be 1: ... ####
-  minrij <- min(nodes$rij)
-  if (minrij != 1L) nodes$rij <- nodes$rij - minrij + 1L
   maxrij <- max(nodes$rij)
-  minkol <- min(nodes$kolom)
-  if (minkol != 1L) nodes$kolom <- nodes$kolom - minkol + 1L
   maxkol <- max(nodes$kolom)
   #### place nodes demanded by user ? ####
   if (!is.null(placenodes)) {

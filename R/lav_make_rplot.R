@@ -132,13 +132,13 @@ lav_make_rplot <- function(nodes.edges,
     }
     if (label != "") {
       if (below) {
-        if (theta >= 0 && theta < pi / 2) {
+        if (theta >= 0 && theta < 90) {
           text(midden[1L], midden[2L], labele, adj = c(0, 1),
                srt = srt, cex = txtcex)
-        } else if (theta >= pi / 2) {
+        } else if (theta >= 90) {
           text(midden[1L], midden[2L], labele, adj = c(1, 1),
                srt = srt, cex = txtcex)
-        } else if (theta < -pi/2) {
+        } else if (theta < -90) {
           text(midden[1L], midden[2L], labele, adj = c(0, 1),
                srt = srt, cex = txtcex)
         } else {
@@ -146,13 +146,13 @@ lav_make_rplot <- function(nodes.edges,
                srt = srt, cex = txtcex)
         }
       } else {
-        if (theta >= 0 && theta < pi / 2) {
+        if (theta >= 0 && theta < 90) {
           text(midden[1L], midden[2L], labele, adj = c(1, 0),
                srt = srt, cex = txtcex)
-        } else if (theta >= pi / 2) {
+        } else if (theta >= 90) {
           text(midden[1L], midden[2L], labele, adj = c(0, 0),
                srt = srt, cex = txtcex)
-        } else if (theta < -pi/2) {
+        } else if (theta < -90) {
           text(midden[1L], midden[2L], labele, adj = c(1, 0),
                srt = srt, cex = txtcex)
         } else {
