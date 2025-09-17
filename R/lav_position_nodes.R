@@ -34,6 +34,7 @@ search_position <- function(j, nodes, edges) {
   nodestocheck <- which(!is.na(nodes$rij))    # index in nodes
   positionednodes <- nodes$id[nodestocheck]   # id of the nodes to check
   check_position <- function(testpos) {
+    if (any(testpos < 0)) return(FALSE)
     isok <- TRUE
     for (i in seq_len(nrow(edges))) {
       if (edges$van[i] != edges$naar[i] &&
@@ -92,19 +93,17 @@ search_position <- function(j, nodes, edges) {
     availcols[2L] <- availcols[2L] + 1L
   }
   connectednodes <- intersect(positionednodes,
-              union(edges$naar[edges$van == j], nodes$van[edges$naar == j]))
+              union(edges$naar[edges$van == j], edges$van[edges$naar == j]))
   if (length(connectednodes) == 0L) {
     bestposition <- as.integer(c(mean(availrows), mean(availcols)))
   } else if (length(connectednodes == 1L)) {
-    bestposition <- as.integer(c(
-      mean(c(mean(availrows), nodes$rij[nodes$id == connectednodes])),
-      mean(c(mean(availcols), nodes$kolom[nodes$id == connectednodes]))
-      ))
+    bestposition <- as.integer(c(nodes$rij[nodes$id == connectednodes],
+                               nodes$kolom[nodes$id == connectednodes]))
   } else {
-    bestposition <- as.integer(c(
+    bestposition <- as.integer(round(c(
       mean(nodes$rij[nodes$id == connectednodes]),
       mean(nodes$kolom[nodes$id == connectednodes])
-    ))
+    )))
   }
   found <- FALSE
   for (coordist in 0:5) {

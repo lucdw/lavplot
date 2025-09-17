@@ -1,0 +1,49 @@
+<svg width="500" height="400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<rect width="100%" height="100%" fill="white" />
+<defs>
+  <marker id="arrow" markerWidth="12" markerHeight="8"
+          refX="11" refY="4" orient="auto">
+    <path d="M 0 0 L 12 4 L 0 8 L 4 4 z" fill="black" />
+  </marker>
+  <marker id="sarrow" markerWidth="12" markerHeight="8"
+          refX="1" refY="4" orient="auto">
+    <path d="M 0 4 L 12 0 L 8 5 L 12 8 z" fill="black" />
+  </marker>
+  <marker id="arr" markerWidth="6" markerHeight="6"
+          refX="5.5" refY="3" orient="auto">
+    <path d="M 0 0 L 6 3 L 0 6 L 2 3 z" fill="black" />
+  </marker>
+  <marker id="sarr" markerWidth="6" markerHeight="6"
+          refX="0.5" refY="3" orient="auto">
+    <path d="M 0 3 L 6 0 L 4 3 L 6 6 z" fill="black" />
+  </marker>
+</defs>
+<path d="M 270 200 L 221.213203435596 200" stroke-width="2" stroke="black" marker-end="url(#arrow)" />
+<path id="L1" d="M 221.213203435596 200 L 270 200" stroke-width="0" stroke="none" fill="none" />
+<text font-size="20" text-anchor="middle">
+<textPath xlink:href="#L1" startOffset="50%">1</textPath>
+</text>
+<path d="M 270 200 L 221.213203435596 300" stroke-width="2" stroke="black" marker-end="url(#arrow)" />
+<path id="L2" d="M 221.213203435596 300 L 270 200" stroke-width="0" stroke="none" fill="none" />
+<text font-size="20" text-anchor="middle">
+<textPath xlink:href="#L2" startOffset="50%">a</textPath>
+</text>
+<path id="L3" d="M 400 278.786796564404 L 400 221.213203435596" stroke-width="2" stroke="black" marker-end="url(#arrow)" />
+<text font-size="20" text-anchor="middle">
+<textPath xlink:href="#L3" startOffset="50%">&#946;</textPath>
+</text>
+<path id="L4" d="M 330 200 L 378.786796564404 200" stroke-width="2" stroke="black" marker-end="url(#arrow)" />
+<text font-size="20" text-anchor="middle">
+<textPath xlink:href="#L4" startOffset="50%">&#947;</textPath>
+</text>
+<circle cx="300" cy="200" r="30" stroke-width="2" stroke="black" fill="green"/>
+<text x="300" y="200" fill="black" font-size="20" dominant-baseline="central" text-anchor="middle">&#951;</text>
+<rect width="42.4264068711929" height="42.4264068711929" x="178.786796564404" y="178.786796564404" stroke-width="2" stroke="black" fill="yellow" />
+<text x="200" y="200" fill="black" font-size="20" dominant-baseline="central" text-anchor="middle">x<tspan dy="5" font-size="15">1</tspan></text>
+<rect width="42.4264068711929" height="42.4264068711929" x="178.786796564404" y="278.786796564404" stroke-width="2" stroke="black" fill="yellow" />
+<text x="200" y="300" fill="black" font-size="20" dominant-baseline="central" text-anchor="middle">x<tspan dy="5" font-size="15">2</tspan></text>
+<rect width="42.4264068711929" height="42.4264068711929" x="378.786796564404" y="178.786796564404" stroke-width="2" stroke="black" fill="yellow" />
+<text x="400" y="200" fill="black" font-size="20" dominant-baseline="central" text-anchor="middle">y</text>
+<rect width="42.4264068711929" height="42.4264068711929" x="378.786796564404" y="278.786796564404" stroke-width="2" stroke="black" fill="yellow" />
+<text x="400" y="300" fill="black" font-size="20" dominant-baseline="central" text-anchor="middle">x<tspan dy="5" font-size="15">4</tspan></text>
+</svg>

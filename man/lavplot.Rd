@@ -90,14 +90,17 @@ hereunder. If we use the placenodes argument, we get the second plot.
 \if{latex}{\figure{semex.pdf}{options: width=3in}}
 
 More details on the parameters can be found in the help for
-the \code{lav_...} functions.
+the \code{lav_\dots} functions.
 }
 \value{
 NULL, invisible
 }
 \description{
+\if{html}{\figure{logo.svg}{options: width=100 alt="lavplot logo"}}
+\if{latex}{\figure{logo.pdf}{options: width=0.5in}}
 Creates code to make a diagram in tikz or svg or plot the diagram or store
-the diagram in a png file.}
+the diagram in a png file.
+}
 \seealso{
 \code{\link{lav_get_model_info}}, \code{\link{lav_position_nodes}},
 \code{\link{lav_make_rplot}}, \code{\link{lav_make_tikz}},
