@@ -1,7 +1,7 @@
 \name{lavplot}
 \alias{lavplot}
 \alias{lav_plot}
-\title{Creates diagram code for tikz, svg or Rplot}
+\title{Creates diagram code for tikz, svg or creates an Rplot}
 \usage{
 lavplot(model = NULL,
         infile = NULL,
@@ -49,50 +49,55 @@ lav_plot(model = NULL,
 \arguments{
 \item{model}{A character vector specifying the model in lavaan syntax or a list
 (or data.frame) with at least members lhs, op, rhs, label and fixed or a fitted
-lavaan object (in which case the column 'est' is used as value to show).
-Should be NULL if infile is given.}
+lavaan object (in which case the \code{ParTable} object is extracted and column
+\code{est} is used as value to show).
+Should be \code{NULL} if infile is given.}
 \item{infile}{A character string specifying the file which contains the model
 syntax.}
 \item{varlv}{A logical indicating that the (residual) variance of a variable
 should be plotted as a separate latent variable (with a smaller circle then
-ordinary LV's). In this case covariances between two such variables will be
-plotted as covariance between the latent variables for the variance.}
-\item{placenodes}{optional list with members nodename = c(row, column),
-row and colom don't have to be integers.}
-\item{edgelabelsbelow}{optional list with members c(nodename1, nodename2).}
+ordinary latent variables). In this case covariances between two such variables
+will be plotted as covariance between the latent variables for the variance.}
+\item{placenodes}{optional list with members \code{\var{nodename} = c(row, column)},
+\code{row} and \code{column} don't have to be integers.}
+\item{edgelabelsbelow}{optional list with members \code{c(\var{nodename1},
+\var{nodename2})}.}
 \item{group.covar.indicators}{logical, should items with indicators which
 have an explicit covariance link be placed in the same group, i.e. forced
 to be on the same side of the diagram?}
 \item{common.opts}{options common to the three types of generated plots.}
-\item{rplot}{options for creating Rplot, see \code{lav_make_rplot}.}
-\item{tikz}{options for creating code for tikz plot, see \code{lav_make_tikz}.}
-\item{svg}{options for creating code for svg plot, see \code{lav_make_svg}.}
+\item{rplot}{options for creating Rplot,
+see \code{\link{lav_make_rplot}}.}
+\item{tikz}{options for creating code for tikz plot,
+see \code{\link{lav_make_tikz}}.}
+\item{svg}{options for creating code for svg plot,
+see \code{\link{lav_make_svg}}.}
 }
 \details{
 If \code{rplot} is specified or neither \code{tikz} nor \code{svg} are specified
-an rplot is generated, possibly stored in a png file if the outfile member of
-rplot is set. If \code{tikz} is specified the code for a tikz diagram is stored
-in the specified outfile, and the same for svg.
+an R plot is generated, possibly stored in a png file if the outfile member of
+\code{rplot} is set. If \code{tikz} is specified the code for a tikz diagram is
+stored in the specified \code{outfile}, and the same for svg.
 
 The lavplot command tries to create a nice plot from the input model, but
 one should keep the names of the variables short and sometimes rearrange the
-nodes in the plot. As an example the (slightly modified) example of the sem
-commando in \code{lavaan} results in the following plot:
+nodes in the plot. As an example the (slightly modified) example of the
+\code{sem} function in \code{lavaan} results in the following first plot
+hereunder. If we use the placenodes argument, we get the second plot.
 \if{html}{\figure{semex0.svg}{options: width=500 alt="sem example"}}
 \if{latex}{\figure{semex0.pdf}{options: width=3in}}
-
-If we use the placenodes argument, we get the following plot:
 \if{html}{\figure{semex.svg}{options: width=500 alt="sem example"}}
 \if{latex}{\figure{semex.pdf}{options: width=3in}}
+
+More details on the parameters can be found in the help for
+the \code{lav_...} functions.
 }
 \value{
 NULL, invisible
 }
 \description{
-Creates the code to make a diagram in tikz or svg, plot the diagram or store
-it in a png file. More details on the parameters can be found in the help for
-the \code{lav_...} functions.
-}
+Creates code to make a diagram in tikz or svg or plot the diagram or store
+the diagram in a png file.}
 \seealso{
 \code{\link{lav_get_model_info}}, \code{\link{lav_position_nodes}},
 \code{\link{lav_make_rplot}}, \code{\link{lav_make_tikz}},

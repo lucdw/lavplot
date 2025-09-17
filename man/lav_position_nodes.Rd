@@ -9,17 +9,20 @@ lav_position_nodes(nodes.edges,
 }
 \arguments{
 \item{nodes.edges}{The nodes and edges data.frames in a list as
-        returned from lav_get_model_info}
- \item{placenodes}{optional list with members nodename = c(row, column),
-row and colom don't have to be integers}
-\item{edgelabelsbelow}{optional list with members c(nodename1, nodename2)}
+        returned from \code{lav_get_model_info}}
+ \item{placenodes}{optional list with members \code{\var{nodename} = c(row, column)},
+\code{row} and \code{column} don't have to be integers.}
+\item{edgelabelsbelow}{optional list with members \code{c(\var{nodename1},
+\var{nodename2})}.}
 \item{group.covar.indicators}{logical, should items with indicators which
 have an explicit covariance link be placed in the same group, i.e. forced
 to be on the same side of the diagram?}
 }
 \value{
-A list with modified nodes and edges data.frames, and an integer \code{mlrij}
-giving the position at which a line should be drawn for multilevel models.
+A list with modified \code{nodes} and \code{edges} data.frames, and an
+integer \code{mlrij} giving the position at which a line should be drawn
+for multilevel models.
+
 The data.frames have new columns defined as follows:
 \enumerate{
 \item \code{nodes}
@@ -33,8 +36,6 @@ The data.frames have new columns defined as follows:
     \item{vananker}{character, anchor point for starting node, initialized NA}
     \item{naaranker}{character, anchor point for destination node,
     initialized NA}
-    \item{tiepe}{character, like op in lavaan model, except (residual)
-    variance, coded here as '~~~'.}
     \item{controlpt.kol}{real, column position of control point if the
     edge has to be drawn as a quadratic Béziers curve}
     \item{controlpt.row}{real, row position of control point if the
@@ -59,6 +60,11 @@ For multilevel models the nodes in block 2 are grouped at the top of the
 diagram and those in block 1 at the bottom. The item \code{mlrij} gives the
 position of the separation between the blocks.
 }
+\seealso{
+\code{\link{lav_get_model_info}}, \code{\link{lav_make_rplot}},
+\code{\link{lavplot}}
+}
+
 \examples{
 model <- 'alfa  =~ 1 * x_1 + x_2 + x_3         # latent variable
           beta <~ x_4 + x_5 + x_6              # composite

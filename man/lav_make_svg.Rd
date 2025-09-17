@@ -15,8 +15,8 @@ lav_make_svg(nodes.edges,
              )
 }
 \arguments{
-\item{nodes.edges}{The list with nodes, edges and mlrij as returned from
-    lav_position_nodes}
+\item{nodes.edges}{A list with data.frames \code{nodes} and \code{edges} and
+integer \code{mlrij} as returned from \code{lav_position_nodes}}
 \item{outfile}{A connection or a character string, the file to store the code.}
 \item{sloped.labels}{logical, sloped labels for the edges}
 \item{standalone}{logical, add code to make a html file with svg in it? If
@@ -34,6 +34,9 @@ between the levels in a  multilevel model.}
 NULL (invisible)}
 \description{
 Create svg code to show a diagram of the model.
+}
+\seealso{
+\code{\link{lav_position_nodes}}
 }
 \examples{
 model <- 'alpha  =~ x_1 + x_2 + x_3       # latent variable

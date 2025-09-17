@@ -1,22 +1,22 @@
 \name{lav_get_model_info}
 \alias{lav_get_model_info}
-\title{Get model info}
+\title{Get model information}
 \usage{
 lav_get_model_info(model = NULL, infile = NULL, varlv = FALSE)
 }
 \arguments{
 \item{model}{A character vector specifying the model in lavaan syntax or a list
 (or data.frame) with at least members lhs, op, rhs, label and fixed or a fitted
-lavaan object (in which case the column 'est' is used as value to show).
-Should be NULL if infile is given.}
+lavaan object (in which case the \code{ParTable} object is extracted and column
+\code{est} is used as value to show).
+Should be \code{NULL} if infile is given.}
 \item{infile}{A character string specifying the file which contains the model
 syntax.}
 \item{varlv}{A logical indicating that the (residual) variance of a variable
 should be plotted as a seperate latent variable (with a smaller circle then
-ordinary LV's). In this case covariances between two such variables will be
-plotted as covariance between the latent variables for the variance.}
+ordinary latent variables). In this case covariances between two such variables
+will be plotted as covariance between the latent variables for the variance.}
 }
-
 \value{
 A list with members nodes and edges, containing the necessary data to create
 a diagram. The return value consists of a list of two data.frames:
@@ -38,11 +38,11 @@ a diagram. The return value consists of a list of two data.frames:
 \item edges
   \describe{
     \item{id}{integer, autoincrement identification of the edge}
-    \item{label}{character, label for the edge, made of the label specified in
+    \item{label}{character, label for the edge, made from the label specified in
     the model and the fixed value if present}
     \item{van}{integer, id of the starting node}
     \item{naar}{integer, id of the destination node}
-    \item{tiepe}{character, like op in lavaan model, except (residual)
+    \item{tiepe}{character, like op in \code{lavaan} model, except (residual)
       variance, coded here as '~~~'.}
   }
 }

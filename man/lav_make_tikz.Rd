@@ -12,8 +12,8 @@ lav_make_tikz(nodes.edges,
               )
 }
 \arguments{
-\item{nodes.edges}{The list with nodes, edges and mlrij as returned from
-    lav_position_nodes}
+\item{nodes.edges}{A list with data.frames \code{nodes} and \code{edges} and
+integer \code{mlrij} as returned from \code{lav_position_nodes}}
 \item{outfile}{A connection or a character string, the file to store the code.}
 \item{cex}{Minimum distance between nodes in cm.}
 \item{sloped.labels}{logical, sloped labels for the edges}
@@ -27,6 +27,9 @@ NULL, invisible
 }
 \description{
 Creates the code to make a diagram in tikz.
+}
+\seealso{
+\code{\link{lav_position_nodes}}
 }
 \examples{
 model <- 'alpha  =~ x_1 + x_2 + x_3       # latent variable

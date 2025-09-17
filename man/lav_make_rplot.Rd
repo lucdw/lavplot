@@ -11,7 +11,8 @@ lav_make_rplot(nodes.edges,
                )
 }
 \arguments{
-\item{nodes.edges}{The data.frames and mlrij as returned from position_nodes}
+\item{nodes.edges}{A list with data.frames \code{nodes} and \code{edges} and
+integer \code{mlrij} as returned from \code{lav_position_nodes}}
 \item{sloped.labels}{Logical, sloped labels above (or under) the edges}
 \item{outfile}{Character string naming the file to store the diagram in PNG or
   NA to show the plot in R.}
@@ -25,6 +26,9 @@ NULL (invisible)}
 \description{
 Creates a plot in R showing a simple diagram of the model.
 }
+\seealso{
+\code{\link{lav_position_nodes}}
+}
 \examples{
 model <- 'alpha  =~ x_1 + x_2 + x_3     # latent variable
           beta <~ x_4 + x_5 + x_6      # composite
@@ -35,8 +39,11 @@ model <- 'alpha  =~ x_1 + x_2 + x_3     # latent variable
           alpha ~ yy * Theta_1 + tt * beta + ss * gamma
           '
 test <- lav_get_model_info(model)
-test <- lav_position_nodes(test)
-lav_make_rplot(test)
+test1 <- lav_position_nodes(test)
+lav_make_rplot(test1, lightness = 1.1)
+# better position for constant in regressen Xi
+test2 <- lav_position_nodes(test, placenodes = list(`1vanXi` = c(4, 4)))
+lav_make_rplot(test2, lightness = 1.1)
 modelml <- '
         level: 1
         fw =~ 1*y_1 + y_2 + y_3 + y_5
