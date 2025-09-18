@@ -96,7 +96,7 @@ the \code{lav_\dots} functions.
 NULL, invisible
 }
 \description{
-\if{html}{\figure{logo.svg}{options: width=100 alt="lavplot logo"}}
+\if{html}{\figure{logo.svg}{options: width=60 alt="lavplot logo"}}
 \if{latex}{\figure{logo.pdf}{options: width=0.5in}}
 Creates code to make a diagram in tikz or svg or plot the diagram or store
 the diagram in a png file.
