@@ -9,6 +9,8 @@ lav_make_svg <- function(nodes.edges,
                          mlovcolors = c("lightgreen", "lightblue"),
                          lightness = 1
                          ) {
+  textattr <- paste0('fill="black" font-size="', svgFontSize,
+              '" font-family="arial" font-style="italic"')
   tmpcol <- col2rgb(mlovcolors)
   wovcol <- paste(as.hexmode(tmpcol[, 1L]), collapse = "")
   bovcol <- paste(as.hexmode(tmpcol[, 2L]), collapse = "")
@@ -149,21 +151,13 @@ lav_make_svg <- function(nodes.edges,
            ' xmlns:xlink="http://www.w3.org/1999/xlink">'),
     '<rect width="100%" height="100%" fill="white" />',
     '<defs>',
-    '  <marker id="arrow" markerWidth="12" markerHeight="8"',
-    '          refX="11" refY="4" orient="auto">',
-    '    <path d="M 0 0 L 12 4 L 0 8 L 4 4 z" fill="black" />',
-    '  </marker>',
-    '  <marker id="sarrow" markerWidth="12" markerHeight="8"',
-    '          refX="1" refY="4" orient="auto">',
-    '    <path d="M 0 4 L 12 0 L 8 5 L 12 8 z" fill="black" />',
-    '  </marker>',
     '  <marker id="arr" markerWidth="6" markerHeight="6"',
-    '          refX="5.5" refY="3" orient="auto">',
-    '    <path d="M 0 0 L 6 3 L 0 6 L 2 3 z" fill="black" />',
+    '          refX="6" refY="2.5" orient="auto">',
+    '    <path d="M 0 0 L 6 2.5 L 0 5 L 2 2.5 z" fill="black" />',
     '  </marker>',
     '  <marker id="sarr" markerWidth="6" markerHeight="6"',
-    '          refX="0.5" refY="3" orient="auto">',
-    '    <path d="M 0 3 L 6 0 L 4 3 L 6 6 z" fill="black" />',
+    '          refX="0" refY="2.5" orient="auto">',
+    '    <path d="M 0 2.5 L 6 0 L 4 2.5 L 6 5 z" fill="black" />',
     '  </marker>',
     '</defs>'),
      zz)
@@ -181,14 +175,14 @@ lav_make_svg <- function(nodes.edges,
         writeLines(paste0('<path id="L', id, '" d="M ', van[1L],
                           ' ', van[2L], ' L ', naar[1L], " ", naar[2L],
                         '" stroke-width="', strokeWidth, '" stroke="black" ',
-                        ifelse(dubbel,'marker-start="url(#sarrow)" ', ''),
-                        'marker-end="url(#arrow)" />'), zz)
+                        ifelse(dubbel,'marker-start="url(#sarr)" ', ''),
+                        'marker-end="url(#arr)" />'), zz)
       } else {
         writeLines(paste0('<path d="M ', van[1L],
                           ' ', van[2L], ' L ', naar[1L], " ", naar[2L],
                           '" stroke-width="', strokeWidth, '" stroke="black" ',
-                          ifelse(dubbel,'marker-start="url(#sarrow)" ', ''),
-                          'marker-end="url(#arrow)" />'), zz)
+                          ifelse(dubbel,'marker-start="url(#sarr)" ', ''),
+                          'marker-end="url(#arr)" />'), zz)
         writeLines(paste0('<path id="L', id, '" d="M ', naar[1L],
                           ' ', naar[2L], ' L ', van[1L], " ", van[2L],
                           '" stroke-width="0" stroke="none" fill="none" />'),
@@ -201,15 +195,15 @@ lav_make_svg <- function(nodes.edges,
                           van[2L], ' Q ', control[1L], ' ', control[2L],
                           ' ', naar[1L], " ", naar[2L],
                           '" stroke-width="', strokeWidth, '" stroke="black" fill="none" ',
-                          ifelse(dubbel,'marker-start="url(#sarrow)" ', ''),
-                          'marker-end="url(#arrow)" />'), zz)
+                          ifelse(dubbel,'marker-start="url(#sarr)" ', ''),
+                          'marker-end="url(#arr)" />'), zz)
       } else {
         writeLines(paste0('<path d="M ', van[1L], ' ',
                           van[2L], ' Q ', control[1L], ' ', control[2L],
                           ' ', naar[1L], " ", naar[2L],
                           '" stroke-width="', strokeWidth, '" stroke="black" fill="none" ',
-                          ifelse(dubbel,'marker-start="url(#sarrow)" ', ''),
-                          'marker-end="url(#arrow)" />'), zz)
+                          ifelse(dubbel,'marker-start="url(#sarr)" ', ''),
+                          'marker-end="url(#arr)" />'), zz)
         writeLines(paste0('<path id="L', id, '" d="M ', naar[1L], ' ',
                           naar[2L], ' Q ', control[1L], ' ', control[2L],
                           ' ', van[1L], " ", van[2L],
@@ -221,7 +215,7 @@ lav_make_svg <- function(nodes.edges,
     if (label != "") {
       if (sloped.labels) {
         writeLines(
-          c(paste0('<text font-size="', svgFontSize, '" text-anchor="middle">'),
+          c(paste0('<text ', textattr, ' text-anchor="middle">'),
             paste0('<textPath xlink:href="#L', id, '" startOffset="50%">',
                    labele, '</textPath>'),
             '</text>'), zz)
@@ -247,7 +241,7 @@ lav_make_svg <- function(nodes.edges,
           extra <- ' '
         }
         writeLines(paste0('<text x="', midden[1L], '" y="', midden[2L],
-                          '" font-size="', svgFontSize, '" ', extra, '>', labele, '</text>'),
+                          '" ', textattr, ' ', extra, '>', labele, '</text>'),
                    zz)
         }
       }
@@ -282,7 +276,7 @@ lav_make_svg <- function(nodes.edges,
     # label
     if (label != "") {
       writeLines(paste0('<text x="', middelpt[1L], '" y="', middelpt[2L],
-                        '" text-anchor="middle" font-size="', svgFontSize, '">', labele,
+                        '" text-anchor="middle" ',textattr, '>', labele,
                         '</text>'), zz)
     }
   }
@@ -294,8 +288,8 @@ lav_make_svg <- function(nodes.edges,
     elems <- node_elements_svg(tiepe, nodedist * noderadius, waar, strokeWidth)
     writeLines(c(
       elems$drawit,
-      paste0('<text x="', waar[1], '" y="', waar[2], '" fill="black" ',
-             'font-size="', svgFontSize, '" dominant-baseline="central" text-anchor="middle">',
+      paste0('<text x="', waar[1], '" y="', waar[2], '" ',
+              textattr, ' dominant-baseline="central" text-anchor="middle">',
              labele, '</text>')
     ), zz)
   }
