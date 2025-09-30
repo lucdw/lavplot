@@ -1,5 +1,6 @@
-lav_format_label <- function(label = "", value = "", show = TRUE,
-                             svgIdxFontSize = 20L, svgDy = 7L) {
+lav_format_label <- function(label = "", value = "", show = FALSE,
+                             idx.font.size = 20L, dy = 7L,
+                             italic = TRUE) {
   latexsymbols <- c("varepsilon",
     "Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta",
     "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi",
@@ -16,6 +17,7 @@ lav_format_label <- function(label = "", value = "", show = TRUE,
     "953", "954", "955", "956", "957", "958", "959", "960",
     "961", "963", "964", "965", "966", "967", "968", "969"
   )
+  rexpression <- FALSE
   if (label == "" && value == "") return(list(svg="", tikz="", r=""))
   if (grepl("1van", label)) label <- "1"
   if (value == "") {
@@ -35,31 +37,44 @@ lav_format_label <- function(label = "", value = "", show = TRUE,
     # separate label and value by equal sign
     if (svgpart[3L] != "") svgpart[3L] <- paste0('=', svgpart[3L])
     if (tikzpart[3L] != "") tikzpart[3L] <- paste0('=', tikzpart[3L])
-    if (rpart[3L] != "") rpart[3L] <- paste0(" == ", rpart[3L])
-    # subscript and greek character set handling
+    if (rpart[3L] != "") {
+      rpart[3L] <- paste0(" == ", rpart[3L])
+      rexpression <- TRUE
+    }
+    # subscript and Greek character set handling
     splitunderscore <- strsplit(label, "_", TRUE)[[1L]]
     svgpart[1] <- tikzpart[1] <- rpart[1] <- splitunderscore[1L]
     if (rpart[1] %in% latexsymbols) {
+      rexpression <- TRUE
       svgpart[1] <- paste0("&#", unicodes[latexsymbols == svgpart[1]], ";")
       tikzpart[1] <- paste0("\\", tikzpart[1])
       if (rpart[1] == "varepsilon") rpart[1] <- "epsilon"
       rpart[1] <- str2expression(rpart[1])
     }
     if (length(splitunderscore) > 1L) {
-      svgpart[2L] <- paste0('<tspan dy="', svgDy  ,'" font-size="', svgIdxFontSize,
+      rexpression <- TRUE
+      svgpart[2L] <- paste0('<tspan dy="', dy  ,'" font-size="', idx.font.size,
                       '">', splitunderscore[2L], '</tspan>')
       if (svgpart[3L] != "") {
-        svgpart[3L] <- paste0('<tspan dy="-', svgDy, '">', svgpart[3L], '</tspan>')
+        svgpart[3L] <- paste0('<tspan dy="-', dy, '">', svgpart[3L], '</tspan>')
       }
       tikzpart[2L] <- paste0('_{', splitunderscore[2L], '}')
       rpart[2L] <- paste0('["', splitunderscore[2L], '"]')
     }
+    if (!italic) tikzpart <- c("\\mathrm{", tikzpart, "}")
   }
   if (show) {
     plot(c(0,3), c(0,2), type = "n")
-    text(1, 1, str2expression(paste(rpart, collapse = "")))
+    if (rexpression) {
+      text(1, 1, str2expression(paste(rpart, collapse = "")))
+    } else {
+      text(1, 1, paste(rpart, collapse = ""), font = ifelse(italic, 3L, 1L))
+    }
   }
   list(svg = paste(svgpart, collapse = ""),
        tikz = paste(c("$", tikzpart, "$"), collapse = ""),
-       r = str2expression(paste(rpart, collapse = "")))
+       r = ifelse(rexpression,
+         str2expression(paste(rpart, collapse = "")),
+         paste(rpart, collapse = ""))
+  )
 }

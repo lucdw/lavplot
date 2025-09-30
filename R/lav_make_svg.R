@@ -2,19 +2,22 @@ lav_make_svg <- function(nodes.edges,
                          outfile = "",
                          sloped.labels = TRUE,
                          standalone = FALSE,
-                         strokeWidth = 2L,
-                         svgFontSize = 20L,
-                         svgIdxFontSize = 15L,
-                         svgDy = 5L,
+                         stroke.width = 2L,
+                         font.size = 20L,
+                         idx.font.size = 15L,
+                         dy = 5L,
                          mlovcolors = c("lightgreen", "lightblue"),
-                         lightness = 1
+                         lightness = 1,
+                         font.family = "Latin Modern Math, arial, Aerial, sans",
+                         italic = TRUE
                          ) {
-  textattr <- paste0('fill="black" font-size="', svgFontSize,
-              '" font-family="arial" font-style="italic"')
+  textattr <- paste0('fill="black" font-size="', font.size,
+              '" font-family="', font.family, '" ',
+              ifelse(italic, 'font-style="italic"',''))
   tmpcol <- col2rgb(mlovcolors)
   wovcol <- paste(as.hexmode(tmpcol[, 1L]), collapse = "")
   bovcol <- paste(as.hexmode(tmpcol[, 2L]), collapse = "")
-  node_elements_svg <- function(nodetiepe, noderadius, waar, strokeWidth) {
+  node_elements_svg <- function(nodetiepe, noderadius, waar, stroke.width) {
     # define form, color and anchors for a node
     localradius <- noderadius
     if (nodetiepe == "varlv") localradius <- noderadius * .8
@@ -25,23 +28,23 @@ lav_make_svg <- function(nodes.edges,
                      lv = ,
                      varlv = paste0('<circle cx="', waar[1], '" cy="', waar[2],
                                     '" r="', localradius,
-                                    '" stroke-width="', strokeWidth,
+                                    '" stroke-width="', stroke.width,
                                     '" stroke="black" fill="white"/>'),
                      ov = paste0('<rect width="', 2 * ovxy, '" height="',
                                  2 * ovxy, '" x="', waar[1] - ovxy, '" y="',
                                  waar[2] - ovxy,
-                                 '" stroke-width="', strokeWidth,
+                                 '" stroke-width="', stroke.width,
                                  '" stroke="black" fill="white" />'),
                      wov =  paste0('<rect width="', 2 * ovxy, '" height="',
                                    2 * ovxy, '" x="', waar[1] - ovxy, '" y="',
                                    waar[2] - ovxy, '" rx="', ovxy / 3, '" ry="',
-                                   ovxy / 3, '" stroke-width="', strokeWidth,
+                                   ovxy / 3, '" stroke-width="', stroke.width,
                                    '" stroke="black" fill="#', wovcol,
                                    '" />'),
                      bov =  paste0('<rect width="', 2 * ovxy, '" height="',
                                    2 * ovxy, '" x="', waar[1] - ovxy, '" y="',
                                    waar[2] - ovxy, '" rx="', ovxy / 3, '" ry="',
-                                   ovxy / 3, '" stroke-width="', strokeWidth,
+                                   ovxy / 3, '" stroke-width="', stroke.width,
                                    '" stroke="black" fill="#', bovcol,
                                    '" />'),
                      cv = paste0('<polygon points="',
@@ -51,13 +54,13 @@ lav_make_svg <- function(nodes.edges,
                                  waar[1] + cvxy[1], ',', waar[2] + cvxy[2], ' ',
                                  waar[1] - cvxy[1], ',', waar[2] + cvxy[2], ' ',
                                  waar[1] - localradius, ',', waar[2],
-                                 '" stroke-width="', strokeWidth,
+                                 '" stroke-width="', stroke.width,
                                  '" stroke="black" fill="none" />'),
                      const = paste0('<polygon points="',
                                     waar[1], ',', waar[2] - localradius, ' ',
                                     waar[1] + constxy[2], ',', waar[2] + constxy[1], ' ',
                                     waar[1] - constxy[2], ',', waar[2] + constxy[1],
-                                    '" stroke-width="', strokeWidth,
+                                    '" stroke-width="', stroke.width,
                                     '" stroke="black" fill="none" />')
     )
     n <- c(waar[1], switch(nodetiepe,
@@ -165,22 +168,21 @@ lav_make_svg <- function(nodes.edges,
                         control = NA_real_, below = FALSE,
                         id = 0) {
     labele <- lav_format_label(label,
-                               show = FALSE,
-                               svgIdxFontSize = svgIdxFontSize,
-                               svgDy = svgDy)$svg
+                               idx.font.size = idx.font.size,
+                               dy = dy)$svg
     dirvec <- naar - van
     theta <- atan2(naar[2] - van[2], naar[1] - van[1])
     if (is.na(control[1L])) { # line
       if (van[1L] <= naar[1L]) {
         writeLines(paste0('<path id="L', id, '" d="M ', van[1L],
                           ' ', van[2L], ' L ', naar[1L], " ", naar[2L],
-                        '" stroke-width="', strokeWidth, '" stroke="black" ',
+                        '" stroke-width="', stroke.width, '" stroke="black" ',
                         ifelse(dubbel,'marker-start="url(#sarr)" ', ''),
                         'marker-end="url(#arr)" />'), zz)
       } else {
         writeLines(paste0('<path d="M ', van[1L],
                           ' ', van[2L], ' L ', naar[1L], " ", naar[2L],
-                          '" stroke-width="', strokeWidth, '" stroke="black" ',
+                          '" stroke-width="', stroke.width, '" stroke="black" ',
                           ifelse(dubbel,'marker-start="url(#sarr)" ', ''),
                           'marker-end="url(#arr)" />'), zz)
         writeLines(paste0('<path id="L', id, '" d="M ', naar[1L],
@@ -194,14 +196,14 @@ lav_make_svg <- function(nodes.edges,
         writeLines(paste0('<path id="L', id, '" d="M ', van[1L], ' ',
                           van[2L], ' Q ', control[1L], ' ', control[2L],
                           ' ', naar[1L], " ", naar[2L],
-                          '" stroke-width="', strokeWidth, '" stroke="black" fill="none" ',
+                          '" stroke-width="', stroke.width, '" stroke="black" fill="none" ',
                           ifelse(dubbel,'marker-start="url(#sarr)" ', ''),
                           'marker-end="url(#arr)" />'), zz)
       } else {
         writeLines(paste0('<path d="M ', van[1L], ' ',
                           van[2L], ' Q ', control[1L], ' ', control[2L],
                           ' ', naar[1L], " ", naar[2L],
-                          '" stroke-width="', strokeWidth, '" stroke="black" fill="none" ',
+                          '" stroke-width="', stroke.width, '" stroke="black" fill="none" ',
                           ifelse(dubbel,'marker-start="url(#sarr)" ', ''),
                           'marker-end="url(#arr)" />'), zz)
         writeLines(paste0('<path id="L', id, '" d="M ', naar[1L], ' ',
@@ -249,9 +251,8 @@ lav_make_svg <- function(nodes.edges,
   }
   plot_var <- function(waar, noderadius, label = "", side = "n") {
     labele <- lav_format_label(label,
-                               show = FALSE,
-                               svgIdxFontSize = svgIdxFontSize,
-                               svgDy = svgDy)$svg
+                               idx.font.size = idx.font.size,
+                               dy = dy)$svg
     thetarange <- c(pi / 6, 11 * pi / 6)
     if (side == "s") thetarange <- thetarange + 3 * pi / 2
     if (side == "e") thetarange <- thetarange + pi
@@ -269,7 +270,7 @@ lav_make_svg <- function(nodes.edges,
     ys <- middelpt[2] + sin(thetarange) * straal
     writeLines(paste0(
       '<path d="M ', xs[1L], ' ', ys[1L], ' A ', straal, ' ', straal ,
-      ' 0 1,1 ', xs[2L], ' ', ys[2L] , '" stroke-width="', strokeWidth,
+      ' 0 1,1 ', xs[2L], ' ', ys[2L] , '" stroke-width="', stroke.width,
       '" stroke="black" fill="none" ',
       'marker-start="url(#sarr)" marker-end="url(#arr)" />'
     ), zz)
@@ -282,10 +283,9 @@ lav_make_svg <- function(nodes.edges,
   }
   plot_node <- function(waar, tiepe, label = "") {
     labele <- lav_format_label(label,
-                               show = FALSE,
-                               svgIdxFontSize = svgIdxFontSize,
-                               svgDy = svgDy)$svg
-    elems <- node_elements_svg(tiepe, nodedist * noderadius, waar, strokeWidth)
+                               idx.font.size = idx.font.size,
+                               dy = dy)$svg
+    elems <- node_elements_svg(tiepe, nodedist * noderadius, waar, stroke.width)
     writeLines(c(
       elems$drawit,
       paste0('<text x="', waar[1], '" y="', waar[2], '" ',
@@ -310,11 +310,11 @@ lav_make_svg <- function(nodes.edges,
       naar <- which(nodes$id == edges$naar[j])
       adrvan <- c(nodedist * nodes$kolom[van], nodedist * nodes$rij[van])
       elems <- node_elements_svg(nodes$tiepe[van], nodedist * noderadius,
-                                 adrvan, strokeWidth)
+                                 adrvan, stroke.width)
       adrvan <- elems[[edges$vananker[j]]]
       adrnaar <- c(nodedist * nodes$kolom[naar], nodedist * nodes$rij[naar])
       elems <- node_elements_svg(nodes$tiepe[naar], nodedist * noderadius,
-                                 adrnaar, strokeWidth)
+                                 adrnaar, stroke.width)
       adrnaar <- elems[[edges$naaranker[j]]]
       if (is.na(edges$controlpt.rij[j])) {
         plot_edge(adrvan, adrnaar, edges$label[j],
@@ -333,7 +333,7 @@ lav_make_svg <- function(nodes.edges,
     } else {
       van <- which(nodes$id == edges$van[j])
       adrvan <- c(nodedist * nodes$kolom[van], nodedist * nodes$rij[van])
-      elems <- node_elements_svg(nodes$tiepe[van], nodedist * noderadius, adrvan, strokeWidth)
+      elems <- node_elements_svg(nodes$tiepe[van], nodedist * noderadius, adrvan, stroke.width)
       adrvan <- elems[[edges$vananker[j]]]
       plot_var(adrvan, noderadius * nodedist, edges$label[j], edges$vananker[j])
     }

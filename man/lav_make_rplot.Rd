@@ -7,7 +7,8 @@ lav_make_rplot(nodes.edges,
                outfile = "",
                addgrid = TRUE,
                mlovcolors = c("lightgreen", "lightblue"),
-               lightness = 1
+               lightness = 1,
+               italic = TRUE
                )
 }
 \arguments{
@@ -20,6 +21,8 @@ integer \code{mlrij} as returned from \code{lav_position_nodes}}
 \item{mlovcolors}{Array of two colors for distinguishing ov nodes with same name
 between the levels in a  multilevel model.}
 \item{lightness}{A scalar factor to modify the distances between nodes.}
+\item{italic}{Are labels to be in italic font? The switch to an italic font will
+only be possible if the label value isn't an expression!}
 }
 \value{
 NULL (invisible)}

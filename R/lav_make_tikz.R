@@ -21,7 +21,8 @@ lav_make_tikz <- function(nodes.edges,
                           sloped.labels = TRUE,
                           standalone = FALSE,
                           mlovcolors = c("lightgreen", "lightblue"),
-                          lightness = 1
+                          lightness = 1,
+                          italic = TRUE
                           ) {
   tmpcol <- col2rgb(mlovcolors)
   wovcol <- paste(round(tmpcol[, 1L]/255, 2), collapse = ",")
@@ -86,7 +87,7 @@ lav_make_tikz <- function(nodes.edges,
     writeLines(paste(
       "\\node[", nodes$tiepe[j], "] (", nodenaam(nodes$naam[j], nodes$blok[j]),
       ") at (", xpos, ",", ypos, ") {",
-      lav_format_label(nodes$naam[j], show = FALSE)$tikz, "};", sep = ""), zz)
+      lav_format_label(nodes$naam[j], italic = italic)$tikz, "};", sep = ""), zz)
   }
   varlv <-any(nodes$tiepe == "varlv")
   for (j in seq.int(nrow(edges))) {
@@ -94,7 +95,7 @@ lav_make_tikz <- function(nodes.edges,
     vannaam <- nodenaam(nodes$naam[van], nodes$blok[van])
     naar <- which(nodes$id == edges$naar[j])
     naarnaam <- nodenaam(nodes$naam[naar], nodes$blok[naar])
-    nodelabel <- lav_format_label(edges$label[j], show = FALSE)$tikz
+    nodelabel <- lav_format_label(edges$label[j], italic = italic)$tikz
     if (van == naar) { # self
       if (nodes$kolom[van] == 1L) {
         writeLines(paste("\\path[<->] (", vannaam,
@@ -139,7 +140,7 @@ lav_make_tikz <- function(nodes.edges,
                            beziersc[2L, 2L], ") and (", beziersc[1L, 3L] , ",",
                            beziersc[2L, 3L], ") .. ")
       }
-      thelabel <- lav_format_label(edges$label[j], show = FALSE)$tikz
+      thelabel <- lav_format_label(edges$label[j], italic = italic)$tikz
       if (thelabel != "") {
         thelabel <- paste0("node[pos=0.5,",
                            ifelse(edges$labelbelow[j], "below", "above"),

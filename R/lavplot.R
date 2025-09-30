@@ -7,6 +7,7 @@ lavplot <- lav_plot <- function(
   group.covar.indicators = FALSE,
   common.opts = list(sloped.labels = TRUE,
                      mlovcolors = c("lightgreen", "lightblue"),
+                     italic = TRUE,
                      lightness = 1),
   rplot = list(outfile = "",
                addgrid = TRUE),
@@ -14,10 +15,11 @@ lavplot <- lav_plot <- function(
               cex = 1.3,
               standalone = FALSE),
   svg = list(outfile = "",
-             strokeWidth = 2L,
-             svgFontSize = 20L,
-             svgIdxFontSize = 15L,
-             svgDy = 5L,
+             stroke.width = 2L,
+             font.size = 20L,
+             idx.font.size = 15L,
+             dy = 5L,
+             font.family = "Latin Modern Math, arial, Aerial, sans",
              standalone = FALSE)
 ) {
   tmp <- lav_get_model_info(model,

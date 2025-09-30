@@ -31,8 +31,10 @@ lav_make_rplot <- function(nodes.edges,
                            outfile = "",
                            addgrid = TRUE,
                            mlovcolors = c("lightgreen", "lightblue"),
-                           lightness = 1
+                           lightness = 1,
+                           italic = TRUE
                            ) {
+  font <- ifelse(italic, 3L, 1L)
   node_elements <- function(nodetiepe, noderadius) {
     # define form, color and anchors for a node type
     thetas <- switch(nodetiepe,
@@ -134,30 +136,30 @@ lav_make_rplot <- function(nodes.edges,
       if (below) {
         if (theta >= 0 && theta < 90) {
           text(midden[1L], midden[2L], labele, adj = c(0, 1),
-               srt = srt, cex = txtcex)
+               srt = srt, cex = txtcex, font = font)
         } else if (theta >= 90) {
           text(midden[1L], midden[2L], labele, adj = c(1, 1),
-               srt = srt, cex = txtcex)
+               srt = srt, cex = txtcex, font = font)
         } else if (theta < -90) {
           text(midden[1L], midden[2L], labele, adj = c(0, 1),
-               srt = srt, cex = txtcex)
+               srt = srt, cex = txtcex, font = font)
         } else {
           text(midden[1L], midden[2L], labele, adj = c(1, 1),
-               srt = srt, cex = txtcex)
+               srt = srt, cex = txtcex, font = font)
         }
       } else {
         if (theta >= 0 && theta < 90) {
           text(midden[1L], midden[2L], labele, adj = c(1, 0),
-               srt = srt, cex = txtcex)
+               srt = srt, cex = txtcex, font = font)
         } else if (theta >= 90) {
           text(midden[1L], midden[2L], labele, adj = c(0, 0),
-               srt = srt, cex = txtcex)
+               srt = srt, cex = txtcex, font = font)
         } else if (theta < -90) {
           text(midden[1L], midden[2L], labele, adj = c(1, 0),
-               srt = srt, cex = txtcex)
+               srt = srt, cex = txtcex, font = font)
         } else {
           text(midden[1L], midden[2L], labele, adj = c(0, 0),
-               srt = srt, cex = txtcex)
+               srt = srt, cex = txtcex, font = font)
         }
       }
     }
@@ -186,7 +188,8 @@ lav_make_rplot <- function(nodes.edges,
     plot_arrow(c(xs[40], ys[40]), c(-sin(thetarange[2]), cos(thetarange[2])))
     # label
     if (label != "")
-      text(middelpt[1L], middelpt[2L], labele, adj = 0.5, cex = txtcex * 0.8)
+      text(middelpt[1L], middelpt[2L], labele, adj = 0.5, cex = txtcex * 0.8,
+           font = font)
   }
   plot_node <- function(waar, tiepe, label = "", txtcex = 0.9) {
     labele <- lav_format_label(label, show=FALSE)$r
@@ -194,7 +197,7 @@ lav_make_rplot <- function(nodes.edges,
     x <- waar[1] + elems$drawx
     y <- waar[2] + elems$drawy
     polygon(x, y, col = elems$boxcol, lwd = 1)
-    text(waar[1L], waar[2L], labele, adj = 0.5, cex = txtcex)
+    text(waar[1L], waar[2L], labele, adj = 0.5, cex = txtcex, font = font)
   }
   mlrij <- nodes.edges$mlrij
   if (is.null(mlrij))

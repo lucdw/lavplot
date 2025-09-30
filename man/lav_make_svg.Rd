@@ -6,12 +6,14 @@ lav_make_svg(nodes.edges,
              outfile = "",
              sloped.labels = TRUE,
              standalone = FALSE,
-             strokeWidth = 2L,
-             svgFontSize = 20L,
-             svgIdxFontSize = 15L,
-             svgDy = 5L,
+             stroke.width = 2L,
+             font.size = 20L,
+             idx.font.size = 15L,
+             dy = 5L,
              mlovcolors = c("lightgreen", "lightblue"),
-             lightness= 1
+             lightness= 1,
+             font.family = "Latin Modern Math, arial, Aerial, sans",
+             italic = TRUE
              )
 }
 \arguments{
@@ -22,13 +24,19 @@ integer \code{mlrij} as returned from \code{lav_position_nodes}}
 \item{standalone}{logical, add code to make a html file with svg in it? If
 FALSE (default) the outfile - if specified - must have a file extension
 'svg', if TRUE the file extension must be 'htm' or 'html'.}
-\item{strokeWidth}{Value for stroke-width parameter in svg.}
-\item{svgFontSize}{An integer specifying normal font size to use.}
-\item{svgIdxFontSize}{An integer specifying font size to use for a subscript.}
-\item{svgDy}{An integer specifying the distance to move the baseline of the subscript.}
+\item{stroke.width}{Value for stroke-width parameter in svg.}
+\item{font.size}{An integer specifying normal font size to use.}
+\item{idx.font.size}{An integer specifying font size to use for a subscript.}
+\item{dy}{An integer specifying the distance to move the baseline of the subscript.}
 \item{mlovcolors}{Array of two colors for distinguishing ov nodes with same name
 between the levels in a  multilevel model.}
 \item{lightness}{A scalar factor to modify the distances between nodes.}
+\item{font.family}{Fonts to be tried for rendering the labels. The first one,
+Latin Modern Math, is close to the default font used in tikz for mathematical
+expressions and can be downloaded from
+\href{https://ctan.org/tex-archive/fonts/lm-math}{CTAN}.}
+\item{italic}{Are labels to be in italic font? If FALSE the labels will be
+shown in mathrm font.}
 }
 \value{
 NULL (invisible)}

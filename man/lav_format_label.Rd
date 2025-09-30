@@ -2,8 +2,9 @@
 \alias{lav_format_label}
 \title{Provides formatted label for use in tikz, svg or rplot}
 \usage{
-lav_format_label(label = "", value = "", show = TRUE,
-                 svgIdxFontSize = 20L, svgDy = 7L)
+lav_format_label(label = "", value = "", show =FALSE,
+                 idx.font.size = 20L, dy = 7L,
+                 italic = TRUE)
 }
 \arguments{
 \item{label}{A character string in one of the formats
@@ -17,17 +18,19 @@ If \var{value} is specified in parameter \code{label} and parameter
 \code{value} is empty, the value in \code{label} will be used.}
 \item{value}{A character string specifying a value or empty.}
 \item{show}{A logical indicating that the result should be plotted in an Rplot.}
-\item{svgIdxFontSize}{An integer specifying font size to use for the
+\item{idx.font.size}{An integer specifying font size to use for the
 subscript in svg.}
-\item{svgDy}{An integer specifying the distance to move the baseline of
+\item{dy}{An integer specifying the distance to move the baseline of
 the subscript in svg.}
+\item{italic}{A logical to indicate if the labels font should be cursive.
+Only used for tikz output and in shown Rplot if result isn't an expression.}
 }
 \value{
 a list with members \code{svg}, \code{tikz} and \code{r}, giving the result.
 }
 \description{
 Creates the code to use in tikz, svg or R to show the label. The label is
-printed in an xy-plot show = TRUE.
+printed in an xy-plot if show = TRUE.
 }
 \details{
 If both \code{label} and \code{value} are empty, the resulting codes are
@@ -43,7 +46,7 @@ If \var{name} in \code{label} is a Greek character or \code{varepsilon},
 it is attempted to generate code which shows the Greek symbol. If there is an
 \var{index} part in \code{label}, it is attempted to generate code which
 displays this value as a subscript. In the svg code the values
-\code{svgIdxFontSize} and \code{svgDy} are used for the subscript in the
+\code{idx.font.size} and \code{dy} are used for the subscript in the
 generated code. If a \var{value} is present, it is attempted
 to show this value after the label, with an equal sign in between both.
 }

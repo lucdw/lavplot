@@ -8,7 +8,8 @@ lav_make_tikz(nodes.edges,
               sloped.labels = TRUE,
               standalone = FALSE,
               mlovcolors = c("lightgreen", "lightblue"),
-              lightness = 1
+              lightness = 1,
+              italic = TRUE
               )
 }
 \arguments{
@@ -21,6 +22,8 @@ integer \code{mlrij} as returned from \code{lav_position_nodes}}
 \item{mlovcolors}{Array of two colors for distinguishing ov nodes with same name
 between the levels in a  multilevel model.}
 \item{lightness}{A scalar factor to modify the distances between nodes.}
+\item{italic}{Are labels to be in italic font? If FALSE the labels will be
+shown in mathrm font.}
 }
 \value{
 NULL, invisible
