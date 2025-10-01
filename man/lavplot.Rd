@@ -121,9 +121,11 @@ model <- 'alpha_11  =~ 1 * x_1 + x_2 + x_3     # latent variable
           x_4 ~~ epsilon_4 * x_4
           x_7 ~~ x_9
           x_10 ~~ x_11 + x_13
+          gamma ~~ 0.7 * xi
           # regressions
           xi ~ v * alpha_11 + t * alpha_12 + 1
           alpha_11 ~ yy * Theta_1 + tt_1 * 0.12 * alpha_12 + ss * gamma
+          Theta_1 ~~ alpha_12
           '
 lavplot(model)
 lavplot(model,

@@ -1,4 +1,47 @@
-BeziersControlPunt <- function(van, naar, wvannaar, maxrij, maxcol) {
+normal_form <- function(P1, P2) {
+  # compute normal form of a line
+  # the constant in the normal form will always be <= 0
+  xy1 <- matrix(c(P1, 1, P2, 1), byrow = TRUE, ncol = 3)
+  a <- det(xy1[, 2:3])
+  b <- -det(xy1[, c(1L, 3L)])
+  c <- det(xy1[, 1:2])
+  fac <- 1 / sqrt(a * a + b * b)
+  if (c > 0) fac <- -fac
+  return(fac * c(a, b, c))
+}
+normal_form_ps <- function(P, slope) {
+  # compute normal form of a line defined by intercept a and slope b
+  # a vertical line is defined by x = a and b = Inf or -Inf
+  if (is.infinite(slope)) return(c(1, 0, -P[1]))
+  coeffs = c(-slope, 1, slope * P[1] - P[2]) / sqrt(1 + slope ^ 2)
+  if (coeffs[3] > 0) coeffs <- -coeffs
+  return(coeffs)
+}
+get_intersection <- function(Line1, Line2) {
+  # get the intersection point of two lines for which coefficients of
+  # equations are given
+  m <- matrix(c(Line1[1:2], Line2[1:2]), byrow = TRUE, ncol = 2L)
+  b <- matrix(c(-Line1[3], -Line2[3]), ncol = 1L)
+  if (abs(det(m)) < 1e-12) return(NA_real_)
+  as.vector(solve(m) %*% b)
+}
+beziers_controlpoint <- function(van, naar, maxrij, maxcol) {
+  middelpunt <- c(maxrij + 1, maxcol + 1) / 2
+  delta <- sqrt(sum((van - naar) ^ 2)) /
+    sqrt(sum(c(maxrij - 1, maxcol - 1) ^ 2))
+  lijn <- normal_form(van, naar)
+  middenlijn <- (van + naar) / 2
+  lijnmidden <- sum(lijn * c(middelpunt, 1))
+  if (lijnmidden > 0) {
+    lijn[3] <- lijn[3] + 0.5 + delta
+  } else {
+    lijn[3] <- lijn[3] - 0.5 - delta
+  }
+  orthoslope <- lijn[2]/lijn[1]
+  loodlijn <- normal_form_ps(middenlijn, orthoslope)
+  get_intersection(lijn, loodlijn)
+}
+beziers_corner_controlpoint <- function(van, naar, wvannaar, maxrij, maxcol) {
   dif <- (abs(van[1L] - naar[1L]) + abs(van[2L] - naar[2L]) - 1) /
     (maxrij + maxcol - 2)
   p <- switch(wvannaar,
@@ -8,12 +51,6 @@ BeziersControlPunt <- function(van, naar, wvannaar, maxrij, maxcol) {
               sw = , ws = c(maxrij, 1) + c(dif, -dif)
   )
   2 * (p - 0.25 * (van + naar))
-}
-veclen <- function(x) sqrt(sum(x*x))
-delta_nodes <- function(node1, node2) {
-  if (any(is.na(node2))) return(-1)
-  delta <- node2 - node1
-  veclen(delta)
 }
 distance_node_edge_ok <- function(edgevan, edgenaar, node) {
   # coordinates edgevan, edgenaar and node are integer,
@@ -96,13 +133,13 @@ search_position <- function(j, nodes, edges) {
               union(edges$naar[edges$van == j], edges$van[edges$naar == j]))
   if (length(connectednodes) == 0L) {
     bestposition <- as.integer(c(mean(availrows), mean(availcols)))
-  } else if (length(connectednodes == 1L)) {
+  } else if (length(connectednodes) == 1L) {
     bestposition <- as.integer(c(nodes$rij[nodes$id == connectednodes],
                                nodes$kolom[nodes$id == connectednodes]))
   } else {
     bestposition <- as.integer(round(c(
-      mean(nodes$rij[nodes$id == connectednodes]),
-      mean(nodes$kolom[nodes$id == connectednodes])
+      mean(nodes$rij[nodes$id %in% connectednodes]),
+      mean(nodes$kolom[nodes$id %in% connectednodes])
     )))
   }
   found <- FALSE
@@ -127,8 +164,7 @@ search_position <- function(j, nodes, edges) {
   }
   return(bestposition) # is very unlikely
 }
-
-complete_anchors <- function(nodes, edges) {
+complete_anchors <- function(nodes, edges, maxrij, maxkol) {
   if (all(!is.na(edges$vananker))) return(edges)
   adaptedges <- which(is.na(edges$vananker))
   breaks <- c(-pi - 0.01, -7 * pi / 8, -5 * pi / 8, -3 * pi / 8, -pi / 8,
@@ -158,31 +194,6 @@ complete_anchors <- function(nodes, edges) {
       }
       next
     }
-    if (edges$tiepe[i] == "~~" && !is.na(nodes$indicatorside[nodevan])) {
-      if (nodes$kolom[nodevan] == nodes$kolom[nodenaar] &&
-          nodes$kolom[nodevan] %in% range(nodes$kolom, na.rm=TRUE)) {
-        midden <- mean(range(nodes$kolom))
-        if (nodes$kolom[nodevan] < midden) {
-          edges$vananker[i] <- "w"
-          edges$naaranker[i] <- "w"
-        } else {
-          edges$vananker[i] <- "e"
-          edges$naaranker[i] <- "e"
-        }
-        next
-      } else if (nodes$rij[nodevan] == nodes$rij[nodenaar] &&
-                 nodes$rij[nodevan] %in% range(nodes$rij, na.rm=TRUE)) {
-        midden <- mean(range(nodes$rij))
-        if (nodes$rij[nodevan] < midden) {
-          edges$vananker[i] <- "n"
-          edges$naaranker[i] <- "n"
-        } else {
-          edges$vananker[i] <- "s"
-          edges$naaranker[i] <- "s"
-        }
-        next
-      }
-    }
     hoek <- atan2(nodes$rij[nodevan] - nodes$rij[nodenaar],
                   nodes$kolom[nodenaar] - nodes$kolom[nodevan])
     wind <- cut(hoek, breaks, winds)
@@ -190,6 +201,13 @@ complete_anchors <- function(nodes, edges) {
     if (hoek > 0) hoek <- hoek - pi else hoek <- hoek + pi
     wind <- cut(hoek, breaks, winds)
     edges$naaranker[i] <- as.character(wind)
+    if (edges$tiepe[i] == "~~") {
+      bc <- beziers_controlpoint(c(nodes$rij[nodevan], nodes$kolom[nodevan]),
+                           c(nodes$rij[nodenaar], nodes$kolom[nodenaar]),
+                           maxrij, maxkol)
+      edges$controlpt.rij[i] <- bc[1L]
+      edges$controlpt.kol[i] <- bc[2L]
+    }
   }
   edges
 }
@@ -548,7 +566,7 @@ lav_position_nodes <- function(nodes.edges,
                  abs(nodes$rij[nodevan] - nodes$rij[nodenaar]) / 2,
                ns = , sn = nodes$kolom[nodenaar],
                we = , ew = nodes$kolom[nodevan],
-               BeziersControlPunt(
+               beziers_corner_controlpoint(
                  c(nodes$rij[nodevan], nodes$kolom[nodevan]),
                  c(nodes$rij[nodenaar], nodes$kolom[nodenaar]),
                  wvannaar, maxrij, maxkol)[2L]
@@ -562,7 +580,7 @@ lav_position_nodes <- function(nodes.edges,
                ee = , ww = (nodes$rij[nodevan] + nodes$rij[nodenaar]) / 2,
                ew = , we = nodes$rij[nodenaar],
                ns = , sn = nodes$rij[nodevan],
-               BeziersControlPunt(
+               beziers_corner_controlpoint(
                  c(nodes$rij[nodevan], nodes$kolom[nodevan]),
                  c(nodes$rij[nodenaar], nodes$kolom[nodenaar]),
                  wvannaar, maxrij, maxkol)[1L]
@@ -570,7 +588,7 @@ lav_position_nodes <- function(nodes.edges,
     }
   }
   #### fill anchors structural edges ####
-  edges <- complete_anchors(nodes, edges)
+  edges <- complete_anchors(nodes, edges, maxrij, maxkol)
   #### labelsbelow demanded by user ? ####
   if (!is.null(edgelabelsbelow)) {
     for (i in seq_along(edgelabelsbelow)) {
