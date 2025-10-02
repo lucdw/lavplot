@@ -241,6 +241,7 @@ lav_position_nodes <- function(nodes.edges,
     result2 <- lav_position_nodes(list(nodes = nodes2, edges = edges2))
     rijen1 <- max(result1$nodes$rij)
     result2$nodes$rij <- result2$nodes$rij + rijen1 + 1L
+    result2$edges$controlpt.rij <- result2$edges$controlpt.rij + rijen1 + 1L
     result1$nodes$blok <- 2L
     result2$nodes$blok <- 1L
     nodes <- rbind(result1$nodes, result2$nodes)
@@ -345,8 +346,49 @@ lav_position_nodes <- function(nodes.edges,
   # structural part + measurement
   lvcvs <- nodes$tiepe %in% c("lv", "cv")
   if (any(lvcvs)) {
-    for (side in c("l", "r", "m", "b")) {
-      curi <- d_lv
+    # count number of indicators on each side
+    nbindic <- c(l=0L, r=0L, m=0L, b=0L)
+    for (side in names(nbindic)) {
+      indicatorsassigned <- integer(0L)
+      strucs <- which(nodes$voorkeur == side & lvcvs)
+      for (k in strucs) {
+        lvs <- edges$tiepe == "=~" & edges$van == nodes$id[k]
+        cvs <- edges$tiepe == "<~" & edges$naar ==  nodes$id[k]
+        indics <- unique(c(edges$naar[lvs], edges$van[cvs]))
+        indicstoplace <- setdiff(indics, indicatorsassigned)
+        indicatorsassigned <- union(indicatorsassigned, indics)
+        nbindic[side] <- nbindic[side] + length(indicstoplace)
+      }
+    }
+    # convert nbindic to offsets for the different sides
+    if (nbindic["l"] == 0L || nbindic["r"] == 0L ||
+        nbindic["l"] == nbindic["r"]) {
+      nbindic["l"] <- 0L
+      nbindic["r"] <- 0L
+    } else {
+      if (nbindic["l"] > nbindic["r"]) {
+        nbindic["r"] <- as.integer((nbindic["l"] - nbindic["r"]) / 2)
+        nbindic["l"] <- 0L
+      } else {
+        nbindic["l"] <- as.integer((nbindic["r"] - nbindic["l"]) / 2)
+        nbindic["r"] <- 0L
+      }
+    }
+    if (nbindic["m"] == 0L || nbindic["b"] == 0L ||
+        nbindic["m"] == nbindic["b"]) {
+      nbindic["m"] <- 0L
+      nbindic["b"] <- 0L
+    } else {
+      if (nbindic["m"] > nbindic["b"]) {
+        nbindic["b"] <- as.integer((nbindic["m"] - nbindic["b"]) / 2)
+        nbindic["m"] <- 0L
+      } else {
+        nbindic["m"] <- as.integer((nbindic["b"] - nbindic["m"]) / 2)
+        nbindic["r"] <- 0L
+      }
+    }
+    for (side in names(nbindic)) {
+      curi <- d_lv + nbindic[side]
       indicatorsassigned <- integer(0L)
       strucs <- which(nodes$voorkeur == side & lvcvs)
       for (k in strucs) {
@@ -395,24 +437,54 @@ lav_position_nodes <- function(nodes.edges,
       }
     }
   } else {  #### only observed variables ####
-    if (any(nodes$voorkeur == "l")) {
+    nbnodes <- sapply(c("l", "r", "m", "b"),
+                      function(n) sum(nodes$voorkeur == n))
+    # offsets for the different sides
+    nodesoffset <- nbnodes
+    if (nodesoffset["l"] == 0L || nodesoffset["r"] == 0L ||
+        nodesoffset["l"] == nodesoffset["r"]) {
+      nodesoffset["l"] <- 0L
+      nodesoffset["r"] <- 0L
+    } else {
+      if (nodesoffset["l"] > nodesoffset["r"]) {
+        nodesoffset["r"] <- as.integer((nodesoffset["l"] - nodesoffset["r"]) / 2)
+        nodesoffset["l"] <- 0L
+      } else {
+        nodesoffset["l"] <- as.integer((nodesoffset["r"] - nodesoffset["l"]) / 2)
+        nodesoffset["r"] <- 0L
+      }
+    }
+    if (nodesoffset["m"] == 0L || nodesoffset["b"] == 0L ||
+        nodesoffset["m"] == nodesoffset["b"]) {
+      nodesoffset["m"] <- 0L
+      nodesoffset["b"] <- 0L
+    } else {
+      if (nodesoffset["m"] > nodesoffset["b"]) {
+        nodesoffset["b"] <- as.integer((nodesoffset["m"] - nodesoffset["b"]) / 2)
+        nodesoffset["m"] <- 0L
+      } else {
+        nodesoffset["m"] <- as.integer((nodesoffset["b"] - nodesoffset["m"]) / 2)
+        nodesoffset["r"] <- 0L
+      }
+    }
+    if (nbnodes["l"] > 0L) {
       strucs <- which(nodes$voorkeur == "l")
-      nodes$rij[strucs] <- 1L + seq.int(length(strucs))
+      nodes$rij[strucs] <- 1L + nodesoffset["l"] + seq.int(length(strucs))
       nodes$kolom[strucs] <- 1L
     }
-    if (any(nodes$voorkeur == "r")) {
+    if (nbnodes["r"] > 0L) {
       strucs <- which(nodes$voorkeur == "r")
-      nodes$rij[strucs] <- 1L + seq.int(length(strucs))
+      nodes$rij[strucs] <- 1L + nodesoffset["r"] + seq.int(length(strucs))
       nodes$kolom[strucs] <- 100L
     }
-    if (any(nodes$voorkeur == "m")) {
+    if (nbnodes["m"] > 0L) {
       strucs <- which(nodes$voorkeur == "m")
-      nodes$kolom[strucs] <- 1L + seq.int(length(strucs))
+      nodes$kolom[strucs] <- 1L + nodesoffset["m"] + seq.int(length(strucs))
       nodes$rij[strucs] <- 1L
     }
-    if (any(nodes$voorkeur == "b")) {
+    if (nbnodes["b"] > 0L) {
       strucs <- which(nodes$voorkeur == "b")
-      nodes$kolom[strucs] <- 1L + seq.int(length(strucs))
+      nodes$kolom[strucs] <- 1L + nodesoffset["b"] + seq.int(length(strucs))
       nodes$rij[strucs] <- 100L
     }
   }
@@ -436,7 +508,7 @@ lav_position_nodes <- function(nodes.edges,
   #### compress neighboring rows (columns) if possible ####
   rijen <- max(nodes$rij, na.rm = TRUE)
   if (rijen > 2) {
-    for (k in seq.int(rijen, 2)) {
+    for (k in c(rijen, 2)) {
       nodesk <- which(nodes$rij == k)
       nodesk1 <- which(nodes$rij == k - 1L)
       if (length(intersect(nodes$kolom[nodesk],
@@ -448,7 +520,7 @@ lav_position_nodes <- function(nodes.edges,
   }
   kolommen <- max(nodes$kolom, na.rm = TRUE)
   if (kolommen > 2) {
-    for (k in seq.int(kolommen, 2)) {
+    for (k in c(kolommen, 2)) {
       nodesk <- which(nodes$kolom == k)
       nodesk1 <- which(nodes$kolom == k - 1L)
       if (length(intersect(nodes$rij[nodesk],
